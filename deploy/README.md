@@ -8,11 +8,12 @@ Your internal tool offers two components. Pick one.
 
 | Component | When to use | Artifact |
 | --- | --- | --- |
-| **Website** (S3 static) | Recommended. Full pricing, approvals, deal-on-a-page. AI "Fill the form" degrades to manual entry. | `out/` |
-| **Container** (ECS) | Only if you need the AI parse button with an `ANTHROPIC_API_KEY`. | Docker image from `Dockerfile` |
+| **Website** (S3 static) | Point the platform at a pre-built `out/` / `dist/` folder. | `out/` |
+| **Container** (ECS) | Zip the repo with the root `Dockerfile`. Image builds `out/` and serves it on port 3000. | Docker image |
 
-Do **not** select both unless the platform wires them together on one hostname —
-the static site calls `/api/parse-merchant` on the same origin.
+Either way you get the same static app. AI "Fill the form" is unavailable in both
+(manual entry still works). Do not select both components unless the platform
+wires them on one hostname.
 
 ---
 
@@ -61,7 +62,8 @@ compile and set `NEXT_PUBLIC_DEMO_MODE=false`.
 
 ## Option B — Container
 
-Use this when you want Claude-backed intake parse on the deployed URL.
+Builds the same static site into `out/`, then serves it on **port 3000**
+(`out/index.html` must exist — the platform checks for it).
 
 ### 1. Build the image
 
@@ -73,29 +75,22 @@ docker build -t take-it-or-leave-it .
 docker build --build-arg NEXT_PUBLIC_DEMO_MODE=false -t take-it-or-leave-it .
 ```
 
-Or without Docker locally:
-
-```bash
-npm run build:standalone
-# then run the traced server under .next/standalone (see Next.js standalone docs)
-```
-
 ### 2. Runtime env
 
 | Variable | Required? | Notes |
 | --- | --- | --- |
-| `ANTHROPIC_API_KEY` | No | Enables `/api/parse-merchant`. Without it the UI falls back to manual entry. |
-| `PORT` | No | Defaults to `3000` in the image (platform requirement). |
+| `PORT` | — | Fixed at **3000** in the image (platform requirement). |
 | `NEXT_PUBLIC_DEMO_MODE` | Build-time | Must be set at **image build**, not only at run — it is inlined into the client bundle. |
+| `ANTHROPIC_API_KEY` | n/a | Not used: this image serves static files only. |
 
 ### 3. Form fields
 
 | Field | Value |
 | --- | --- |
-| Components | **Container** only |
+| Components | **Container** |
 | Dockerfile | repo root `Dockerfile` |
 
-Health / listen: the process binds `0.0.0.0:3000` (required by the internal platform).
+Health / listen: serves `out/` on `0.0.0.0:3000` (includes `out/index.html`).
 
 ---
 

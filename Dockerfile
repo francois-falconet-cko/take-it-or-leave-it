@@ -1,17 +1,15 @@
-# Take It or Leave It — ECS / container image
+# Take It or Leave It — container image for the internal platform
 #
-# Keeps the optional /api/parse-merchant route (needs ANTHROPIC_API_KEY at
-# runtime). Prefer the static S3 deploy when you do not need plain-English
-# parse — see deploy/README.md.
+# Builds the static export into `out/` (includes index.html) and serves it on
+# port 3000. Pricing runs entirely in the browser; AI parse is unavailable
+# without a Node API (enter fields manually).
 #
 # Build:
 #   docker build -t take-it-or-leave-it .
-#   # real rates (book must exist on the host before build):
 #   docker build --build-arg NEXT_PUBLIC_DEMO_MODE=false -t take-it-or-leave-it .
 #
-# Run (must listen on 3000 — platform requirement):
+# Run (platform requires port 3000):
 #   docker run --rm -p 3000:3000 take-it-or-leave-it
-#   docker run --rm -p 3000:3000 -e ANTHROPIC_API_KEY=sk-… take-it-or-leave-it
 
 FROM node:22-alpine AS deps
 WORKDIR /app
@@ -28,28 +26,27 @@ RUN node scripts/ensure-book.mjs
 
 ARG NEXT_PUBLIC_DEMO_MODE=true
 ENV NEXT_PUBLIC_DEMO_MODE=$NEXT_PUBLIC_DEMO_MODE
-ENV BUILD_TARGET=standalone
+ENV BUILD_TARGET=static
 ENV NEXT_TELEMETRY_DISABLED=1
 
-RUN npm run build
+RUN npm run build \
+  && test -f out/index.html
 
 FROM node:22-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
-ENV PORT=3000
-ENV HOSTNAME=0.0.0.0
 
-RUN addgroup --system --gid 1001 nodejs \
+# Static file server; -l 3000 is required by the platform.
+RUN npm install -g serve@14.2.4 \
+  && addgroup --system --gid 1001 nodejs \
   && adduser --system --uid 1001 nextjs
 
-# Standalone output is a minimal Node server + traced deps.
-COPY --from=builder /app/public ./public
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+# Platform looks for out/index.html — keep that path in the image.
+COPY --from=builder --chown=nextjs:nodejs /app/out ./out
 
 USER nextjs
 EXPOSE 3000
 
-CMD ["node", "server.js"]
+CMD ["serve", "out", "-l", "3000"]
