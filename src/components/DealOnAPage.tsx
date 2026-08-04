@@ -343,22 +343,34 @@ export function DealOnAPage() {
                   {copied ? 'Copied' : 'Copy email'}
                 </button>
                 <a
-                  href={email.mailtoHref}
-                  className={`btn btn-ghost ${email.mailtoSafe ? '' : 'pointer-events-none opacity-40'}`}
+                  href={email.mailtoSafe ? email.mailtoHref : email.mailtoHrefShort}
+                  className="btn btn-ghost shrink-0"
+                  onClick={() => {
+                    // Put the body on the clipboard on the way out, so the compose
+                    // window the client opens is one paste away from complete.
+                    if (!email.mailtoSafe) void navigator.clipboard.writeText(draft);
+                  }}
                   title={
                     email.mailtoSafe
-                      ? 'Open in your mail client'
-                      : 'Too long for a mailto: link — several clients would truncate it silently. Use Copy instead.'
+                      ? 'Open in your mail client with the full draft'
+                      : 'Opens an addressed compose window and copies the body — mail clients truncate a URL this long, so paste it in'
                   }
                 >
                   <Mail size={15} />
-                  Mail
+                  {email.mailtoSafe ? 'Mail' : 'Mail + copy'}
                 </a>
               </div>
 
               <p className="text-[0.6875rem] leading-relaxed text-faint">
                 The tool drafts, you send. Nothing is emailed automatically.
-                {!email.mailtoSafe && ' This draft is too long for a mailto: link — use Copy.'}
+                {!email.mailtoSafe && (
+                  <>
+                    {' '}
+                    This draft is longer than a mail client will carry in a link, so{' '}
+                    <strong className="text-muted">Mail + copy</strong> opens an addressed window and puts the body on
+                    your clipboard to paste.
+                  </>
+                )}
               </p>
             </div>
           </Card>

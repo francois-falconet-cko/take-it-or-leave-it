@@ -14,8 +14,14 @@
 import type { Intake, PricingBook, Quote } from './types.ts';
 import { bps, bpsAsPct, money, pct } from './format.ts';
 
-/** Most mail clients truncate a mailto: body somewhere past 2,000 characters. */
-export const MAILTO_LIMIT = 1900;
+/**
+ * Outlook and Gmail both stop reading a mailto: URL somewhere around 2,048
+ * characters, and they truncate silently — the mail window just opens with the
+ * end of the request missing. The limit applies to the whole percent-encoded
+ * href, not the raw body, and encoding a plain-text email with newlines and
+ * aligned columns inflates it by roughly 65%. So measure the href.
+ */
+export const MAILTO_HREF_LIMIT = 2000;
 
 export interface EmailDraft {
   to: string;
@@ -23,8 +29,12 @@ export interface EmailDraft {
   body: string;
   /** Who the rep actually sends this to, and why. */
   routing: string;
+  /** False when the full body would be silently truncated by the mail client. */
   mailtoSafe: boolean;
+  /** Full draft. Only use when mailtoSafe. */
   mailtoHref: string;
+  /** Recipient and subject only, for when the full body will not fit. */
+  mailtoHrefShort: string;
 }
 
 export function buildEmail(
@@ -140,15 +150,22 @@ export function buildEmail(
 
   const body = lines.join('\n');
   const subject = `Frontbook Approval Request: ${intake.merchantName || 'New merchant'} — ${bps(quote.requestedBps)} bps (${pct(quote.discountPct)} discount)`;
-  const mailtoHref = `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  const mailto = (b: string) =>
+    `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(b)}`;
+
+  const mailtoHref = mailto(body);
 
   return {
     to,
     subject,
     body,
     routing,
-    mailtoSafe: encodeURIComponent(body).length <= MAILTO_LIMIT * 3,
+    mailtoSafe: mailtoHref.length <= MAILTO_HREF_LIMIT,
     mailtoHref,
+    // A full front-book request runs past what a mail client will carry in a URL,
+    // so the fallback opens an addressed, subject-filled compose window and the
+    // rep pastes the body they just copied. Better than a button that does nothing.
+    mailtoHrefShort: mailto('[Paste the approval request here — it is on your clipboard.]'),
   };
 }
 
