@@ -12,3 +12,5 @@ sources/*.eml
 sources/raw/*.txt
 pricing-book.diff.md
 .DS_Store
+out/
+dist/

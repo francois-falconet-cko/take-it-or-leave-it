@@ -6,6 +6,9 @@
   "scripts": {
     "dev": "next dev -p 3400",
     "build": "next build",
+    "build:static": "node scripts/ensure-book.mjs && BUILD_TARGET=static next build && rm -rf dist && cp -R out dist",
+    "build:standalone": "node scripts/ensure-book.mjs && BUILD_TARGET=standalone next build",
+    "build:container": "docker build -t take-it-or-leave-it .",
     "start": "next start -p 3400",
     "kiosk": "next build && next start -p 3400",
     "typecheck": "tsc --noEmit",

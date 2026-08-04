@@ -1,0 +1,19 @@
+node_modules
+.next
+out
+dist
+.git
+.DS_Store
+*.tsbuildinfo
+.env
+.env.local
+pricing-book.diff.md
+sources/raw
+sources/*.eml
+sources/acq framework.csv
+# Keep data/*.json — demo book is required; live book is optional (stubbed).
+docs
+.claude
+agent-transcripts
+*.md
+deploy
