@@ -1,19 +1,15 @@
 node_modules
 .next
-out
-dist
 .git
 .DS_Store
 *.tsbuildinfo
 .env
 .env.local
 pricing-book.diff.md
-sources/raw
-sources/*.eml
-sources/acq framework.csv
-# Keep data/*.json — demo book is required; live book is optional (stubbed).
+sources
 docs
 .claude
-agent-transcripts
-*.md
-deploy
+dist
+**/*.md
+# out/ is REQUIRED in the upload zip (pre-built); do not ignore it here.
+# When building the image locally with a full context, prefer the packaging zip.

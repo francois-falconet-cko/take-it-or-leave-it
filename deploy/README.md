@@ -1,109 +1,80 @@
-# Deploying Take It or Leave It
+# Deploying Take It or Leave It (CKO AI Sandbox)
 
-The app is almost entirely client-side: the pricing engine is a pure TypeScript
-function bundled into the page. The only server piece is
-`/api/parse-merchant` (optional plain-English → form fields via Claude).
+Your S3 error (`NoSuchKey` for `frontbook-express/index.html`) means the
+**Website** upload did not contain `index.html` at the zip root. Uploading the
+repo source (or a zip with `out/index.html` nested) puts the file at the wrong
+key.
 
-Your internal tool offers two components. Pick one.
-
-| Component | When to use | Artifact |
-| --- | --- | --- |
-| **Website** (S3 static) | Point the platform at a pre-built `out/` / `dist/` folder. | `out/` |
-| **Container** (ECS) | Zip the repo with the root `Dockerfile`. Image builds `out/` and serves it on port 3000. | Docker image |
-
-Either way you get the same static app. AI "Fill the form" is unavailable in both
-(manual entry still works). Do not select both components unless the platform
-wires them on one hostname.
-
----
-
-## Option A — Website (recommended)
-
-### 1. Build the static site
+## Quick path
 
 ```bash
 npm ci
-npm run book:compile          # only needed for real rates; see below
-npm run build:static
+npm run package:sandbox
 ```
 
-That writes HTML/JS/CSS to **`out/`** and a copy at **`dist/`** (same
-contents — use whichever path your platform asks for). Index document:
-`index.html`.
+That builds the static site and writes two zips under `dist/`:
 
-### 2. Form fields in the create-site UI
-
-Suggested values:
-
-| Field | Value |
-| --- | --- |
-| Title | Take It or Leave It |
-| Shortname | `take-it-or-leave-it` (or whatever your naming scheme wants) |
-| Description | Front-book pricing on Acquirer Guidance |
-| Components | **Website** only |
-
-### 3. Demo vs real rates
-
-| Goal | Build command |
-| --- | --- |
-| Safe for demos / recordings (default) | `npm run build:static` |
-| Real Acquirer Guidance rates | `NEXT_PUBLIC_DEMO_MODE=false npm run build:static` after `npm run book:compile` |
-
-`data/pricing-book.json` is gitignored. Without it, `build:static` stubs from the
-demo book so the build still succeeds — but rates stay obfuscated until you
-compile and set `NEXT_PUBLIC_DEMO_MODE=false`.
-
-### What you lose on static
-
-- Plain-English "Fill the form" returns an error and asks the rep to type
-  fields manually. Pricing itself is unchanged.
-
----
-
-## Option B — Container
-
-Builds the same static site into `out/`, then serves it on **port 3000**
-(`out/index.html` must exist — the platform checks for it).
-
-### 1. Build the image
-
-```bash
-# Demo rates (default)
-docker build -t take-it-or-leave-it .
-
-# Real rates — compile the book on the host first, then:
-docker build --build-arg NEXT_PUBLIC_DEMO_MODE=false -t take-it-or-leave-it .
-```
-
-### 2. Runtime env
-
-| Variable | Required? | Notes |
+| Zip | Select in the UI | Why |
 | --- | --- | --- |
-| `PORT` | — | Fixed at **3000** in the image (platform requirement). |
-| `NEXT_PUBLIC_DEMO_MODE` | Build-time | Must be set at **image build**, not only at run — it is inlined into the client bundle. |
-| `ANTHROPIC_API_KEY` | n/a | Not used: this image serves static files only. |
+| `dist/sandbox-website.zip` | **Website** only | `index.html` at zip root → S3 key `<shortname>/index.html` |
+| `dist/sandbox-container.zip` | **Container** only | Root `Dockerfile` + prebuilt `out/` (air-gapped image build) |
 
-### 3. Form fields
+Do **not** select both unless you know the platform merges them correctly.
 
-| Field | Value |
-| --- | --- |
-| Components | **Container** |
-| Dockerfile | repo root `Dockerfile` |
+Verify the website zip before upload:
 
-Health / listen: serves `out/` on `0.0.0.0:3000` (includes `out/index.html`).
+```bash
+unzip -l dist/sandbox-website.zip | head
+# first entries must include index.html (not out/index.html)
+```
 
 ---
 
-## Commands cheat sheet
+## Option A — Website (fixes your current 404)
+
+1. `npm run package:sandbox`
+2. Upload **`dist/sandbox-website.zip`**
+3. Components: **Website** only
+4. Shortname: e.g. `frontbook-express`
+
+Suggested form fields: Title `Take It or Leave It`, description as you like.
+
+Demo rates by default. For real rates, compile the book then rebuild:
 
 ```bash
-npm run build:static       # → out/ and dist/  for S3 Website
-npm run build:standalone   # → .next/standalone  for containers
-npm run build:container    # docker build -t take-it-or-leave-it .
+npm run book:compile
+NEXT_PUBLIC_DEMO_MODE=false npm run package:sandbox
 ```
 
-Local preview of the static export:
+---
+
+## Option B — Container (sandbox packaging Option 2)
+
+Per the sandbox packaging rules: Dockerfile present → zip with Dockerfile at
+root, listen on **3000**, `GET /` → 200, ECR pull-through base image.
+
+1. `npm run package:sandbox` (builds `out/` on your machine — Docker does **not**
+   run `next build`, so no Google Fonts / npm registry needed in CodeBuild)
+2. Upload **`dist/sandbox-container.zip`**
+3. Components: **Container** only
+
+Image serves `out/` via `scripts/static-server.mjs` on port 3000.
+
+---
+
+## Local checks
 
 ```bash
-npx serve dist -p 3400
+npm run build:static
+npm run start:static          # http://0.0.0.0:3000 — same as the container
+curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:3000/
 ```
+
+---
+
+## Why the old upload failed
+
+| What was uploaded | S3 key looked up | Result |
+| --- | --- | --- |
+| Repo source / nested `out/` | `frontbook-express/index.html` | **NoSuchKey** |
+| Contents of `out/` at zip root | `frontbook-express/index.html` | Works |

@@ -1,52 +1,27 @@
-# Take It or Leave It — container image for the internal platform
+# Take It or Leave It — CKO AI Sandbox container image
 #
-# Builds the static export into `out/` (includes index.html) and serves it on
-# port 3000. Pricing runs entirely in the browser; AI parse is unavailable
-# without a Node API (enter fields manually).
+# Air-gapped build: no npm install, no Next.js compile inside Docker.
+# Build the static site on a machine with network first (`npm run build:static`),
+# then package with `npm run package:sandbox` so `out/index.html` is in the zip.
 #
-# Build:
-#   docker build -t take-it-or-leave-it .
-#   docker build --build-arg NEXT_PUBLIC_DEMO_MODE=false -t take-it-or-leave-it .
-#
-# Run (platform requires port 3000):
-#   docker run --rm -p 3000:3000 take-it-or-leave-it
+# Platform rules: listen on 3000, GET / → 200, base image via ECR pull-through.
 
-FROM node:22-alpine AS deps
-WORKDIR /app
-COPY package.json package-lock.json ./
-RUN npm ci
+FROM 891377407345.dkr.ecr.eu-west-1.amazonaws.com/cko-pull-through/docker-hub/library/node:22-alpine
 
-FROM node:22-alpine AS builder
-WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
-COPY . .
-
-# Stub the gitignored live book from the demo book when absent.
-RUN node scripts/ensure-book.mjs
-
-ARG NEXT_PUBLIC_DEMO_MODE=true
-ENV NEXT_PUBLIC_DEMO_MODE=$NEXT_PUBLIC_DEMO_MODE
-ENV BUILD_TARGET=static
-ENV NEXT_TELEMETRY_DISABLED=1
-
-RUN npm run build \
-  && test -f out/index.html
-
-FROM node:22-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
-ENV NEXT_TELEMETRY_DISABLED=1
+ENV PORT=3000
 
-# Static file server; -l 3000 is required by the platform.
-RUN npm install -g serve@14.2.4 \
-  && addgroup --system --gid 1001 nodejs \
+RUN addgroup --system --gid 1001 nodejs \
   && adduser --system --uid 1001 nextjs
 
-# Platform looks for out/index.html — keep that path in the image.
-COPY --from=builder --chown=nextjs:nodejs /app/out ./out
+# Pre-built static export — must include index.html at out/index.html
+COPY --chown=nextjs:nodejs out ./out
+COPY --chown=nextjs:nodejs scripts/static-server.mjs ./static-server.mjs
 
 USER nextjs
 EXPOSE 3000
 
-CMD ["serve", "out", "-l", "3000"]
+# Fail fast if the zip was packaged without a build
+CMD ["node", "static-server.mjs", "out"]
