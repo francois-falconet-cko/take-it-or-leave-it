@@ -1,0 +1,348 @@
+@import 'tailwindcss';
+
+/* ---------------------------------------------------------------------------
+   Design tokens. Sampled from the 2026 brand kit — src/lib/brand.ts is the
+   source of truth and these mirror it so Tailwind utilities (bg-surface,
+   text-lime) are available alongside the TS constants.
+   --------------------------------------------------------------------------- */
+@theme {
+  --color-surface: #23242b;
+  --color-raised: #2f2f34;
+  --color-high: #3a3a40;
+  --color-sunken: #1c1d24;
+
+  --color-ink: #f8fafd;
+  --color-muted: #a3a4ad;
+  --color-faint: #60616a;
+
+  --color-line: #3a3a40;
+  --color-line-strong: #4e4f57;
+
+  --color-blue: #2a5df5;
+  --color-blue-bright: #165fff;
+  --color-purple: #841aff;
+  --color-orange: #ff4f18;
+  --color-lime: #b3ff00;
+
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+  --font-display: var(--font-grotesk), var(--font-inter), system-ui, sans-serif;
+  --font-mono: var(--font-mono-face), ui-monospace, monospace;
+}
+
+@layer base {
+  html,
+  body {
+    min-height: 100%;
+    background: var(--color-surface);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-blue-bright);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background: var(--color-blue);
+    color: var(--color-ink);
+  }
+
+  /* Kill the spinner on number inputs — the volume fields are wide and a
+     stepper on a $12,000,000 value is noise, not an affordance. */
+  input[type='number']::-webkit-outer-spin-button,
+  input[type='number']::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type='number'] {
+    -moz-appearance: textfield;
+  }
+}
+
+@layer utilities {
+  .scroll-quiet {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-line-strong) transparent;
+  }
+  .scroll-quiet::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  .scroll-quiet::-webkit-scrollbar-thumb {
+    background: var(--color-line-strong);
+    border-radius: 999px;
+    border: 3px solid transparent;
+    background-clip: content-box;
+  }
+  .scroll-quiet::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  /* Brand headlines: caps, tight, no closing period. See VOICE in lib/brand.ts. */
+  .headline {
+    font-family: var(--font-display);
+    text-transform: uppercase;
+    letter-spacing: -0.01em;
+    line-height: 0.95;
+    font-weight: 700;
+  }
+
+  .chip-mono {
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: 0.6875rem;
+    font-weight: 500;
+  }
+
+  .tnum {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@layer components {
+  /* Form primitives. Dark, 40px tall, quiet until focused. */
+  .field {
+    width: 100%;
+    min-height: 2.5rem;
+    background: var(--color-sunken);
+    border: 1px solid var(--color-line);
+    border-radius: 0.5rem;
+    color: var(--color-ink);
+    font-size: 0.875rem;
+    padding: 0 0.75rem;
+    transition:
+      border-color 140ms ease,
+      box-shadow 140ms ease;
+  }
+  .field::placeholder {
+    color: var(--color-faint);
+  }
+  .field:focus {
+    outline: none;
+    border-color: var(--color-blue-bright);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-blue-bright) 25%, transparent);
+  }
+  .field[data-invalid='true'] {
+    border-color: var(--color-orange);
+  }
+  .field[data-ai-filled='true'] {
+    border-color: color-mix(in srgb, var(--color-purple) 70%, transparent);
+    box-shadow: inset 3px 0 0 0 var(--color-purple);
+  }
+
+  select.field {
+    appearance: none;
+    background-image: linear-gradient(45deg, transparent 50%, var(--color-muted) 50%),
+      linear-gradient(135deg, var(--color-muted) 50%, transparent 50%);
+    background-position:
+      calc(100% - 16px) 50%,
+      calc(100% - 11px) 50%;
+    background-size:
+      5px 5px,
+      5px 5px;
+    background-repeat: no-repeat;
+    padding-right: 2rem;
+  }
+
+  .label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--color-muted);
+    margin-bottom: 0.375rem;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 2.5rem;
+    padding: 0 1rem;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    transition:
+      filter 140ms ease,
+      background-color 140ms ease,
+      border-color 140ms ease;
+  }
+  .btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+  .btn-primary {
+    background: var(--color-blue);
+    color: #fff;
+  }
+  .btn-primary:hover:not(:disabled) {
+    filter: brightness(1.12);
+  }
+  .btn-ghost {
+    background: transparent;
+    color: var(--color-ink);
+    border: 1px solid var(--color-line-strong);
+  }
+  .btn-ghost:hover:not(:disabled) {
+    border-color: var(--color-muted);
+    background: var(--color-raised);
+  }
+
+  /* Range input, themed. The challenge slider is the demo's emotional beat, so
+     it needs to feel like a deliberate control rather than a browser default. */
+  input[type='range'] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 1.5rem;
+    background: transparent;
+  }
+  input[type='range']::-webkit-slider-runnable-track {
+    height: 6px;
+    border-radius: 999px;
+    background: var(--track, var(--color-high));
+  }
+  input[type='range']::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    height: 20px;
+    width: 20px;
+    margin-top: -7px;
+    border-radius: 999px;
+    background: var(--color-ink);
+    border: 3px solid var(--thumb, var(--color-blue-bright));
+    cursor: grab;
+  }
+  input[type='range']:active::-webkit-slider-thumb {
+    cursor: grabbing;
+    transform: scale(1.1);
+  }
+  input[type='range']::-moz-range-track {
+    height: 6px;
+    border-radius: 999px;
+    background: var(--track, var(--color-high));
+  }
+  input[type='range']::-moz-range-thumb {
+    height: 20px;
+    width: 20px;
+    border-radius: 999px;
+    background: var(--color-ink);
+    border: 3px solid var(--thumb, var(--color-blue-bright));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Print. The Deal on a Page exports through the browser's own print-to-PDF, so
+   this stylesheet is the export format — no PDF library in the bundle.
+   --------------------------------------------------------------------------- */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 10mm;
+  }
+
+  html,
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  /* Everything not part of the page itself disappears. */
+  .no-print {
+    display: none !important;
+  }
+
+  .print-root {
+    display: block !important;
+    max-width: none !important;
+    padding: 0 !important;
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  .print-card {
+    background: #fff !important;
+    border: 1px solid #ccc !important;
+    color: #000 !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+    box-shadow: none !important;
+  }
+
+  .print-ink {
+    color: #000 !important;
+  }
+  .print-muted {
+    color: #555 !important;
+  }
+  .print-rule {
+    border-color: #ccc !important;
+  }
+
+  /* Keep the guidance waterfall together — a table split across a page break is
+     exactly the artefact that makes an exported quote look untrustworthy. */
+  table {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  tr,
+  td,
+  th {
+    break-inside: avoid;
+  }
+
+  a[href]::after {
+    content: '';
+  }
+
+  /* Density. A typical quote lands on one A4 page. A deal carrying several
+     warnings runs to two — `break-inside: avoid` on every card and table means
+     the break falls between blocks rather than through the middle of the
+     waterfall, which is the part that has to stay legible. Squeezing harder than
+     this to force one page costs more in readability than it wins. */
+  .print-root {
+    font-size: 9.5px;
+  }
+  .print-root > * + * {
+    margin-top: 5px !important;
+  }
+  .print-card > * {
+    padding: 5px 10px !important;
+  }
+  .print-card {
+    border-radius: 4px !important;
+  }
+  .print-root .font-display {
+    font-size: 14px !important;
+    line-height: 1.05 !important;
+  }
+  .print-root h1.headline {
+    font-size: 18px !important;
+  }
+  .print-root table {
+    font-size: 9px !important;
+  }
+  .print-root table td,
+  .print-root table th {
+    padding: 2px 8px !important;
+  }
+  .print-root .grid {
+    gap: 6px !important;
+  }
+  /* The Phase 2 stub is a roadmap note, not part of the quote. */
+  .print-root .print-omit {
+    display: none !important;
+  }
+}

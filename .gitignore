@@ -1,0 +1,13 @@
+node_modules/
+.next/
+*.tsbuildinfo
+.env
+.env.local
+
+# Real rates never leave the machine by accident. The demo book is committed;
+# the live one is not. Re-create it with `npm run book:compile`.
+data/pricing-book.json
+sources/acq framework.csv
+sources/*.eml
+sources/raw/*.txt
+pricing-book.diff.md

@@ -1,0 +1,124 @@
+{
+  "$comment": "Every pricing source the book is compiled from. `glean_query` is what the compile script asks Glean for when GLEAN_API_TOKEN is set; without a token the script reads sources/raw/<id>.txt instead. See PRD 8.2 / 8.3.",
+  "sources": [
+    {
+      "id": "src_acq_framework",
+      "title": "Acquirer Framework — take rate by region, vertical and monthly volume band",
+      "system": "CSV",
+      "url": "https://checkout.highspot.com/spots/61a11b3b4aaa0b25e1cf0250?list=6a677f53591fe609e17d6567&overview=false",
+      "local_path": "sources/acq framework.csv",
+      "glean_query": "Acquirer Guidance take rate framework vertical region",
+      "feeds": "acquiring",
+      "extractor": "csv"
+    },
+    {
+      "id": "src_guidance_email",
+      "title": "IMPORTANT: Acquirer Guidance — How We Price & Approve New Front Book Deals",
+      "system": "Email",
+      "url": "https://docs.google.com/presentation/d/1-FXJtjmc3_nBvjWNHmUxOwxRUj8fu8g2TLWuuV8ofhk/edit",
+      "local_path": "sources/IMPORTANT_ Acquirer Guidance - How We Price & Approve New Front Book Deals.eml",
+      "glean_query": "Acquirer Guidance how we price and approve new front book deals approval thresholds",
+      "feeds": "approval_matrix",
+      "extractor": "eml"
+    },
+    {
+      "id": "src_pricing_model",
+      "title": "Pricing Model for Front Book",
+      "system": "Highspot",
+      "url": "https://checkout.highspot.com/items/6a672ef0763aee04169066f3?source=slack#1",
+      "glean_query": "Pricing Model for Front Book",
+      "feeds": "reference",
+      "extractor": "claude"
+    },
+    {
+      "id": "src_mac",
+      "title": "MAC — Merchant Acquiring Costs",
+      "system": "Highspot",
+      "url": "https://checkout.highspot.com/items/62e7bdd8f28282c82ae63b35?lfrm=srp.0#2",
+      "glean_query": "MAC merchant acquiring cost pricing",
+      "feeds": "reference",
+      "extractor": "claude"
+    },
+    {
+      "id": "src_gateway_premium",
+      "title": "Gateway + Acquirer premium",
+      "system": "Highspot",
+      "url": "https://checkout.highspot.com/items/61a11c0094083a172b79ceca?lfrm=srp.2#2",
+      "glean_query": "gateway acquirer premium pricing tiers",
+      "feeds": "gateway",
+      "extractor": "claude"
+    },
+    {
+      "id": "src_vas_network_tokens",
+      "title": "Network Tokens",
+      "system": "Highspot",
+      "url": "https://checkout.highspot.com/items/647dde7dc4f2ebc1f397d615?lfrm=srp.0#1",
+      "glean_query": "Network Tokens pricing per transaction",
+      "feeds": "vas:network_tokens",
+      "extractor": "claude"
+    },
+    {
+      "id": "src_vas_rtau",
+      "title": "RTAU — Real Time Account Updater",
+      "system": "Highspot",
+      "url": "https://checkout.highspot.com/items/647ddf5780ff58cb0fb43391?lfrm=srp.1#1",
+      "glean_query": "RTAU real time account updater pricing per request",
+      "feeds": "vas:rtau",
+      "extractor": "claude"
+    },
+    {
+      "id": "src_vas_forward_vault",
+      "title": "Forward API & Vault",
+      "system": "Highspot",
+      "url": "https://checkout.highspot.com/items/668e9333f3aea59c05c394bb?lfrm=srp.0#1",
+      "glean_query": "Forward API Vault pricing per request",
+      "feeds": "vas:forward_vault",
+      "extractor": "claude"
+    },
+    {
+      "id": "src_vas_integrated_platforms",
+      "title": "Integrated Platforms",
+      "system": "Highspot",
+      "url": "https://checkout.highspot.com/items/64cd76ed34cc409788c6e0d2?lfrm=srp.0#1",
+      "glean_query": "Integrated Platforms pricing",
+      "feeds": "vas:integrated_platforms",
+      "extractor": "claude"
+    },
+    {
+      "id": "src_vas_settlement",
+      "title": "Settlement Fees",
+      "system": "Highspot",
+      "url": "https://checkout.highspot.com/items/6543caf903357cebea0bfda8?lfrm=srp.0#1",
+      "glean_query": "settlement fees pricing payout",
+      "feeds": "vas:settlement",
+      "extractor": "claude"
+    },
+    {
+      "id": "src_vas_fraud",
+      "title": "Fraud Detection",
+      "system": "Highspot",
+      "url": "https://checkout.highspot.com/items/63d7afa15769ea57b607767c?lfrm=srp.0#1",
+      "glean_query": "Fraud Detection pricing per transaction",
+      "feeds": "vas:fraud_detection",
+      "extractor": "claude"
+    },
+    {
+      "id": "src_vas_authentication",
+      "title": "Authentication (3DS)",
+      "system": "Highspot",
+      "url": "https://checkout.highspot.com/items/62f147b00bfa5c8457fddd7c?lfrm=srp.0#2",
+      "glean_query": "Authentication 3DS pricing per authentication",
+      "feeds": "vas:authentication",
+      "extractor": "claude"
+    },
+    {
+      "id": "src_vas_apms",
+      "title": "APMs — Alternative Payment Methods",
+      "system": "Highspot",
+      "url": "https://checkout.highspot.com/items/6409b86eedc1c8eef79161c9?lfrm=srp.0#4",
+      "glean_query": "APM alternative payment methods pricing",
+      "feeds": "vas:apms",
+      "extractor": "claude"
+    }
+  ]
+}
