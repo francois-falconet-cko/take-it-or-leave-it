@@ -13,6 +13,67 @@
 
 import type { Intake, PricingBook, Quote } from './types.ts';
 import { bps, bpsAsPct, feeAmount, money, pct } from './format.ts';
+import { resolveRecipient, type Recipient } from './approvers.ts';
+
+/** A rate written the way an approver wants to read it: bps first, percent in support. */
+const rate = (b: number | null) => (b == null ? '—' : `${bps(b)} bps (${bpsAsPct(b)})`);
+
+export interface ApprovalEmailDraft {
+  recipient: Recipient;
+  subject: string;
+  body: string;
+}
+
+/**
+ * The approval request, as the rep sends it.
+ *
+ * Short on purpose. The long-form draft below (`buildEmail`) carries the whole
+ * deal for the Deal on a Page; this one asks one question — approve this
+ * reduction — and gives the three numbers needed to answer it. The reasons are
+ * left as empty bullets because they are the one part the tool cannot write, and
+ * a pre-filled rationale is exactly what an approver learns to skip.
+ */
+export function buildApprovalEmail(intake: Intake, quote: Quote): ApprovalEmailDraft | null {
+  if (!quote.approval?.required || quote.targetBps == null || quote.requestedBps == null) return null;
+
+  const recipient = resolveRecipient(quote.approval);
+  if (!recipient) return null;
+
+  // Negative discount means priced above guidance, which never reaches here.
+  const reduction = pct(Math.max(0, quote.discountPct ?? 0));
+  const merchant = intake.merchantName || 'this merchant';
+
+  const body = [
+    `Hey ${recipient.firstName},`,
+    '',
+    `I am requesting approval for a pricing reduction of ${reduction} from the recommended take rate of ${rate(quote.targetBps)} for ${merchant}.`,
+    '',
+    'Recommended Take Rate:',
+    rate(quote.targetBps),
+    '',
+    'Sales Rep Adjusted Take Rate:',
+    rate(quote.requestedBps),
+    '',
+    'Reduction:',
+    reduction,
+    '',
+    'Main reasons for the request:',
+    '',
+    '-',
+    '-',
+    '-',
+    '-',
+    '',
+    'Best,',
+    intake.repName || '',
+  ].join('\n');
+
+  return {
+    recipient,
+    subject: `Pricing Approval Request - ${reduction} Discount${intake.merchantName ? ` - ${intake.merchantName}` : ''}`,
+    body,
+  };
+}
 
 /**
  * Outlook and Gmail both stop reading a mailto: URL somewhere around 2,048

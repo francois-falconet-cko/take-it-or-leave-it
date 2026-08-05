@@ -7,15 +7,15 @@ import type { Intake, Quote, VasFeeSelection } from './types.ts';
 import { book } from './book.ts';
 import { price, primaryFee, verticalForMcc } from './engine/index.ts';
 
-export type Step = 'intake' | 'recommendation' | 'challenge' | 'deal';
-
-export const REASON_FALLBACK = [
-  'Competitive Threat',
-  'Strategic Account',
-  'Volume Commitment',
-  'Executive Mandate',
-  'Migration / Displacement',
-];
+/**
+ * Two working steps, then the artefact.
+ *
+ * The old flow had the rep price the deal, then separately name a rate to
+ * challenge with. The rate they build from core acquiring and VAS *is* the rate
+ * under approval now, so there is nothing left to choose on a middle screen —
+ * intake goes straight to the approval path.
+ */
+export type Step = 'intake' | 'approval' | 'deal';
 
 export function emptyIntake(): Intake {
   return {
@@ -71,10 +71,6 @@ interface State {
   intake: Intake;
   /** Fields the plain-English parser populated, so the UI can mark them. */
   aiFilled: string[];
-  /** null until the rep opens the challenge flow. */
-  requestedBps: number | null;
-  reasonCategory: string;
-  justification: string;
   /** Frozen at mount so the pure engine gets a stable `today`. */
   today: string;
 
@@ -84,8 +80,6 @@ interface State {
   setVas: (key: string, next: { enabled?: boolean; attachRate?: number; quotedAmount?: number | null }) => void;
   /** Override one fee inside a multi-fee framework — Integrated Platforms, APMs. */
   setVasFee: (key: string, feeKey: string, next: VasFeeSelection) => void;
-  setRequestedBps: (bps: number | null) => void;
-  setReason: (category: string, justification: string) => void;
   markAiFilled: (fields: string[]) => void;
   loadDemo: (intake: Partial<Intake>) => void;
   reset: () => void;
@@ -97,9 +91,6 @@ export const useStore = create<State>()(
       step: 'intake',
       intake: emptyIntake(),
       aiFilled: [],
-      requestedBps: null,
-      reasonCategory: '',
-      justification: '',
       today: new Date().toISOString().slice(0, 10),
 
       setStep: (step) => set({ step }),
@@ -159,17 +150,12 @@ export const useStore = create<State>()(
           };
         }),
 
-      setRequestedBps: (requestedBps) => set({ requestedBps }),
-      setReason: (reasonCategory, justification) => set({ reasonCategory, justification }),
       markAiFilled: (aiFilled) => set({ aiFilled }),
 
       loadDemo: (partial) =>
         set(() => ({
           intake: { ...emptyIntake(), ...partial },
           step: 'intake',
-          requestedBps: null,
-          reasonCategory: '',
-          justification: '',
           aiFilled: [],
         })),
 
@@ -177,25 +163,19 @@ export const useStore = create<State>()(
         set({
           intake: emptyIntake(),
           step: 'intake',
-          requestedBps: null,
-          reasonCategory: '',
-          justification: '',
           aiFilled: [],
         }),
 
     }),
     {
-      // Bumped when the intake gained chargeback ratio, seller count and per-fee
-      // VAS overrides. A half-migrated deal restored from v1 would quote against a
-      // framework band it never had inputs for.
-      name: 'tiloi-v2',
+      // Bumped when the accept/challenge fork was replaced by a single approval
+      // step. A session persisted under v2 carries step: 'recommendation' or
+      // 'challenge', which no longer resolve to a screen.
+      name: 'tiloi-v3',
       // Surviving a mid-demo refresh matters more than a clean slate.
       partialize: (s) => ({
         step: s.step,
         intake: s.intake,
-        requestedBps: s.requestedBps,
-        reasonCategory: s.reasonCategory,
-        justification: s.justification,
         aiFilled: s.aiFilled,
       }),
     },
@@ -213,9 +193,11 @@ export const useStore = create<State>()(
  */
 export function useQuote(): Quote {
   const intake = useStore((s) => s.intake);
-  const requestedBps = useStore((s) => s.requestedBps);
   const today = useStore((s) => s.today);
-  return useMemo(() => price(intake, book, today, { requestedBps }), [intake, requestedBps, today]);
+  // approveOnAdjusted: the rate the rep built from core acquiring + VAS is the
+  // rate under approval. The engine still accepts an explicit `requestedBps` for
+  // tests and scripts; the app never pins one.
+  return useMemo(() => price(intake, book, today, { approveOnAdjusted: true }), [intake, today]);
 }
 
 /** Volume fields are the only ones where "" and 0 must not be confused. */

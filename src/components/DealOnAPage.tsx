@@ -10,13 +10,15 @@ import { Card, Chip, FindingList, SourceLink, Tile } from './ui/primitives';
 import { BrandLockup } from './ui/Wordmark';
 
 export function DealOnAPage() {
-  const { intake, setStep, reasonCategory, justification, today } = useStore();
+  const { intake, setStep, today } = useStore();
   const quote = useQuote();
   const [copied, setCopied] = useState(false);
 
   const email = useMemo(
-    () => buildEmail(intake, quote, book, reasonCategory, justification),
-    [intake, quote, reasonCategory, justification],
+    // The rationale is written by the rep straight into the approval draft on the
+    // previous page, so there is no stored category or justification to fold in.
+    () => buildEmail(intake, quote, book, '', ''),
+    [intake, quote],
   );
   const [draft, setDraft] = useState(email?.body ?? '');
   useEffect(() => setDraft(email?.body ?? ''), [email?.body]);
@@ -47,7 +49,7 @@ export function DealOnAPage() {
             <p className="text-[0.875rem] leading-relaxed text-muted">
               This deal has no guidance take rate, so there is nothing to summarise. Route it to Strategic Pricing.
             </p>
-            <button type="button" className="btn btn-ghost mt-4" onClick={() => setStep('recommendation')}>
+            <button type="button" className="btn btn-ghost mt-4" onClick={() => setStep('intake')}>
               <ArrowLeft size={14} />
               Back
             </button>
@@ -295,20 +297,6 @@ export function DealOnAPage() {
           </div>
         </Card>
 
-        {/* 6 — Justification */}
-        {(reasonCategory || justification) && (
-          <Card title="Rationale">
-            <div className="p-5">
-              {reasonCategory && <p className="print-ink text-[0.8125rem] font-semibold text-ink">{reasonCategory}</p>}
-              {justification && (
-                <p className="print-muted mt-1.5 whitespace-pre-wrap text-[0.8125rem] leading-relaxed text-muted">
-                  {justification}
-                </p>
-              )}
-            </div>
-          </Card>
-        )}
-
         {/* 7 — Flags */}
         {quote.findings.some((f) => f.level === 'warning') && (
           <Card title="Flags">
@@ -431,9 +419,9 @@ export function DealOnAPage() {
             <Printer size={15} />
             Print / PDF
           </button>
-          <button type="button" className="btn btn-ghost" onClick={() => setStep('challenge')}>
+          <button type="button" className="btn btn-ghost" onClick={() => setStep('approval')}>
             <ArrowLeft size={14} />
-            Rate
+            Approval
           </button>
         </div>
 

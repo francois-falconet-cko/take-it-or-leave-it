@@ -10,9 +10,8 @@ import { Chip } from './ui/primitives';
 import { Wordmark } from './ui/Wordmark';
 
 const STEPS: { key: Step; label: string }[] = [
-  { key: 'intake', label: 'Merchant' },
-  { key: 'recommendation', label: 'Deal terms' },
-  { key: 'challenge', label: 'Accept or challenge' },
+  { key: 'intake', label: 'Price the deal' },
+  { key: 'approval', label: 'Approval path' },
   { key: 'deal', label: 'Deal on a page' },
 ];
 

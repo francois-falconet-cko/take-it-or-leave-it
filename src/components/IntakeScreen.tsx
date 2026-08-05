@@ -1,26 +1,23 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ArrowRight, Sparkles, Wand2 } from 'lucide-react';
+import { ArrowRight, Sparkles } from 'lucide-react';
 import { book } from '@/lib/book';
 import { useQuote, useStore } from '@/lib/store';
 import { mccTierFor, primaryFee, vasBandFor, verticalForMcc } from '@/lib/engine';
-import { bps, feeAmount, int, sym } from '@/lib/format';
+import { bps, bpsAsPct, feeAmount, int, pct, sym } from '@/lib/format';
 import demoMerchants from '../../data/demo-merchants.json' with { type: 'json' };
 import { autofillFieldKeys, lookupUrlAutofill } from '@/lib/urlAutofill';
 import { GuidanceQuotePanel } from './GuidanceQuotePanel';
-import { Card, Chip, Field, FindingRow, NumberInput, Select, TextInput, Toggle } from './ui/primitives';
-import type { Currency, RiskLevel } from '@/lib/types';
+import { Card, Chip, Field, NumberInput, Select, TextInput, Toggle } from './ui/primitives';
+import type { Currency, Quote, RiskLevel } from '@/lib/types';
 
 export function IntakeScreen() {
   const { intake, patch, setMcc, setVas, setStep, aiFilled, markAiFilled, loadDemo } = useStore();
   const quote = useQuote();
-  const [plainText, setPlainText] = useState('');
-  const [parsing, setParsing] = useState(false);
-  const [parseError, setParseError] = useState<string | null>(null);
   const [urlAutofillId, setUrlAutofillId] = useState<string | null>(null);
   const [priceBuilt, setPriceBuilt] = useState(false);
-  const quoteRef = useRef<HTMLDivElement>(null);
+  const pricingRef = useRef<HTMLDivElement>(null);
 
   function onMerchantUrlChange(raw: string) {
     patch({ merchantUrl: raw });
@@ -40,7 +37,7 @@ export function IntakeScreen() {
 
   const hasVolume = !!(intake.monthlyTpv || intake.threeMonthTpv || intake.annualTpv);
   const canBuild = hasVolume && !!intake.vertical && !!intake.region;
-  const canContinueToTerms = priceBuilt && quote.status === 'OK';
+  const canContinueToApproval = priceBuilt && quote.status === 'OK' && quote.adjusted?.totalBps != null;
 
   /**
    * Framework band and MCC tier, resolved here as well as in the engine so the
@@ -61,71 +58,13 @@ export function IntakeScreen() {
 
   useEffect(() => {
     if (!priceBuilt) return;
-    quoteRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    pricingRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, [priceBuilt]);
 
-  async function parsePlainEnglish() {
-    setParsing(true);
-    setParseError(null);
-    try {
-      const res = await fetch('/api/parse-merchant', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ text: plainText }),
-      });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error ?? 'Parse failed');
-      patch(json.fields);
-      markAiFilled(Object.keys(json.fields));
-    } catch (e) {
-      setParseError(e instanceof Error ? e.message : 'Parse failed');
-    } finally {
-      setParsing(false);
-    }
-  }
 
   return (
     <div className="grid gap-5 lg:grid-cols-[1fr_320px]">
       <div className="space-y-5">
-        <Card
-          title="Describe the merchant"
-          subtitle="Paste what you know in plain English, or skip straight to the fields below."
-          right={<Chip tone="purple">AI</Chip>}
-        >
-          <div className="space-y-3 p-4">
-            <textarea
-              className="field min-h-[72px] resize-y py-2 leading-relaxed"
-              placeholder="UK fashion retailer on Shopify, about £4m a month, £65 average basket"
-              value={plainText}
-              onChange={(e) => setPlainText(e.target.value)}
-            />
-            <div className="flex items-center gap-3">
-              <button
-                type="button"
-                className="btn btn-ghost"
-                disabled={parsing || plainText.trim().length < 10}
-                onClick={parsePlainEnglish}
-              >
-                <Wand2 size={14} />
-                {parsing ? 'Reading…' : 'Fill the form'}
-              </button>
-              <span className="text-[0.6875rem] leading-snug text-faint">
-                Fills merchant fields only — never a rate. Everything stays editable.
-              </span>
-            </div>
-            {parseError && (
-              <FindingRow
-                finding={{
-                  level: 'info',
-                  code: 'PARSE_UNAVAILABLE',
-                  message: 'AI parse unavailable — enter the fields manually.',
-                  detail: parseError,
-                }}
-              />
-            )}
-          </div>
-        </Card>
-
         <Card title="Merchant">
           <div className="grid gap-4 p-4 sm:grid-cols-2 lg:grid-cols-3">
             <Field label="Merchant name" className="sm:col-span-2 lg:col-span-1" aiFilled={isAi('merchantName')}>
@@ -209,32 +148,6 @@ export function IntakeScreen() {
                 ]}
               />
             </Field>
-
-            {/* Two independent gates hang off this one number, which is why it is
-                worth asking for: above 1% every product framework prices off its
-                Other MCCs table, and above 0.9% the MAC says do not submit. */}
-            <Field
-              label="Chargeback ratio"
-              aiFilled={isAi('chargebackRatioPct')}
-              hint={
-                intake.chargebackRatioPct == null
-                  ? 'Optional. Sets the Standard vs Other MCC pricing tier and the MAC gate.'
-                  : intake.chargebackRatioPct > 1
-                    ? 'Above 1% — every product prices off its Other MCCs table'
-                    : intake.chargebackRatioPct > book.mac.chargeback_ceiling_pct
-                      ? `Above the MAC's ${book.mac.chargeback_ceiling_pct}% pre-submission ceiling`
-                      : 'Inside both the 1% pricing line and the MAC ceiling'
-              }
-            >
-              <NumberInput
-                value={intake.chargebackRatioPct}
-                onChange={(v) => patch({ chargebackRatioPct: v })}
-                suffix="%"
-                placeholder="0.4"
-                aiFilled={isAi('chargebackRatioPct')}
-                invalid={intake.chargebackRatioPct != null && intake.chargebackRatioPct > 1}
-              />
-            </Field>
           </div>
         </Card>
 
@@ -296,237 +209,262 @@ export function IntakeScreen() {
         </Card>
 
         {priceBuilt && (
-          <div ref={quoteRef} className="space-y-4">
-            <GuidanceQuotePanel />
-            {canContinueToTerms && (
-              <div className="flex flex-wrap items-center gap-3">
-                <button type="button" className="btn btn-primary" onClick={() => setStep('recommendation')}>
-                  Continue to deal terms
-                  <ArrowRight size={14} />
-                </button>
-                <span className="text-[0.75rem] text-faint">Gold status, incentives, then accept or challenge.</span>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/*
-          Core acquiring sits above value-added services because that is the order a
-          rep builds a price in: the acquiring economics first, then what is layered
-          on top. Both feed the adjusted take rate at the top of the quote.
-        */}
-        <Card
-          title="Core acquiring"
-          subtitle="What you are charging for acquiring itself. Feeds the Sales Rep Adjusted Take Rate — it does not change the Acquirer Guidance recommendation."
-          right={
-            quote.adjusted && quote.adjusted.coreAcquiringBps > 0 ? (
-              <Chip tone="blue">{bps(quote.adjusted.coreAcquiringBps)} bps</Chip>
-            ) : (
-              <Chip tone="neutral">Not priced yet</Chip>
-            )
-          }
-        >
-          <div className="grid gap-4 p-4 sm:grid-cols-2">
-            <Field
-              label="Acquirer markup"
-              hint={
-                intake.acquirerMarkupPct == null
-                  ? 'Percentage of processed volume. 0.15% is 15 bps.'
-                  : `${intake.acquirerMarkupPct}% = ${intake.acquirerMarkupPct * 100} bps`
-              }
-            >
-              <NumberInput
-                value={intake.acquirerMarkupPct}
-                onChange={(v) => patch({ acquirerMarkupPct: v })}
-                suffix="%"
-                placeholder="0.15"
-              />
-            </Field>
-
-            <Field
-              label="Gateway fee"
-              hint={
-                intake.atv == null
-                  ? 'Per transaction. Needs ATV above to convert to bps.'
-                  : intake.gatewayFee == null
-                    ? `Per transaction. At ${sym(intake.currency)}${intake.atv} ATV, ${sym(intake.currency)}0.10 is ${((0.1 / intake.atv) * 10_000).toFixed(1)} bps.`
-                    : `${feeAmount(intake.gatewayFee, intake.gatewayFeeCurrency, 'per_txn')} per transaction`
-              }
-            >
-              <div className="flex gap-2">
-                <div className="w-24 shrink-0">
-                  <Select
-                    value={intake.gatewayFeeCurrency}
-                    onChange={(v) => patch({ gatewayFeeCurrency: v as Currency })}
-                    options={Object.keys(book.fx.rates).map((c) => ({ value: c as Currency, label: c }))}
-                  />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <NumberInput
-                    value={intake.gatewayFee}
-                    onChange={(v) => patch({ gatewayFee: v })}
-                    prefix={sym(intake.gatewayFeeCurrency)}
-                    placeholder="0.10"
-                  />
-                </div>
-              </div>
-            </Field>
-          </div>
-          <p className="border-t border-line px-4 py-2.5 text-[0.6875rem] leading-relaxed text-faint">
-            A per-transaction gateway fee is not the same number of basis points — it converts through ATV. At a small
-            basket it is worth far more than it looks.
-          </p>
-        </Card>
-
-        <Card
-          title="Value-added services"
-          subtitle="Priced off each product's own framework. The guidance take rate is unaffected — its Other line already carries the VAS uplift — but the floor and ceiling here decide who signs."
-          right={
-            <div className="flex flex-wrap justify-end gap-2">
-              {vasBand ? (
-                <Chip tone="blue" title="Product frameworks band on monthly processing volume in the deal currency.">
-                  {intake.currency} {vasBand.label}
-                </Chip>
-              ) : (
-                <Chip tone="neutral">Volume needed for a band</Chip>
-              )}
-              <Chip tone={vasTier === 'other' ? 'orange' : 'neutral'} title={vasTierReason}>
-                {vasTier === 'other' ? 'Other MCCs' : 'Standard MCCs'}
-              </Chip>
-            </div>
-          }
-        >
-          <div className="grid gap-3 p-4 sm:grid-cols-2">
-            {book.vas_catalogue.map((fw) => {
-              const fee = primaryFee(fw);
-              const sel = intake.vas[fw.key] ?? { enabled: false, attachRate: fee?.default_attach_rate ?? 1 };
-              const price =
-                fee && vasBand && fee.tiers
-                  ? {
-                      recommended: fee.tiers[vasTier].recommended[vasBand.index],
-                      floor: fee.tiers[vasTier].floor[vasBand.index],
-                      ceiling: fee.tiers[vasTier].ceiling[vasBand.index],
-                    }
-                  : null;
-              const cur = fee?.currency === 'LOCAL' ? intake.currency : (fee?.currency ?? intake.currency);
-              const attachable = fee?.unit === 'per_request' || fee?.unit === 'pct_of_value';
-
-              return (
-                <div key={fw.key} className="space-y-2">
-                  <Toggle
-                    checked={sel.enabled}
-                    onChange={(on) => setVas(fw.key, { enabled: on })}
-                    label={fw.label}
+          <>
+            {/*
+              The two sections that build the Sales Rep Adjusted Take Rate, directly
+              above it and mirrored in the sticky panel to the right so every change
+              lands in view without scrolling. Core acquiring leads because that is
+              the order a rep prices in: acquiring economics first, then what is
+              layered on top.
+            */}
+            <div ref={pricingRef} className="space-y-5">
+              <Card
+                title="Core acquiring"
+                subtitle="What you are charging for acquiring itself. Feeds the Sales Rep Adjusted Take Rate — it does not change the Acquirer Guidance recommendation."
+                right={
+                  quote.adjusted && quote.adjusted.coreAcquiringBps > 0 ? (
+                    <Chip tone="blue">{bps(quote.adjusted.coreAcquiringBps)} bps</Chip>
+                  ) : (
+                    <Chip tone="neutral">Not priced yet</Chip>
+                  )
+                }
+              >
+                <div className="grid gap-4 p-4 sm:grid-cols-2">
+                  <Field
+                    label="Acquirer markup"
                     hint={
-                      fw.needs_extraction
-                        ? 'No framework document yet — cannot be priced'
-                        : price?.recommended != null
-                          ? `Recommended ${feeAmount(price.recommended, cur, fee!.unit)} · ${fee!.basis}`
-                          : fw.fees.length > 1
-                            ? `${fw.fees.length} fees · ${fw.mandatory ? 'mandatory' : 'optional'}`
-                            : fee?.basis ?? ''
+                      intake.acquirerMarkupPct == null
+                        ? 'Percentage of processed volume. 0.15% is 15 bps.'
+                        : `${intake.acquirerMarkupPct}% = ${intake.acquirerMarkupPct * 100} bps`
                     }
-                    accent={fw.mandatory ? 'var(--color-lime)' : 'var(--color-blue-bright)'}
-                  />
+                  >
+                    <NumberInput
+                      value={intake.acquirerMarkupPct}
+                      onChange={(v) => patch({ acquirerMarkupPct: v })}
+                      suffix="%"
+                      placeholder="0.15"
+                    />
+                  </Field>
 
-                  {sel.enabled && (
-                    <div className="space-y-2.5 rounded-lg border border-line bg-sunken px-3 py-2.5">
-                      {price && (
-                        <div>
-                          <div className="flex items-baseline justify-between gap-2">
-                            <span className="label !mb-0">Quoting</span>
-                            <span className="text-[0.6875rem] text-faint">
-                              floor {price.floor == null ? '—' : feeAmount(price.floor, cur, fee!.unit)} · ceiling{' '}
-                              {price.ceiling == null ? '—' : feeAmount(price.ceiling, cur, fee!.unit)}
-                            </span>
-                          </div>
-                          <NumberInput
-                            value={sel.quotedAmount ?? price.recommended}
-                            onChange={(v) => setVas(fw.key, { quotedAmount: v })}
-                            prefix={fee!.unit === 'pct_of_value' ? undefined : sym(cur)}
-                            suffix={fee!.unit === 'pct_of_value' ? '%' : undefined}
-                            invalid={
-                              sel.quotedAmount != null &&
-                              ((price.floor != null && sel.quotedAmount < price.floor) ||
-                                (price.ceiling != null && sel.quotedAmount > price.ceiling))
-                            }
-                          />
-                          {sel.quotedAmount != null && sel.quotedAmount !== price.recommended && (
-                            <button
-                              type="button"
-                              className="mt-1 text-[0.6875rem] text-blue-bright underline decoration-line-strong underline-offset-2"
-                              onClick={() => setVas(fw.key, { quotedAmount: null })}
-                            >
-                              Back to recommended
-                            </button>
-                          )}
-                        </div>
-                      )}
-
-                      {attachable && (
-                        <div>
-                          <div className="flex items-baseline justify-between">
-                            <span className="label !mb-0">
-                              {fee!.unit === 'pct_of_value' ? 'Share of volume' : 'Attach rate'}
-                            </span>
-                            <span className="tnum text-[0.8125rem] font-semibold text-blue-bright">
-                              {Math.round(sel.attachRate * 100)}%
-                            </span>
-                          </div>
-                          <input
-                            type="range"
-                            min={0}
-                            max={100}
-                            step={1}
-                            value={Math.round(sel.attachRate * 100)}
-                            onChange={(e) => setVas(fw.key, { attachRate: Number(e.target.value) / 100 })}
-                            className="mt-1"
-                          />
-                          <p className="mt-0.5 text-[0.6875rem] leading-snug text-faint">{fee!.attach_rate_note}</p>
-                        </div>
-                      )}
-
-                      {/* Integrated Platforms bills per active seller. Nothing else
-                          in the intake needs a seller count, so it is asked for
-                          here rather than cluttering the merchant panel. */}
-                      {fw.fees.some((f) => f.driver === 'per_seller_month') && (
-                        <Field label="Active sellers" hint="Drives the per-seller monthly fee">
-                          <NumberInput
-                            value={intake.activeSellers}
-                            onChange={(v) => patch({ activeSellers: v })}
-                            placeholder="2500"
-                          />
-                        </Field>
-                      )}
-
-                      {fw.fees.length > 1 && (
-                        <p className="text-[0.6875rem] leading-snug text-faint">
-                          {fw.fees.length} fees in this framework. The full table, with each fee&apos;s floor, is on the
-                          quote below.
-                        </p>
-                      )}
-                      {!price && !fw.needs_extraction && (
-                        <p className="text-[0.6875rem] leading-snug text-orange">
-                          Enter monthly volume to place this product in a framework band.
-                        </p>
-                      )}
-                      {fw.needs_extraction && (
-                        <p className="text-[0.6875rem] leading-snug text-orange">{fw.notes[0]}</p>
-                      )}
+                  <Field
+                    label="Gateway fee"
+                    hint={
+                      intake.atv == null
+                        ? 'Per transaction. Needs ATV above to convert to bps.'
+                        : intake.gatewayFee == null
+                          ? `Per transaction. At ${sym(intake.currency)}${intake.atv} ATV, ${sym(intake.currency)}0.10 is ${((0.1 / intake.atv) * 10_000).toFixed(1)} bps.`
+                          : `${feeAmount(intake.gatewayFee, intake.gatewayFeeCurrency, 'per_txn')} per transaction`
+                    }
+                  >
+                    <div className="flex gap-2">
+                      <div className="w-24 shrink-0">
+                        <Select
+                          value={intake.gatewayFeeCurrency}
+                          onChange={(v) => patch({ gatewayFeeCurrency: v as Currency })}
+                          options={Object.keys(book.fx.rates).map((c) => ({ value: c as Currency, label: c }))}
+                        />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <NumberInput
+                          value={intake.gatewayFee}
+                          onChange={(v) => patch({ gatewayFee: v })}
+                          prefix={sym(intake.gatewayFeeCurrency)}
+                          placeholder="0.10"
+                        />
+                      </div>
                     </div>
-                  )}
+                  </Field>
                 </div>
-              );
-            })}
-          </div>
-          <p className="border-t border-line px-4 py-2.5 text-[0.6875rem] leading-relaxed text-faint">
-            Products with a lime toggle are mandatory — their frameworks say so in as many words. Leaving one off is not
-            a discount, it is a gap in the quote.
-          </p>
-        </Card>
+                <p className="border-t border-line px-4 py-2.5 text-[0.6875rem] leading-relaxed text-faint">
+                  A per-transaction gateway fee is not the same number of basis points — it converts through ATV. At a
+                  small basket it is worth far more than it looks.
+                </p>
+              </Card>
+
+              <Card
+                title="Value-added services"
+                subtitle="Priced off each product's own framework. The guidance take rate is unaffected — its Other line already carries the VAS uplift — but the floor and ceiling here decide who signs."
+                right={
+                  <div className="flex flex-wrap justify-end gap-2">
+                    {vasBand ? (
+                      <Chip
+                        tone="blue"
+                        title="Product frameworks band on monthly processing volume in the deal currency."
+                      >
+                        {intake.currency} {vasBand.label}
+                      </Chip>
+                    ) : (
+                      <Chip tone="neutral">Volume needed for a band</Chip>
+                    )}
+                    <Chip tone={vasTier === 'other' ? 'orange' : 'neutral'} title={vasTierReason}>
+                      {vasTier === 'other' ? 'Other MCCs' : 'Standard MCCs'}
+                    </Chip>
+                  </div>
+                }
+              >
+                <div className="grid gap-3 p-4 sm:grid-cols-2">
+                  {book.vas_catalogue.map((fw) => {
+                    const fee = primaryFee(fw);
+                    const sel = intake.vas[fw.key] ?? { enabled: false, attachRate: fee?.default_attach_rate ?? 1 };
+                    const price =
+                      fee && vasBand && fee.tiers
+                        ? {
+                            recommended: fee.tiers[vasTier].recommended[vasBand.index],
+                            floor: fee.tiers[vasTier].floor[vasBand.index],
+                            ceiling: fee.tiers[vasTier].ceiling[vasBand.index],
+                          }
+                        : null;
+                    const cur = fee?.currency === 'LOCAL' ? intake.currency : (fee?.currency ?? intake.currency);
+                    const attachable = fee?.unit === 'per_request' || fee?.unit === 'pct_of_value';
+
+                    return (
+                      <div key={fw.key} className="space-y-2">
+                        <Toggle
+                          checked={sel.enabled}
+                          onChange={(on) => setVas(fw.key, { enabled: on })}
+                          label={fw.label}
+                          hint={
+                            fw.needs_extraction
+                              ? 'No framework document yet — cannot be priced'
+                              : price?.recommended != null
+                                ? `Recommended ${feeAmount(price.recommended, cur, fee!.unit)} · ${fee!.basis}`
+                                : fw.fees.length > 1
+                                  ? `${fw.fees.length} fees · ${fw.mandatory ? 'mandatory' : 'optional'}`
+                                  : fee?.basis ?? ''
+                          }
+                          accent={fw.mandatory ? 'var(--color-lime)' : 'var(--color-blue-bright)'}
+                        />
+
+                        {sel.enabled && (
+                          <div className="space-y-2.5 rounded-lg border border-line bg-sunken px-3 py-2.5">
+                            {price && (
+                              <div>
+                                <div className="flex items-baseline justify-between gap-2">
+                                  <span className="label !mb-0">Quoting</span>
+                                  <span className="text-[0.6875rem] text-faint">
+                                    floor {price.floor == null ? '—' : feeAmount(price.floor, cur, fee!.unit)} ·
+                                    ceiling{' '}
+                                    {price.ceiling == null ? '—' : feeAmount(price.ceiling, cur, fee!.unit)}
+                                  </span>
+                                </div>
+                                <NumberInput
+                                  value={sel.quotedAmount ?? price.recommended}
+                                  onChange={(v) => setVas(fw.key, { quotedAmount: v })}
+                                  prefix={fee!.unit === 'pct_of_value' ? undefined : sym(cur)}
+                                  suffix={fee!.unit === 'pct_of_value' ? '%' : undefined}
+                                  invalid={
+                                    sel.quotedAmount != null &&
+                                    ((price.floor != null && sel.quotedAmount < price.floor) ||
+                                      (price.ceiling != null && sel.quotedAmount > price.ceiling))
+                                  }
+                                />
+                                {sel.quotedAmount != null && sel.quotedAmount !== price.recommended && (
+                                  <button
+                                    type="button"
+                                    className="mt-1 text-[0.6875rem] text-blue-bright underline decoration-line-strong underline-offset-2"
+                                    onClick={() => setVas(fw.key, { quotedAmount: null })}
+                                  >
+                                    Back to recommended
+                                  </button>
+                                )}
+                              </div>
+                            )}
+
+                            {attachable && (
+                              <div>
+                                <div className="flex items-baseline justify-between">
+                                  <span className="label !mb-0">
+                                    {fee!.unit === 'pct_of_value' ? 'Share of volume' : 'Attach rate'}
+                                  </span>
+                                  <span className="tnum text-[0.8125rem] font-semibold text-blue-bright">
+                                    {Math.round(sel.attachRate * 100)}%
+                                  </span>
+                                </div>
+                                <input
+                                  type="range"
+                                  min={0}
+                                  max={100}
+                                  step={1}
+                                  value={Math.round(sel.attachRate * 100)}
+                                  onChange={(e) => setVas(fw.key, { attachRate: Number(e.target.value) / 100 })}
+                                  className="mt-1"
+                                />
+                                <p className="mt-0.5 text-[0.6875rem] leading-snug text-faint">
+                                  {fee!.attach_rate_note}
+                                </p>
+                              </div>
+                            )}
+
+                            {/* Integrated Platforms bills per active seller. Nothing else
+                                in the intake needs a seller count, so it is asked for
+                                here rather than cluttering the merchant panel. */}
+                            {fw.fees.some((f) => f.driver === 'per_seller_month') && (
+                              <Field label="Active sellers" hint="Drives the per-seller monthly fee">
+                                <NumberInput
+                                  value={intake.activeSellers}
+                                  onChange={(v) => patch({ activeSellers: v })}
+                                  placeholder="2500"
+                                />
+                              </Field>
+                            )}
+
+                            {fw.fees.length > 1 && (
+                              <p className="text-[0.6875rem] leading-snug text-faint">
+                                {fw.fees.length} fees in this framework. The full table, with each fee&apos;s floor, is
+                                on the quote below.
+                              </p>
+                            )}
+                            {!price && !fw.needs_extraction && (
+                              <p className="text-[0.6875rem] leading-snug text-orange">
+                                Enter monthly volume to place this product in a framework band.
+                              </p>
+                            )}
+                            {fw.needs_extraction && (
+                              <p className="text-[0.6875rem] leading-snug text-orange">{fw.notes[0]}</p>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+                <p className="border-t border-line px-4 py-2.5 text-[0.6875rem] leading-relaxed text-faint">
+                  Products with a lime toggle are mandatory — their frameworks say so in as many words. Leaving one off
+                  is not a discount, it is a gap in the quote.
+                </p>
+              </Card>
+            </div>
+
+            <GuidanceQuotePanel />
+
+            {/*
+              Continue sits at the very bottom: the rep scrolls the whole quote, then
+              commits. The adjusted rate they built is the rate that gets approved —
+              there is nothing to choose here.
+            */}
+            <div className="flex flex-wrap items-center gap-3 border-t border-line pt-5">
+              <button
+                type="button"
+                className="btn btn-primary"
+                disabled={!canContinueToApproval}
+                onClick={() => setStep('approval')}
+              >
+                Continue to approval path
+                <ArrowRight size={14} />
+              </button>
+              <span className="max-w-md text-[0.75rem] leading-snug text-faint">
+                {canContinueToApproval
+                  ? 'Approvals are measured on the Sales Rep Adjusted Take Rate.'
+                  : 'Price core acquiring or a value-added service first — the approval path is driven by the adjusted rate.'}
+              </span>
+            </div>
+          </>
+        )}
       </div>
 
       <aside className="space-y-4 lg:sticky lg:top-24 lg:self-start">
+        {priceBuilt && <LiveRatePanel quote={quote} />}
+
         <Card title="Demo merchants" subtitle="Seeded deals with known answers.">
           <div className="space-y-2 p-3">
             {demoMerchants.merchants.map((m) => (
@@ -552,14 +490,14 @@ export function IntakeScreen() {
         <Card title="What happens next">
           <ol className="space-y-2.5 p-4 text-[0.8125rem] leading-relaxed text-muted">
             <li>
-              <strong className="text-ink">Build the price</strong> — guidance take rate appears on this page, under
-              volume.
+              <strong className="text-ink">Build the price</strong> — the recommended take rate appears under volume.
             </li>
             <li>
-              <strong className="text-ink">Deal terms</strong> — Gold, incentives and free processing on the next page.
+              <strong className="text-ink">Price the deal</strong> — core acquiring and value-added services build the
+              adjusted take rate.
             </li>
             <li>
-              <strong className="text-ink">Accept or challenge</strong> — then a printable deal on a page.
+              <strong className="text-ink">Approval path</strong> — who signs, and the email to send them.
             </li>
           </ol>
         </Card>
@@ -578,6 +516,77 @@ export function IntakeScreen() {
   );
 }
 
+/**
+ * The sticky readout.
+ *
+ * The point of moving core acquiring and VAS above the quote is that a rep sees
+ * what a change does. That only works if the number stays on screen, so it is
+ * repeated here rather than left to the headline further down the page.
+ */
+function LiveRatePanel({ quote }: { quote: Quote }) {
+  const a = quote.adjusted;
+  const priced = a?.totalBps != null;
+  const discount = quote.discountPct;
+  const belowGuidance = discount != null && discount > 0;
+
+  return (
+    <Card title="Live take rate" subtitle={priced ? undefined : 'Updates as you price below'}>
+      <div className="space-y-3 p-4">
+        <div>
+          <div className="chip-mono text-faint">Recommended</div>
+          <div className="mt-0.5 flex items-baseline gap-1.5">
+            <span className="font-display text-2xl font-bold leading-none tnum text-lime">{bps(quote.targetBps)}</span>
+            <span className="text-[0.75rem] text-muted">bps</span>
+            <span className="tnum text-[0.75rem] text-faint">{bpsAsPct(quote.targetBps)}</span>
+          </div>
+        </div>
+
+        <div className="border-t border-line pt-3">
+          <div className="chip-mono text-faint">Sales rep adjusted</div>
+          {priced ? (
+            <>
+              <div className="mt-0.5 flex items-baseline gap-1.5">
+                <span className="font-display text-3xl font-bold leading-none tnum text-blue-bright">
+                  {bps(a!.totalBps)}
+                </span>
+                <span className="text-[0.75rem] text-muted">bps</span>
+                <span className="tnum text-[0.75rem] text-faint">{bpsAsPct(a!.totalBps)}</span>
+              </div>
+              <p className="mt-1.5 text-[0.6875rem] leading-snug text-faint">
+                Core {bps(a!.coreAcquiringBps)} + VAS {bps(a!.vasBps)}
+              </p>
+            </>
+          ) : (
+            <div className="mt-0.5 font-display text-3xl font-bold leading-none text-faint">—</div>
+          )}
+        </div>
+
+        {priced && discount != null && (
+          <div className="border-t border-line pt-3">
+            <div className="chip-mono text-faint">vs recommended</div>
+            <div className="mt-1 flex items-center gap-2">
+              <Chip tone={belowGuidance ? 'orange' : 'lime'}>
+                {belowGuidance ? `${pct(discount)} discount` : 'at or above guidance'}
+              </Chip>
+            </div>
+            <p className="mt-1.5 text-[0.6875rem] leading-snug text-faint">
+              {belowGuidance
+                ? 'This is the figure the approval path is based on.'
+                : 'No discount approval required at this rate.'}
+            </p>
+          </div>
+        )}
+
+        {priced && a!.incomplete && (
+          <p className="border-t border-line pt-3 text-[0.6875rem] leading-snug text-orange">
+            One or more lines could not be priced — the total understates the deal.
+          </p>
+        )}
+      </div>
+    </Card>
+  );
+}
+
 function Row({ k, v }: { k: string; v: string }) {
   return (
     <div className="flex items-baseline justify-between gap-3">
@@ -586,4 +595,3 @@ function Row({ k, v }: { k: string; v: string }) {
     </div>
   );
 }
-

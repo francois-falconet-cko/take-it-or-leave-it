@@ -72,6 +72,16 @@ const EMPTY: Omit<Quote, 'status' | 'findings'> = {
 export interface PriceOptions {
   /** Rate the rep is asking for. Omit to evaluate guidance alone. */
   requestedBps?: number | null;
+  /**
+   * Route approvals off the Sales Rep Adjusted Take Rate — core acquiring plus the
+   * value-added services actually on the deal — instead of a separately entered
+   * requested rate.
+   *
+   * This is what the app does: the rep prices the deal, and the rate they built is
+   * the rate that gets approved. `requestedBps` still wins if one is supplied, so
+   * the engine can be driven either way and the tests can pin a rate explicitly.
+   */
+  approveOnAdjusted?: boolean;
 }
 
 export function price(intake: Intake, book: PricingBook, today: string, opts: PriceOptions = {}): Quote {
@@ -338,8 +348,23 @@ export function price(intake: Intake, book: PricingBook, today: string, opts: Pr
 
   const mmbFloor = mmbImpliedFloorBps(intake.mmb, billableMonthlyTpv);
 
+  // --- Product pricing frameworks ------------------------------------------
+  const vasCheck = buildVasCheck(intake, book, row.other_bps ?? 0, billableMonthlyTpv, findings);
+
+  // --- Sales Rep Adjusted Take Rate ----------------------------------------
+  // Bottom-up: core acquiring as the rep prices it, plus the VAS actually on the
+  // deal at their framework prices. Computed before approvals because it is what
+  // approvals are measured on — see `approveOnAdjusted`.
+  const adjusted = buildAdjustedRate(
+    coreAcquiringComponents(intake, book, billableMonthlyTpv),
+    vasCheck.lines,
+    roundBps(targetBps),
+  );
+
   // --- Requested rate, variance, approvals --------------------------------
-  const requestedBps = opts.requestedBps ?? null;
+  // The rate under approval is the one the rep built, unless a caller pins one.
+  const requestedBps =
+    opts.requestedBps ?? (opts.approveOnAdjusted ? (adjusted?.totalBps ?? null) : null);
   let discount: number | null = null;
   let m: { emnrMonthly: number; emnrAnnual: number; annualRevenueAtRisk: number } | null = null;
   let approval = null;
@@ -375,19 +400,6 @@ export function price(intake: Intake, book: PricingBook, today: string, opts: Pr
       approval = { ...approval, approvers: sortApprovers(approval.approvers) };
     }
   }
-
-  // --- Product pricing frameworks ------------------------------------------
-  const vasCheck = buildVasCheck(intake, book, row.other_bps ?? 0, billableMonthlyTpv, findings);
-
-  // --- Sales Rep Adjusted Take Rate ----------------------------------------
-  // Bottom-up: core acquiring as the rep prices it, plus the VAS actually on the
-  // deal at their framework prices. Runs alongside the guidance recommendation and
-  // never feeds it — approvals still measure the requested rate against guidance.
-  const adjusted = buildAdjustedRate(
-    coreAcquiringComponents(intake, book, billableMonthlyTpv),
-    vasCheck.lines,
-    roundBps(targetBps),
-  );
 
   // --- Minimum Acceptance Criteria -----------------------------------------
   // Evaluated at the rate actually on the table: the requested one if the rep has

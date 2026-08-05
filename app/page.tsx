@@ -3,8 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Shell } from '@/components/Shell';
 import { IntakeScreen } from '@/components/IntakeScreen';
-import { RecommendationScreen } from '@/components/RecommendationScreen';
-import { ChallengeScreen } from '@/components/ChallengeScreen';
+import { ApprovalPathScreen } from '@/components/ApprovalPathScreen';
 import { DealOnAPage } from '@/components/DealOnAPage';
 import { useStore } from '@/lib/store';
 import { BRAND_PLATFORM } from '@/lib/brand';
@@ -26,10 +25,8 @@ export default function Page() {
         </div>
       ) : step === 'intake' ? (
         <IntakeScreen />
-      ) : step === 'recommendation' ? (
-        <RecommendationScreen />
-      ) : step === 'challenge' ? (
-        <ChallengeScreen />
+      ) : step === 'approval' ? (
+        <ApprovalPathScreen />
       ) : (
         <DealOnAPage />
       )}

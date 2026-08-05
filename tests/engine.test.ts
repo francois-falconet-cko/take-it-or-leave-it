@@ -21,6 +21,8 @@ import { routeApproval, topApprover } from '../src/lib/engine/approvals.ts';
 import { bandContains } from '../src/lib/engine/select.ts';
 import { mccTierFor, vasBandFor } from '../src/lib/engine/vas.ts';
 import { macSectorsFor } from '../src/lib/engine/mac.ts';
+import { resolveRecipient } from '../src/lib/approvers.ts';
+import { buildApprovalEmail } from '../src/lib/email.ts';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const book: PricingBook = JSON.parse(readFileSync(resolve(ROOT, 'data/pricing-book.json'), 'utf8'));
@@ -1136,5 +1138,135 @@ describe('purity', () => {
     price(i, book, TODAY, { requestedBps: 30 });
     assert.equal(JSON.stringify(i), snapshot);
     assert.equal(JSON.stringify(book.acquiring.slice(0, 20)), bookSnapshot);
+  });
+});
+
+/**
+ * The Sales Rep Adjusted Take Rate is what gets approved.
+ *
+ * The rep builds a rate from core acquiring and value-added services; the tool
+ * measures that against guidance and routes on the gap. Nobody types a "requested
+ * rate" any more, so these cases pin the wiring: the adjusted total has to reach
+ * the approval ladder, and an unpriced deal must not silently route as a 100%
+ * discount.
+ */
+describe('approvals driven by the adjusted take rate', () => {
+  const base = { monthlyTpv: 5_000_000, atv: 50 };
+
+  test('the adjusted rate becomes the rate under approval', () => {
+    // 0.20% markup = 20 bps of core acquiring, no VAS.
+    const q = price(intake({ ...base, acquirerMarkupPct: 0.2 }), book, TODAY, { approveOnAdjusted: true });
+    assert.equal(q.adjusted?.totalBps, 20);
+    assert.equal(q.requestedBps, 20);
+    assert.ok(q.discountPct != null && q.discountPct > 0, 'a rate below guidance is a discount');
+    assert.equal(q.approval?.required, true);
+  });
+
+  test('an explicitly requested rate still wins over the adjusted one', () => {
+    const q = price(intake({ ...base, acquirerMarkupPct: 0.2 }), book, TODAY, {
+      approveOnAdjusted: true,
+      requestedBps: 35,
+    });
+    assert.equal(q.requestedBps, 35);
+  });
+
+  test('nothing priced means nothing to approve — not a 100% discount', () => {
+    const q = price(intake(base), book, TODAY, { approveOnAdjusted: true });
+    assert.equal(q.adjusted?.totalBps ?? null, null);
+    assert.equal(q.requestedBps, null);
+    assert.equal(q.approval, null);
+  });
+
+  test('pricing at or above guidance needs no approval on the non-Gold ladder', () => {
+    const guidance = price(intake(base), book, TODAY).targetBps!;
+    const q = price(intake({ ...base, acquirerMarkupPct: (guidance + 5) / 100 }), book, TODAY, {
+      approveOnAdjusted: true,
+    });
+    assert.ok(q.adjusted!.totalBps! > guidance);
+    assert.equal(q.approval?.required, false);
+  });
+
+  test('a Gold deal at guidance still needs sign-off', () => {
+    const guidance = price(intake(base), book, TODAY).targetBps!;
+    const q = price(intake({ ...base, isGold: true, acquirerMarkupPct: guidance / 100 }), book, TODAY, {
+      approveOnAdjusted: true,
+    });
+    assert.equal(q.discountPct, 0);
+    assert.equal(q.approval?.required, true);
+    assert.deepEqual(
+      q.approval!.approvers.map((a) => a.name),
+      ['Team Leader', 'Strategic Pricing'],
+    );
+  });
+
+  test('the MAC is evaluated at the adjusted rate, not at guidance', () => {
+    const cheap = price(intake({ ...base, acquirerMarkupPct: 0.02 }), book, TODAY, { approveOnAdjusted: true });
+    const atGuidance = price(intake(base), book, TODAY);
+    assert.ok(
+      (cheap.macCheck?.monthlyNetRevenueUsd ?? 0) < (atGuidance.macCheck?.monthlyNetRevenueUsd ?? 0),
+      'a deeply cut adjusted rate produces less net revenue for the MAC test',
+    );
+  });
+});
+
+/**
+ * Who the request is addressed to. Roles come from the guidance; the mapping from
+ * role to mailbox is an org fact that lives in src/lib/approvers.ts.
+ */
+describe('approval recipients', () => {
+  const matrix = book.approval_matrix;
+  const terms = { isGold: false, cashIncentivesUsd: null, freeProcessingMonths: null, vasFreeTrialMonths: null, spException: 'none' as const };
+
+  const route = (discountPct: number, over: Partial<typeof terms> = {}) =>
+    routeApproval({ matrix, discountPct, annualBillableTpvUsd: 60_000_000, intake: { ...terms, ...over } });
+
+  test('a non-Gold deal inside 25% goes to the Regional Leader by name', () => {
+    const r = resolveRecipient(route(18));
+    assert.equal(r?.email, 'ashley.paulus@checkout.com');
+    assert.equal(r?.firstName, 'Ashley');
+  });
+
+  test('above 25% Strategic Pricing receives it, not the rep', () => {
+    const r = resolveRecipient(route(40));
+    assert.equal(r?.email, 'strategic.pricing@checkout.com');
+  });
+
+  test('every Gold deal routes through Paul Goodwin, whatever the band', () => {
+    for (const d of [0, 8, 20, 40, 70]) {
+      const r = resolveRecipient(route(d, { isGold: true }));
+      assert.equal(r?.email, 'paul.goodwin@checkout.com', `${d}% discount on the Gold ladder`);
+    }
+  });
+
+  test('no approval means no recipient', () => {
+    assert.equal(resolveRecipient(route(-5)), null);
+  });
+});
+
+describe('the approval email', () => {
+  // Guidance for UK Retail at £5m/month is 32 bps. 28 bps of core acquiring is a
+  // 12.5% discount, which keeps this inside the Regional Leader band so the draft
+  // is addressed to a person rather than escalated to Strategic Pricing.
+  const base = { monthlyTpv: 5_000_000, atv: 50, acquirerMarkupPct: 0.28, merchantName: 'Acme Retail', repName: 'Sam' };
+
+  test('greets the recipient and carries both rates and the reduction', () => {
+    const i = intake(base);
+    const q = price(i, book, TODAY, { approveOnAdjusted: true });
+    const draft = buildApprovalEmail(i, q)!;
+
+    assert.ok(draft.body.startsWith('Hey Ashley,'), 'greets by first name');
+    assert.match(draft.subject, /^Pricing Approval Request - /);
+    assert.ok(draft.body.includes('Recommended Take Rate:'));
+    assert.ok(draft.body.includes('Sales Rep Adjusted Take Rate:'));
+    assert.ok(draft.body.includes(`${q.adjusted!.totalBps} bps`), 'quotes the adjusted rate');
+    assert.ok(draft.body.includes('Main reasons for the request:'));
+    assert.ok(draft.body.trimEnd().endsWith('Sam'), 'signs off with the rep');
+  });
+
+  test('there is no draft when no approval is required', () => {
+    const guidance = price(intake(base), book, TODAY).targetBps!;
+    const i = intake({ ...base, acquirerMarkupPct: (guidance + 5) / 100 });
+    const q = price(i, book, TODAY, { approveOnAdjusted: true });
+    assert.equal(buildApprovalEmail(i, q), null);
   });
 });
