@@ -1,0 +1,20 @@
+{
+  "$comment": "Hackathon demo: paste a matching Merchant URL and the intake fields below auto-fill. Add hosts aliases so https://www.… and bare domains both match. No rates — facts only.",
+  "profiles": [
+    {
+      "id": "rebellious-fashion",
+      "hosts": ["rebelliousfashion.com"],
+      "fields": {
+        "merchantName": "Rebellious Fashion",
+        "mcc": "5651",
+        "vertical": "Retail",
+        "verticalOverridden": true,
+        "region": "UK",
+        "countryScope": null,
+        "riskLevel": "STD",
+        "platform": "Shopify",
+        "currentProviders": "Shopify Payments"
+      }
+    }
+  ]
+}

@@ -1,35 +1,56 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowRight, Sparkles, Wand2 } from 'lucide-react';
 import { book } from '@/lib/book';
-import { useStore } from '@/lib/store';
-import { verticalForMcc, volumeDisagreement } from '@/lib/engine';
-import { int, money, unitLabel } from '@/lib/format';
+import { useQuote, useStore } from '@/lib/store';
+import { verticalForMcc } from '@/lib/engine';
+import { int, unitLabel } from '@/lib/format';
 import demoMerchants from '../../data/demo-merchants.json' with { type: 'json' };
+import { autofillFieldKeys, lookupUrlAutofill } from '@/lib/urlAutofill';
+import { GuidanceQuotePanel } from './GuidanceQuotePanel';
 import { Card, Chip, Field, FindingRow, NumberInput, Select, TextInput, Toggle } from './ui/primitives';
 import type { Currency, RiskLevel } from '@/lib/types';
 
-const PLATFORMS = ['Shopify', 'Salesforce Commerce', 'Adobe Commerce / Magento', 'BigCommerce', 'Custom', 'Other'];
-
 export function IntakeScreen() {
   const { intake, patch, setMcc, setVas, setStep, aiFilled, markAiFilled, loadDemo } = useStore();
+  const quote = useQuote();
   const [plainText, setPlainText] = useState('');
   const [parsing, setParsing] = useState(false);
   const [parseError, setParseError] = useState<string | null>(null);
+  const [urlAutofillId, setUrlAutofillId] = useState<string | null>(null);
+  const [priceBuilt, setPriceBuilt] = useState(false);
+  const quoteRef = useRef<HTMLDivElement>(null);
+
+  function onMerchantUrlChange(raw: string) {
+    patch({ merchantUrl: raw });
+    const hit = lookupUrlAutofill(raw);
+    if (!hit) {
+      setUrlAutofillId(null);
+      return;
+    }
+    if (hit.id === urlAutofillId) return;
+    patch({ merchantUrl: raw, ...hit.fields });
+    markAiFilled(autofillFieldKeys(hit.fields));
+    setUrlAutofillId(hit.id);
+  }
 
   const mccHit = useMemo(() => (intake.mcc ? verticalForMcc(book, intake.mcc) : null), [intake.mcc]);
-  const scopes = book.dimensions.country_scopes[intake.region] ?? [];
   const isAi = (f: string) => aiFilled.includes(f);
 
-  const disagreement = volumeDisagreement(intake);
   const hasVolume = !!(intake.monthlyTpv || intake.threeMonthTpv || intake.annualTpv);
-  const canContinue = hasVolume && !!intake.vertical && !!intake.region;
+  const canBuild = hasVolume && !!intake.vertical && !!intake.region;
+  const canContinueToTerms = priceBuilt && quote.status === 'OK';
 
-  const billable = useMemo(() => {
-    const m = intake.monthlyTpv ?? (intake.threeMonthTpv ? intake.threeMonthTpv / 3 : intake.annualTpv ? intake.annualTpv / 12 : null);
-    return m == null ? null : m * (intake.scopePct / 100);
-  }, [intake.monthlyTpv, intake.threeMonthTpv, intake.annualTpv, intake.scopePct]);
+  function buildPrice() {
+    if (!canBuild) return;
+    setPriceBuilt(true);
+  }
+
+  useEffect(() => {
+    if (!priceBuilt) return;
+    quoteRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, [priceBuilt]);
 
   async function parsePlainEnglish() {
     setParsing(true);
@@ -42,7 +63,6 @@ export function IntakeScreen() {
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error ?? 'Parse failed');
-      // The parser only ever fills intake fields. It never returns a rate.
       patch(json.fields);
       markAiFilled(Object.keys(json.fields));
     } catch (e) {
@@ -55,7 +75,6 @@ export function IntakeScreen() {
   return (
     <div className="grid gap-5 lg:grid-cols-[1fr_320px]">
       <div className="space-y-5">
-        {/* --- Plain English ------------------------------------------------ */}
         <Card
           title="Describe the merchant"
           subtitle="Paste what you know in plain English, or skip straight to the fields below."
@@ -64,7 +83,7 @@ export function IntakeScreen() {
           <div className="space-y-3 p-4">
             <textarea
               className="field min-h-[72px] resize-y py-2 leading-relaxed"
-              placeholder="UK fashion retailer on Shopify, about £4m a month, £65 average basket, currently with Adyen, wants 3DS and network tokens, 2 year term"
+              placeholder="UK fashion retailer on Shopify, about £4m a month, £65 average basket"
               value={plainText}
               onChange={(e) => setPlainText(e.target.value)}
             />
@@ -95,7 +114,6 @@ export function IntakeScreen() {
           </div>
         </Card>
 
-        {/* --- Merchant ----------------------------------------------------- */}
         <Card title="Merchant">
           <div className="grid gap-4 p-4 sm:grid-cols-2 lg:grid-cols-3">
             <Field label="Merchant name" className="sm:col-span-2 lg:col-span-1" aiFilled={isAi('merchantName')}>
@@ -107,8 +125,21 @@ export function IntakeScreen() {
               />
             </Field>
 
-            <Field label="Merchant URL" aiFilled={isAi('merchantUrl')}>
-              <TextInput value={intake.merchantUrl} onChange={(v) => patch({ merchantUrl: v })} placeholder="acme.com" />
+            <Field
+              label="Merchant URL"
+              aiFilled={isAi('merchantUrl')}
+              hint={
+                urlAutofillId
+                  ? 'Known demo URL — merchant fields filled from the static profile.'
+                  : 'Paste a demo host (e.g. rebelliousfashion.com) to auto-fill merchant fields.'
+              }
+            >
+              <TextInput
+                value={intake.merchantUrl}
+                onChange={onMerchantUrlChange}
+                placeholder="rebelliousfashion.com"
+                aiFilled={!!urlAutofillId}
+              />
             </Field>
 
             <Field
@@ -147,23 +178,9 @@ export function IntakeScreen() {
                 onChange={(v) => patch({ region: v, countryScope: null })}
                 options={[
                   ...book.dimensions.regions.map((r) => ({ value: r, label: r })),
-                  // Deliberately offered even though guidance does not cover it —
-                  // the tool should be able to tell a rep "no guidance here".
                   { value: 'LATAM', label: 'LATAM (not in guidance)' },
                 ]}
                 aiFilled={isAi('region')}
-              />
-            </Field>
-
-            <Field
-              label="Country scope"
-              hint={scopes.length ? 'The framework has more specific rows for these' : 'No country overrides in this region'}
-            >
-              <Select
-                value={intake.countryScope ?? ''}
-                onChange={(v) => patch({ countryScope: v === '' ? null : v })}
-                placeholder={`${intake.region} — regional default`}
-                options={scopes.map((s) => ({ value: s, label: s }))}
               />
             </Field>
 
@@ -180,43 +197,14 @@ export function IntakeScreen() {
                 ]}
               />
             </Field>
-
-            <Field label="Platform" aiFilled={isAi('platform')}>
-              <Select
-                value={intake.platform}
-                onChange={(v) => patch({ platform: v })}
-                placeholder="Select"
-                options={PLATFORMS.map((p) => ({ value: p, label: p }))}
-                aiFilled={isAi('platform')}
-              />
-            </Field>
-
-            <Field label="Current provider(s)" aiFilled={isAi('currentProviders')}>
-              <TextInput
-                value={intake.currentProviders}
-                onChange={(v) => patch({ currentProviders: v })}
-                placeholder="Adyen, Stripe"
-                aiFilled={isAi('currentProviders')}
-              />
-            </Field>
-
-            <Field label="Current acceptance rate">
-              <NumberInput
-                value={intake.currentAcceptanceRate}
-                onChange={(v) => patch({ currentAcceptanceRate: v })}
-                suffix="%"
-                placeholder="87.4"
-              />
-            </Field>
           </div>
         </Card>
 
-        {/* --- Volume ------------------------------------------------------- */}
         <Card
-          title="Volume and deal shape"
-          subtitle="Guidance bands on MONTHLY processing volume. Average transaction value drives per-transaction VAS pricing."
+          title="Volume"
+          subtitle="Guidance bands on monthly processing volume. Average transaction value drives per-transaction VAS pricing."
         >
-          <div className="grid gap-4 p-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-4 p-4 sm:grid-cols-2 lg:grid-cols-3">
             <Field label="Currency">
               <Select
                 value={intake.currency}
@@ -244,126 +232,46 @@ export function IntakeScreen() {
                 aiFilled={isAi('monthlyTpv')}
               />
             </Field>
-
-            <Field label="3-month TPV" hint="Cross-check only">
-              <NumberInput value={intake.threeMonthTpv} onChange={(v) => patch({ threeMonthTpv: v })} placeholder="—" />
-            </Field>
-
-            <Field label="Annual TPV" aiFilled={isAi('annualTpv')} hint="Used if monthly is blank">
-              <NumberInput
-                value={intake.annualTpv}
-                onChange={(v) => patch({ annualTpv: v })}
-                placeholder="48000000"
-                aiFilled={isAi('annualTpv')}
-              />
-            </Field>
-
-            <Field
-              label="Scope of volume"
-              hint={
-                billable != null
-                  ? `${money(billable, intake.currency)}/month to Checkout.com`
-                  : 'Share of volume Checkout.com will process'
-              }
-            >
-              <NumberInput value={intake.scopePct} onChange={(v) => patch({ scopePct: v ?? 100 })} suffix="%" />
-            </Field>
-
-            <Field label="Scope note" className="sm:col-span-2">
-              <TextInput
-                value={intake.scopeNote}
-                onChange={(v) => patch({ scopeNote: v })}
-                placeholder="cards only, EU entity, phase 1"
-              />
-            </Field>
-
-            <Field label="Contract term" aiFilled={isAi('contractTerm')}>
-              <TextInput value={intake.contractTerm} onChange={(v) => patch({ contractTerm: v })} placeholder="2 years" />
-            </Field>
-
-            <Field label="Monthly Minimum Bill" hint="Implies a floor take rate">
-              <NumberInput
-                value={intake.mmb}
-                onChange={(v) => patch({ mmb: v })}
-                prefix={intake.currency === 'GBP' ? '£' : intake.currency === 'EUR' ? '€' : '$'}
-                placeholder="—"
-              />
-            </Field>
-
-            <Field label="Your name" hint="Signs the approval email">
-              <TextInput value={intake.repName} onChange={(v) => patch({ repName: v })} placeholder="A. Manager" />
-            </Field>
           </div>
 
-          {disagreement && disagreement.spread > 0.15 && (
-            <div className="px-4 pb-4">
-              <FindingRow
-                finding={{
-                  level: 'warning',
-                  code: 'VOLUME_DISAGREEMENT',
-                  message: `Volume figures disagree by ${Math.round(disagreement.spread * 100)}% once annualized.`,
-                  detail: disagreement.annualized
-                    .map((a) => `${a.label}: ${money(a.value, intake.currency)}`)
-                    .join('   ·   '),
-                }}
-              />
-            </div>
-          )}
-        </Card>
-
-        {/* --- Deal shape that changes the approval ladder ------------------- */}
-        <Card
-          title="Approval-relevant terms"
-          subtitle="Gold status, cash incentives and free processing each route differently, whatever the take rate is."
-        >
-          <div className="grid gap-4 p-4 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="sm:col-span-2">
-              <Toggle
-                checked={intake.isGold}
-                onChange={(v) => patch({ isGold: v })}
-                label="Gold account"
-                hint="Gold deals need Team Leader + Strategic Pricing even at guidance"
-                accent="var(--color-lime)"
-              />
-            </div>
-
-            <Field label="Cash incentives" hint="Above $500k reaches the CEO on Gold">
-              <NumberInput
-                value={intake.cashIncentivesUsd}
-                onChange={(v) => patch({ cashIncentivesUsd: v })}
-                prefix="$"
-                placeholder="—"
-              />
-            </Field>
-
-            <Field label="Free processing / VAS trial" hint="Months. 4+ needs the CRO">
-              <NumberInput
-                value={intake.freeProcessingMonths}
-                onChange={(v) => patch({ freeProcessingMonths: v })}
-                suffix="mo"
-                placeholder="—"
-              />
-            </Field>
-
-            <Field
-              label="Strategic Pricing exception"
-              className="sm:col-span-2"
-              hint="Cases Strategic Pricing can approve on behalf of the CRO"
+          <div className="border-t border-line px-4 py-4">
+            <button
+              type="button"
+              className="btn btn-primary"
+              disabled={!canBuild}
+              onClick={buildPrice}
             >
-              <Select
-                value={intake.spException}
-                onChange={(v) => patch({ spException: v as typeof intake.spException })}
-                options={[
-                  { value: 'none', label: 'None' },
-                  { value: 'new_entity_only', label: 'Adding an entity to an approved merchant, no pricing change' },
-                  { value: 'minor_adjustment_le_5pct', label: 'Adjustment of 5% or less to CRO-approved pricing' },
-                ]}
-              />
-            </Field>
+              <Sparkles size={14} />
+              Build the price
+            </button>
+            {!canBuild && (
+              <p className="mt-2 text-[0.6875rem] leading-snug text-faint">
+                Needs a vertical, a region and monthly TPV.
+              </p>
+            )}
+            {canBuild && intake.atv == null && (
+              <p className="mt-2 text-[0.6875rem] leading-snug text-orange">
+                No ATV — the guidance rate still works, but per-transaction VAS pricing will not.
+              </p>
+            )}
           </div>
         </Card>
 
-        {/* --- VAS ---------------------------------------------------------- */}
+        {priceBuilt && (
+          <div ref={quoteRef} className="space-y-4">
+            <GuidanceQuotePanel />
+            {canContinueToTerms && (
+              <div className="flex flex-wrap items-center gap-3">
+                <button type="button" className="btn btn-primary" onClick={() => setStep('recommendation')}>
+                  Continue to deal terms
+                  <ArrowRight size={14} />
+                </button>
+                <span className="text-[0.75rem] text-faint">Gold status, incentives, then accept or challenge.</span>
+              </div>
+            )}
+          </div>
+        )}
+
         <Card
           title="Value-added services"
           subtitle="Guidance already carries expected VAS revenue in its Other line. These toggles drive the attach check, not the target rate."
@@ -408,7 +316,6 @@ export function IntakeScreen() {
         </Card>
       </div>
 
-      {/* --- Right rail ----------------------------------------------------- */}
       <aside className="space-y-4 lg:sticky lg:top-24 lg:self-start">
         <Card title="Demo merchants" subtitle="Seeded deals with known answers.">
           <div className="space-y-2 p-3">
@@ -416,7 +323,10 @@ export function IntakeScreen() {
               <button
                 key={m.id}
                 type="button"
-                onClick={() => loadDemo(m.intake as never)}
+                onClick={() => {
+                  setPriceBuilt(false);
+                  loadDemo(m.intake as never);
+                }}
                 className="w-full rounded-lg border border-line bg-sunken px-3 py-2.5 text-left transition-colors hover:border-blue-bright"
               >
                 <div className="flex items-baseline justify-between gap-2">
@@ -432,39 +342,16 @@ export function IntakeScreen() {
         <Card title="What happens next">
           <ol className="space-y-2.5 p-4 text-[0.8125rem] leading-relaxed text-muted">
             <li>
-              <strong className="text-ink">Guidance take rate</strong> — matched to your region, vertical and monthly
-              band, decomposed line by line with a link to the source for each.
+              <strong className="text-ink">Build the price</strong> — guidance take rate appears on this page, under
+              volume.
             </li>
             <li>
-              <strong className="text-ink">Accept or challenge</strong> — move the rate and watch the discount, the
-              revenue at risk and the approval chain move with it.
+              <strong className="text-ink">Deal terms</strong> — Gold, incentives and free processing on the next page.
             </li>
             <li>
-              <strong className="text-ink">Deal on a page</strong> — one printable page plus a drafted approval email.
+              <strong className="text-ink">Accept or challenge</strong> — then a printable deal on a page.
             </li>
           </ol>
-          <div className="border-t border-line px-4 py-3">
-            <button
-              type="button"
-              className="btn btn-primary w-full"
-              disabled={!canContinue}
-              onClick={() => setStep('recommendation')}
-            >
-              <Sparkles size={14} />
-              Build the price
-              <ArrowRight size={14} />
-            </button>
-            {!canContinue && (
-              <p className="mt-2 text-[0.6875rem] leading-snug text-faint">
-                Needs a vertical, a region and one volume figure.
-              </p>
-            )}
-            {canContinue && intake.atv == null && (
-              <p className="mt-2 text-[0.6875rem] leading-snug text-orange">
-                No ATV — the guidance rate still works, but per-transaction VAS pricing will not.
-              </p>
-            )}
-          </div>
         </Card>
 
         <Card title="Coverage">

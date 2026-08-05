@@ -10,7 +10,7 @@ import { Chip } from './ui/primitives';
 
 const STEPS: { key: Step; label: string }[] = [
   { key: 'intake', label: 'Merchant' },
-  { key: 'recommendation', label: 'Guidance' },
+  { key: 'recommendation', label: 'Deal terms' },
   { key: 'challenge', label: 'Accept or challenge' },
   { key: 'deal', label: 'Deal on a page' },
 ];
