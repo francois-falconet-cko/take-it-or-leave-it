@@ -15,6 +15,22 @@
         "platform": "Shopify",
         "currentProviders": "Shopify Payments"
       }
+    },
+    {
+      "id": "holafly",
+      "$note": "Irish entity, so region EEA on the regional default — the only EEA country overrides in the framework are SEU and FRIT, and Ireland is neither. riskLevel is set explicitly because MCC 4814 defaults to STD in the MCC map; a high-risk eSIM/telecom merchant is not what that default assumes.",
+      "hosts": ["esim.holafly.com", "holafly.com"],
+      "fields": {
+        "merchantName": "Holafly",
+        "mcc": "4814",
+        "vertical": "Digital",
+        "verticalOverridden": true,
+        "region": "EEA",
+        "countryScope": null,
+        "riskLevel": "HIGH",
+        "platform": "N/A",
+        "currentProviders": "Adyen"
+      }
     }
   ]
 }

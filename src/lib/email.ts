@@ -12,7 +12,7 @@
  */
 
 import type { Intake, PricingBook, Quote } from './types.ts';
-import { bps, bpsAsPct, money, pct } from './format.ts';
+import { bps, bpsAsPct, feeAmount, money, pct } from './format.ts';
 
 /**
  * Outlook and Gmail both stop reading a mailto: URL somewhere around 2,048
@@ -114,6 +114,57 @@ export function buildEmail(
   lines.push(`  ${'Guidance total:'.padEnd(width)}${bpsAsPct(quote.targetBps)}  (${bps(quote.targetBps)} bps)`);
   lines.push(`  ${'Requested:'.padEnd(width)}${bpsAsPct(quote.requestedBps)}  (${bps(quote.requestedBps)} bps)`);
   lines.push('');
+
+  // VAS priced outside its framework range is a separate approval with a separate
+  // approver — a Regional Revenue Leader signs a below-floor 3DS fee whether or not
+  // the take rate itself needed anyone. Putting it in the same email is what stops
+  // a rep getting a take-rate approval and then discovering the fee needs another.
+  const outOfRange = (quote.vasCheck?.lines ?? []).filter(
+    (l) => l.verdict === 'below_floor' || l.verdict === 'above_ceiling',
+  );
+  if (outOfRange.length) {
+    lines.push('Product pricing outside the framework range — separate approval:');
+    for (const l of outOfRange) {
+      const bound = l.verdict === 'below_floor' ? `floor ${l.floor}` : `ceiling ${l.ceiling}`;
+      lines.push(
+        `  ${l.frameworkLabel} — ${l.label}: ${l.amount} vs ${bound}` +
+          (l.approvers.length ? ` — needs ${l.approvers.join(' then ')}` : ''),
+      );
+    }
+    lines.push('');
+  }
+
+  if (quote.vasCheck && quote.vasCheck.lines.length) {
+    lines.push(
+      `Value-added services quoted (${quote.vasCheck.tier === 'other' ? 'Other' : 'Standard'} MCCs, ${cur} ${quote.vasCheck.band?.label ?? 'no band'}):`,
+    );
+    for (const l of quote.vasCheck.lines) {
+      if (l.amount == null) continue;
+      lines.push(
+        `  ${(l.frameworkLabel + ' — ' + l.label + ':').padEnd(width + 26)}${feeAmount(l.amount, l.currency, l.unit)}${l.bps == null ? '' : `  (${bps(l.bps)} bps)`}`,
+      );
+    }
+    lines.push('');
+  }
+
+  if (quote.macCheck && quote.macCheck.sectors.length) {
+    const m = quote.macCheck;
+    lines.push(`Minimum Acceptance Criteria — ${m.sectors.map((s) => s.title).join(', ')}:`);
+    if (m.requiredMonthlyNetRevenueUsd != null) {
+      lines.push(
+        `  Expected monthly net revenue floor: USD ${m.requiredMonthlyNetRevenueUsd.toLocaleString('en-US')} (${m.requiredBy})`,
+      );
+      lines.push(
+        `  This deal at the requested rate:    USD ${Math.round(m.monthlyNetRevenueUsd ?? 0).toLocaleString('en-US')}${m.clearsNetRevenue === false ? '  — BELOW THE MAC FLOOR' : ''}`,
+      );
+    }
+    if (m.chargebackRatioPct != null) {
+      lines.push(
+        `  Chargeback ratio: ${m.chargebackRatioPct}% against a ${m.chargebackCeilingPct}% ceiling${m.clearsChargebacks === false ? '  — OVER THE CEILING' : ''}`,
+      );
+    }
+    lines.push('');
+  }
 
   if (a.sideTracks.length) {
     lines.push('Separate approvals required:');

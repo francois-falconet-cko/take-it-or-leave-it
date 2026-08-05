@@ -10,6 +10,9 @@ data/pricing-book.json
 sources/acq framework.csv
 sources/*.eml
 sources/raw/*.txt
+# Converted Highspot product pricing decks and the MAC, plus the hand
+# transcription of their rate tables. Same reason as the CSV: real rates.
+pricing-files/
 pricing-book.diff.md
 .DS_Store
 out/

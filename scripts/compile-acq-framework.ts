@@ -17,9 +17,11 @@
  *   - It does not stamp reviewed_by. Only scripts/approve-book.ts does that.
  */
 
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, statSync, writeFileSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { vasFrameworks } from './load-vas-frameworks.ts';
+import { mac } from './parse-mac.ts';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const CSV = resolve(ROOT, 'sources/acq framework.csv');
@@ -294,136 +296,48 @@ const mcc_map: { mcc: string; label: string; vertical: string; risk_default: 'ST
 ];
 
 /**
- * VAS catalogue. Structure is real, list prices are NOT — every entry is
- * needs_extraction until someone runs the Glean pipeline against the Highspot
- * one-pagers. The placeholder amounts exist so the attach-check panel can be
- * exercised; the UI marks every one of them as unverified.
+ * VAS catalogue, now compiled from the product pricing frameworks rather than
+ * hardcoded here.
  *
- * Note this catalogue does NOT feed the guidance take rate. Per the Acquirer
+ * It used to be eight placeholder amounts with needs_extraction: true on every
+ * one. Six of those products now have their real framework — banded on monthly
+ * volume, tiered on Standard vs Other MCCs, with a floor and a ceiling that each
+ * carry an approval requirement. scripts/load-vas-frameworks.ts checks every
+ * number back against the source document before it gets here, so a transcription
+ * typo fails this compile rather than surfacing in a quote.
+ *
+ * Two products (Forward API & Vault, Settlement Fees) still have no document and
+ * stay needs_extraction. That is the honest state, not a gap to paper over.
+ *
+ * This catalogue still does NOT feed the guidance take rate. Per the Acquirer
  * Guidance email, "we're moving away from per-product fees toward one overall
- * customer take rate" — the framework's Total take rate already carries the
- * VAS uplift. These entries drive the reconciliation panel only.
+ * customer take rate" — the framework's Total take rate already carries the VAS
+ * uplift. These entries price the products and drive the attach check.
  */
-type VasEntry = {
-  key: string;
-  label: string;
-  unit: 'bps' | 'per_txn' | 'per_request' | 'monthly_flat' | 'pct_of_value';
-  amount: number | null;
-  currency: string;
-  default_attach_rate: number;
-  attach_rate_note: string;
-  source_id: string;
-  needs_extraction: boolean;
-  confidence: 'high' | 'medium' | 'low' | 'unverified';
-  notes: string;
-};
-
-const vas_catalogue: VasEntry[] = [
-  {
-    key: 'network_tokens',
-    label: 'Network Tokens',
-    unit: 'per_txn',
-    amount: 0.01,
-    currency: 'USD',
-    default_attach_rate: 1.0,
-    attach_rate_note: 'Applies to every tokenised transaction.',
-    source_id: 'src_vas_network_tokens',
-    needs_extraction: true,
-    confidence: 'unverified',
-    notes: 'PLACEHOLDER amount. Extract from Highspot before quoting.',
-  },
-  {
-    key: 'rtau',
-    label: 'RTAU',
-    unit: 'per_request',
-    amount: 0.25,
-    currency: 'USD',
-    default_attach_rate: 0.05,
-    attach_rate_note: 'Only fires on transactions that fail and are retried. 5% is a starting assumption — set it per merchant.',
-    source_id: 'src_vas_rtau',
-    needs_extraction: true,
-    confidence: 'unverified',
-    notes: 'PLACEHOLDER amount and attach rate. Both must be confirmed.',
-  },
-  {
-    key: 'forward_vault',
-    label: 'Forward API & Vault',
-    unit: 'per_request',
-    amount: 0.02,
-    currency: 'USD',
-    default_attach_rate: 1.0,
-    attach_rate_note: 'One forward request per transaction on a vaulted flow.',
-    source_id: 'src_vas_forward_vault',
-    needs_extraction: true,
-    confidence: 'unverified',
-    notes: 'PLACEHOLDER amount.',
-  },
-  {
-    key: 'integrated_platforms',
-    label: 'Integrated Platforms',
-    unit: 'bps',
-    amount: 5,
-    currency: 'USD',
-    default_attach_rate: 1.0,
-    attach_rate_note: 'Applies across platform volume.',
-    source_id: 'src_vas_integrated_platforms',
-    needs_extraction: true,
-    confidence: 'unverified',
-    notes: 'PLACEHOLDER amount.',
-  },
-  {
-    key: 'settlement',
-    label: 'Settlement Fees',
-    unit: 'monthly_flat',
-    amount: 250,
-    currency: 'USD',
-    default_attach_rate: 1.0,
-    attach_rate_note: 'Per settlement cycle; modelled monthly.',
-    source_id: 'src_vas_settlement',
-    needs_extraction: true,
-    confidence: 'unverified',
-    notes: 'PLACEHOLDER amount. Real pricing is per payout and depends on cycle and currency.',
-  },
-  {
-    key: 'fraud_detection',
-    label: 'Fraud Detection',
-    unit: 'per_txn',
-    amount: 0.02,
-    currency: 'USD',
-    default_attach_rate: 1.0,
-    attach_rate_note: 'Screened on every transaction.',
-    source_id: 'src_vas_fraud',
-    needs_extraction: true,
-    confidence: 'unverified',
-    notes: 'PLACEHOLDER amount.',
-  },
-  {
-    key: 'authentication',
-    label: 'Authentication (3DS)',
-    unit: 'per_request',
-    amount: 0.04,
-    currency: 'USD',
-    default_attach_rate: 0.35,
-    attach_rate_note: 'Only transactions routed to 3DS. Varies hugely by region and SCA exemption strategy.',
-    source_id: 'src_vas_authentication',
-    needs_extraction: true,
-    confidence: 'unverified',
-    notes: 'PLACEHOLDER amount and attach rate.',
-  },
-  {
-    key: 'apms',
-    label: 'APMs',
-    unit: 'bps',
-    amount: 10,
-    currency: 'USD',
-    default_attach_rate: 1.0,
-    attach_rate_note: 'Applies to the APM share of volume — set attach rate to that share.',
-    source_id: 'src_vas_apms',
-    needs_extraction: true,
-    confidence: 'unverified',
-    notes: 'PLACEHOLDER amount. APM cost is scheme-specific and largely pass-through.',
-  },
-];
+const vas_catalogue = vasFrameworks.frameworks.map((fw) => ({
+  key: fw.key,
+  label: fw.label,
+  source_id: fw.source_id,
+  source_locator: fw.source_locator,
+  doc_updated_at: fw.doc_updated_at,
+  doc_updated_at_inferred: fw.doc_updated_at_inferred,
+  doc_updated_at_note: fw.doc_updated_at_note,
+  doc_extracted_at: fw.doc_extracted_at,
+  confidence: fw.confidence,
+  confidence_note: fw.confidence_note ?? null,
+  pricing_model: fw.pricing_model,
+  mandatory: fw.mandatory,
+  free_trials_allowed: fw.free_trials_allowed,
+  approval_below_floor: fw.approval_below_floor,
+  approval_above_ceiling: fw.approval_above_ceiling,
+  approval_verbatim: fw.approval_verbatim,
+  scope: fw.scope,
+  needs_extraction: fw.needs_extraction,
+  blended_uplift: fw.blended_uplift,
+  notes: fw.notes,
+  fees: fw.fees,
+  ...(fw.reference_methods ? { reference_methods: fw.reference_methods } : {}),
+}));
 
 /**
  * Approval matrix, transcribed from the Acquirer Guidance email of 27 Jul 2026
@@ -488,6 +402,17 @@ const approval_matrix = {
 };
 
 const sourcesConfig = JSON.parse(readFileSync(resolve(ROOT, 'sources/sources.config.json'), 'utf8'));
+
+const existsLocally = (rel: string): boolean => {
+  try {
+    statSync(resolve(ROOT, rel));
+    return true;
+  } catch {
+    return false;
+  }
+};
+/** Mtime as YYYY-MM-DD. Used only for doc_extracted_at, never for a revision date. */
+const fileDay = (rel: string): string => statSync(resolve(ROOT, rel)).mtime.toISOString().slice(0, 10);
 const COMPILED_AT = process.env.BOOK_COMPILED_AT ?? new Date().toISOString();
 const DAY = COMPILED_AT.slice(0, 10);
 /** Date the Acquirer Guidance was communicated to Commercial. */
@@ -519,24 +444,61 @@ const book = {
     note: 'Static table. Used only to place a merchant into a USD volume band and to convert per-transaction fees. Replace with a real feed before production use.',
   },
 
+  /**
+   * One entry per source document, carrying whatever date it actually states.
+   *
+   * Three distinct dates, kept distinct on purpose:
+   *
+   *   doc_updated_at    the revision date the document itself claims. Three of the
+   *                     product decks claim none, so this is null for them and the
+   *                     UI says "undated" rather than implying freshness.
+   *   doc_extracted_at  when the PDF was converted to markdown. Always real.
+   *   retrieved_at      when this compile read the file off disk.
+   *
+   * Collapsing them into one would either fabricate a revision date or throw away
+   * the only real date we have. The staleness check runs on doc_updated_at, which
+   * is why the 2023 Integrated Platforms deck correctly trips it.
+   */
   sources: sourcesConfig.sources.map((s: Record<string, unknown>) => {
-    const haveLocally = s.id === 'src_acq_framework' || s.id === 'src_guidance_email';
-    // The guidance email is dated. The CSV is not, so we date it to the guidance
-    // rollout and mark that as inferred rather than leave staleness unmeasurable.
-    const docDate = haveLocally ? GUIDANCE_EFFECTIVE_FROM : null;
+    const id = s.id as string;
+    const localPath = s.local_path as string | undefined;
+    const extractor = s.extractor as string;
+    const fw = vasFrameworks.frameworks.find((f) => f.source_id === id);
+
+    const haveLocally = localPath != null && existsLocally(localPath);
+    const isGuidance = id === 'src_acq_framework' || id === 'src_guidance_email';
+
+    // The guidance email is dated. The CSV is not, so it is dated to the guidance
+    // rollout and marked inferred rather than leaving staleness unmeasurable.
+    let docDate: string | null = null;
+    let inferred = false;
+    let note: string | null = null;
+
+    if (isGuidance) {
+      docDate = GUIDANCE_EFFECTIVE_FROM;
+      inferred = id === 'src_acq_framework';
+      note = inferred
+        ? 'The framework CSV carries no revision date. Dated to the Acquirer Guidance rollout of 2026-07-27. Ask Strategic Pricing for the real revision date.'
+        : null;
+    } else if (fw) {
+      docDate = fw.doc_updated_at;
+      inferred = fw.doc_updated_at_inferred;
+      note = fw.doc_updated_at_note;
+    } else if (id === 'src_mac') {
+      note = 'The MAC deck carries no revision date. One section is stamped "January 2026".';
+    }
+
     return {
-      id: s.id,
+      id,
       title: s.title,
       system: s.system,
       url: s.url,
       doc_updated_at: docDate,
-      doc_updated_at_inferred: s.id === 'src_acq_framework',
-      doc_updated_at_note:
-        s.id === 'src_acq_framework'
-          ? 'The framework CSV carries no revision date. Dated to the Acquirer Guidance rollout of 2026-07-27. Ask Strategic Pricing for the real revision date.'
-          : null,
+      doc_updated_at_inferred: inferred,
+      doc_updated_at_note: note,
+      doc_extracted_at: fw?.doc_extracted_at ?? (extractor === 'md' && haveLocally ? fileDay(localPath!) : null),
       retrieved_at: haveLocally ? COMPILED_AT : null,
-      retrieved_via: haveLocally ? 'local file' : 'pending',
+      retrieved_via: haveLocally ? (extractor === 'md' ? 'converted markdown (Glean)' : 'local file') : 'pending',
       feeds: s.feeds,
     };
   }),
@@ -556,7 +518,26 @@ const book = {
 
   mcc_map,
   acquiring,
+
+  /**
+   * Product framework volume bands. Separate from monthly_tpv_bands_musd above and
+   * NOT interchangeable with it: this ladder starts at 500k where acquiring
+   * guidance starts at 1m, and its figures are read in the deal currency because
+   * the decks print one number under "Monthly Processing Volume ($/£/€)".
+   */
+  vas_bands: vasFrameworks.bands,
   vas_catalogue,
+  mcc_tier_rule: vasFrameworks.mcc_tier_rule,
+
+  mac: {
+    source_id: mac.source_id,
+    source_locator: mac.source_locator,
+    pre_submission_checklist: mac.pre_submission_checklist,
+    chargeback_ceiling_pct: mac.chargeback_ceiling_pct,
+    chargeback_verbatim: mac.chargeback_verbatim,
+    sectors: mac.sectors,
+  },
+
   approval_matrix,
   coverage_gaps,
 
@@ -567,11 +548,39 @@ const book = {
     rows_not_reconciling: nonReconciling,
     rows_missing_reference_atv: acquiring.filter((a) => a.reference_atv == null).length,
     rows_with_assumed_risk_level: acquiring.filter((a) => a.risk_level_assumed).length,
+    vas_frameworks_total: vas_catalogue.length,
+    vas_frameworks_documented: vas_catalogue.filter((v) => !v.needs_extraction).length,
     vas_pending_extraction: vas_catalogue.filter((v) => v.needs_extraction).length,
+    vas_prices_verified_against_source: vasFrameworks.frameworks.reduce(
+      (n, fw) =>
+        n +
+        fw.fees.reduce(
+          (m, fee) =>
+            m +
+            (fee.tiers
+              ? (['standard', 'other'] as const).reduce(
+                  (k, t) =>
+                    k +
+                    (['recommended', 'floor', 'ceiling'] as const).reduce(
+                      (j, l) => j + fee.tiers![t][l].filter((v) => v != null && v !== 0).length,
+                      0,
+                    ),
+                  0,
+                )
+              : 0),
+          0,
+        ),
+      0,
+    ),
+    mac_sectors: mac.sectors.length,
+    mac_sectors_with_net_revenue_floor: mac.sectors.filter((s) => s.min_monthly_net_revenue_usd != null).length,
     notes: [
       'Total take rate is carried through verbatim from the CSV and is authoritative.',
       `${nonReconciling} rows have Acquiring + Other != Total (rounding in the Other column). Flagged per row as reconciles: false.`,
-      'VAS list prices are placeholders pending Glean extraction and do not affect the guidance take rate.',
+      `${vas_catalogue.filter((v) => !v.needs_extraction).length} of ${vas_catalogue.length} product frameworks are documented, banded on monthly volume and tiered Standard/Other MCC. Every price was checked back against the text of its source document at compile time.`,
+      'Product prices still do not affect the guidance take rate. The framework Other line already carries the VAS and FX uplift; these drive the attach check and the floor/ceiling approvals.',
+      `${vas_catalogue.filter((v) => v.needs_extraction).map((v) => v.label).join(' and ') || 'No product'} still has no framework document.`,
+      `MAC: ${mac.sectors.length} sectors, ${mac.sectors.filter((s) => s.min_monthly_net_revenue_usd != null).length} with a stated monthly net revenue floor.`,
     ],
   },
 
@@ -600,6 +609,32 @@ function jitter(id: string): number {
 
 const obfBps = (bps: number, id: string) => Math.round(bps * DEMO_SCALE * jitter(id) * 100) / 100;
 
+/**
+ * Obfuscates a fee. Rounded to three decimals rather than two, because the real
+ * frameworks go to $0.005 and rounding that to $0.01 would double it — a demo book
+ * still has to behave like a rate card.
+ */
+const obfFee = (amount: number, id: string) => Math.round(amount * DEMO_SCALE * jitter(id) * 1000) / 1000;
+
+/**
+ * One jitter per band, shared by that band's floor, recommendation and ceiling.
+ *
+ * Jittering the three independently would sometimes push a floor above its own
+ * recommendation, and the engine would then read every demo quote as below-floor.
+ * A demo book has to be wrong about the numbers and right about the behaviour.
+ */
+const obfTier = (
+  t: { recommended: (number | null)[]; floor: (number | null)[]; ceiling: (number | null)[] },
+  salt: string,
+) => {
+  const at = (v: number | null, i: number) => (v == null || v === 0 ? v : obfFee(v, `${salt}${i}`));
+  return {
+    recommended: t.recommended.map(at),
+    floor: t.floor.map(at),
+    ceiling: t.ceiling.map(at),
+  };
+};
+
 const demoBook = {
   ...book,
   version: `${book.version}-demo`,
@@ -620,11 +655,48 @@ const demoBook = {
       verbatim: `[DEMO DATA — obfuscated] ${a.region} | ${a.vertical} | ${a.country_scope ?? 'all countries'} | ${a.risk_level} | ${a.monthly_tpv_band_musd.min}–${a.monthly_tpv_band_musd.max ?? '∞'}m/mo`,
     };
   }),
+  /**
+   * The product frameworks obfuscate per price point, not per product — a single
+   * multiplier on a whole table would leave the shape of the curve readable, and
+   * the curve is half of what makes a rate card useful to a competitor.
+   *
+   * Floors and ceilings are scaled with their recommendation so the demo book stays
+   * internally consistent: a demo quote must still be able to land below a floor or
+   * above a ceiling, because that is the behaviour being demonstrated.
+   */
   vas_catalogue: vas_catalogue.map((v) => ({
     ...v,
-    amount: v.amount == null ? null : Math.round(v.amount * DEMO_SCALE * jitter(v.key) * 10_000) / 10_000,
-    notes: `[DEMO DATA — obfuscated] ${v.notes}`,
+    fees: v.fees.map((fee) => ({
+      ...fee,
+      tiers:
+        fee.tiers == null
+          ? null
+          : {
+              standard: obfTier(fee.tiers.standard, `${v.key}${fee.key}s`),
+              other: obfTier(fee.tiers.other, `${v.key}${fee.key}o`),
+            },
+    })),
+    reference_methods: undefined,
+    notes: [`[DEMO DATA — obfuscated] Rates below are deliberately wrong.`, ...v.notes],
   })),
+
+  /**
+   * MAC net revenue floors are obfuscated too. They are not the rate card, but
+   * they are a number off a confidential deck, and the promise DEMO_MODE makes is
+   * that nothing on screen is real. The criteria text stays — it is what makes the
+   * gate legible in a demo, and it is policy rather than a figure.
+   */
+  mac: {
+    ...book.mac,
+    sectors: mac.sectors.map((s) => ({
+      ...s,
+      min_monthly_net_revenue_usd:
+        s.min_monthly_net_revenue_usd == null
+          ? null
+          : Math.round((s.min_monthly_net_revenue_usd * DEMO_SCALE * jitter(s.key)) / 100) * 100,
+      net_revenue_verbatim: s.net_revenue_verbatim ? `[DEMO DATA — obfuscated] ${s.net_revenue_verbatim}` : null,
+    })),
+  },
 };
 
 writeFileSync(resolve(ROOT, 'data/pricing-book.demo.json'), JSON.stringify(demoBook, null, 2) + '\n', 'utf8');
@@ -637,6 +709,12 @@ console.log(`  country scopes         ${JSON.stringify(countryScopes)}`);
 console.log(`  coverage gaps          ${coverage_gaps.length} region x vertical pairs`);
 console.log(`  non-reconciling rows   ${nonReconciling}`);
 console.log(`  skipped rows           ${skipped.length}`);
-console.log(`  VAS pending extraction ${book.quality.vas_pending_extraction}`);
+console.log(`\nProduct pricing frameworks`);
+console.log(vasFrameworks.report.join('\n'));
+console.log(
+  `  ${book.quality.vas_frameworks_documented}/${book.quality.vas_frameworks_total} documented · ${book.quality.vas_prices_verified_against_source} price points verified against source text · ${book.quality.vas_pending_extraction} pending`,
+);
+console.log(`\nMinimum Acceptance Criteria`);
+console.log(mac.report.join('\n'));
 console.log(`\n  reviewed_by is null — run \`npm run book:approve -- --by "<name>"\` after checking the numbers.`);
 if (skipped.length) console.log('\nSkipped:\n' + skipped.map((s) => '  ' + s).join('\n'));

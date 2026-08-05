@@ -175,7 +175,12 @@ export function Chip({
     danger: 'bg-orange text-surface',
   };
   return (
-    <span title={title} className={`chip-mono inline-flex items-center rounded px-1.5 py-0.5 ${tones[tone]}`}>
+    // nowrap because a chip is a label, not prose: wrapping "medium confidence"
+    // onto two lines pushes the text straight out of its own pill.
+    <span
+      title={title}
+      className={`chip-mono inline-flex items-center whitespace-nowrap rounded px-1.5 py-0.5 ${tones[tone]}`}
+    >
       {children}
     </span>
   );

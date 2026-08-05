@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { ArrowLeft, CheckCircle2, RefreshCw, XCircle } from 'lucide-react';
 import { DEMO_MODE, book, bookProblems, daysSince, oldestSourceDate, staleness } from '@/lib/book';
 import { dateLabel, int } from '@/lib/format';
-import { Card, Chip, StalenessDot, Tile } from '@/components/ui/primitives';
+import { Card, Chip, ConfidenceChip, StalenessDot, Tile } from '@/components/ui/primitives';
 
 /**
  * The pricing book, as a screen.
@@ -107,11 +107,89 @@ export default function BookPage() {
               sub="stated total ≠ components"
             />
             <Tile
-              label="VAS pending extraction"
-              value={String(pendingVas.length)}
+              label="Product frameworks"
+              value={`${book.vas_catalogue.length - pendingVas.length}/${book.vas_catalogue.length}`}
               tone={pendingVas.length ? 'orange' : 'lime'}
+              sub={`${q.vas_prices_verified_against_source} prices verified`}
             />
+            <Tile
+              label="MAC sectors"
+              value={String(book.mac.sectors.length)}
+              sub={`${q.mac_sectors_with_net_revenue_floor} with an eNR floor`}
+            />
+            <Tile label="VAS volume bands" value={String(book.vas_bands.length)} sub="from 500k/month, deal currency" />
           </div>
+        </Card>
+
+        <Card
+          title="Product pricing frameworks"
+          subtitle="One framework per product, banded on monthly volume and tiered Standard or Other MCCs. Every price is checked back against the text of its source document at compile time — a transcription typo fails the build rather than reaching a quote."
+          right={
+            <span className="chip-mono text-faint">
+              {q.vas_prices_verified_against_source as number} prices verified against source
+            </span>
+          }
+        >
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-[0.8125rem]">
+              <thead>
+                <tr className="chip-mono text-faint">
+                  <th className="px-5 py-2 font-medium">Product</th>
+                  <th className="px-3 py-2 font-medium">Status</th>
+                  <th className="px-3 py-2 text-right font-medium">Fees</th>
+                  <th className="px-3 py-2 font-medium">Document date</th>
+                  <th className="px-3 py-2 font-medium">Rules</th>
+                  <th className="px-5 py-2 font-medium">Below floor</th>
+                </tr>
+              </thead>
+              <tbody>
+                {book.vas_catalogue.map((fw) => (
+                  <tr key={fw.key} className="border-t border-line/60">
+                    <td className="px-5 py-2.5">
+                      <span className="font-medium text-ink">{fw.label}</span>
+                      {fw.scope && <span className="ml-1.5 text-[0.6875rem] text-faint">{fw.scope}</span>}
+                    </td>
+                    <td className="px-3 py-2.5">
+                      <ConfidenceChip confidence={fw.confidence} />
+                    </td>
+                    <td className="px-3 py-2.5 text-right tnum text-muted">{fw.fees.length}</td>
+                    <td className="px-3 py-2.5">
+                      <span className="flex items-center gap-2">
+                        <StalenessDot state={staleness(fw.doc_updated_at, today)} date={fw.doc_updated_at} today={today} />
+                        <span className="tnum text-muted">{dateLabel(fw.doc_updated_at)}</span>
+                        {fw.doc_updated_at_inferred && (
+                          <Chip tone="orange" title={fw.doc_updated_at_note ?? undefined}>
+                            inferred
+                          </Chip>
+                        )}
+                        {fw.doc_updated_at == null && fw.doc_extracted_at && (
+                          <span
+                            className="text-[0.6875rem] text-faint"
+                            title={fw.doc_updated_at_note ?? undefined}
+                          >
+                            extracted {dateLabel(fw.doc_extracted_at)}
+                          </span>
+                        )}
+                      </span>
+                    </td>
+                    <td className="px-3 py-2.5">
+                      <span className="flex flex-wrap gap-1">
+                        {fw.mandatory && <Chip tone="lime">mandatory</Chip>}
+                        {!fw.free_trials_allowed && <Chip tone="orange">no free trials</Chip>}
+                        {fw.pricing_model && <Chip tone="neutral">{fw.pricing_model}</Chip>}
+                      </span>
+                    </td>
+                    <td className="px-5 py-2.5 text-[0.75rem] text-muted" title={fw.approval_verbatim ?? undefined}>
+                      {fw.approval_below_floor.length ? fw.approval_below_floor.join(' → ') : '—'}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="border-t border-line px-5 py-2.5 text-[0.6875rem] leading-relaxed text-faint">
+            {book.mcc_tier_rule.verbatim}
+          </p>
         </Card>
 
         <Card
@@ -202,8 +280,9 @@ export default function BookPage() {
               </ul>
             </div>
             <div>
-              <h3 className="chip-mono text-faint">VAS list prices not yet extracted</h3>
+              <h3 className="chip-mono text-faint">Products with no framework document</h3>
               <ul className="mt-2 space-y-1 text-[0.8125rem] text-muted">
+                {pendingVas.length === 0 && <li className="text-lime">None — every product has its framework.</li>}
                 {pendingVas.map((v) => (
                   <li key={v.key} className="flex gap-2">
                     <span className="text-orange">·</span>
@@ -213,8 +292,27 @@ export default function BookPage() {
               </ul>
               <p className="mt-2 text-[0.6875rem] leading-relaxed text-faint">
                 These do not affect the guidance take rate — the framework already carries expected VAS revenue in its
-                Other line. They are needed only for the attach check.
+                Other line. Without a document there is no banded price, so the attach check leaves them blank rather
+                than filling in a plausible number.
               </p>
+
+              {/* The two decks that came through imperfectly. Saying so on the book
+                  page is the point: the alternative is a rep discovering it from a
+                  merchant. */}
+              {book.vas_catalogue.some((v) => v.confidence_note) && (
+                <>
+                  <h3 className="chip-mono mt-4 text-faint">Extraction caveats</h3>
+                  <ul className="mt-2 space-y-1.5 text-[0.75rem] leading-relaxed text-muted">
+                    {book.vas_catalogue
+                      .filter((v) => v.confidence_note)
+                      .map((v) => (
+                        <li key={v.key}>
+                          <span className="font-medium text-ink">{v.label}</span> — {v.confidence_note}
+                        </li>
+                      ))}
+                  </ul>
+                </>
+              )}
             </div>
           </div>
         </Card>

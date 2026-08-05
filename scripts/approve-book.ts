@@ -27,8 +27,20 @@ for (const file of ['data/pricing-book.json', 'data/pricing-book.demo.json']) {
   const path = resolve(ROOT, file);
   const book = JSON.parse(readFileSync(path, 'utf8'));
 
-  const [day, n] = String(book.version).split('.');
-  book.version = `${day}.${Number(n ?? 0) + (book.reviewed_by ? 1 : 0)}${String(book.version).includes('-demo') ? '' : ''}`;
+  /**
+   * Version is `<day>.<revision>`, with a `-demo` suffix on the obfuscated book.
+   *
+   * The old split on "." coerced the whole tail to a number, so the demo book's
+   * "1-demo" became NaN and its version read "2026-08-05.NaN". That is the book
+   * DEMO_MODE loads by default, so the broken version was the one on screen.
+   */
+  const parsed = /^(.+)\.(\d+)(-demo)?$/.exec(String(book.version));
+  if (!parsed) throw new Error(`Cannot parse book version "${book.version}" in ${file}`);
+  const [, day, revision, suffix = ''] = parsed;
+
+  // Re-approving an already-signed book bumps the revision. A first approval does
+  // not: it is the same numbers a human has now read, not a new compilation.
+  book.version = `${day}.${Number(revision) + (book.reviewed_by ? 1 : 0)}${suffix}`;
   book.reviewed_by = by;
   book.reviewed_at = process.env.BOOK_APPROVED_AT ?? new Date().toISOString();
 

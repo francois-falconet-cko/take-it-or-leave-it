@@ -1,9 +1,9 @@
 {
-  "version": "2026-08-04.1-demo",
-  "generated_at": "2026-08-04T16:46:16.301Z",
+  "version": "2026-08-05.1-demo",
+  "generated_at": "2026-08-05T12:43:45.663Z",
   "generated_by": "compile-acq-framework.ts (DEMO — rates obfuscated)",
-  "reviewed_by": null,
-  "reviewed_at": null,
+  "reviewed_by": "Ad",
+  "reviewed_at": "2026-08-05T12:43:45.947Z",
   "guidance": {
     "name": "Acquirer Guidance",
     "effective_from": "2026-07-27",
@@ -32,7 +32,8 @@
       "doc_updated_at": "2026-07-27",
       "doc_updated_at_inferred": true,
       "doc_updated_at_note": "The framework CSV carries no revision date. Dated to the Acquirer Guidance rollout of 2026-07-27. Ask Strategic Pricing for the real revision date.",
-      "retrieved_at": "2026-08-04T16:46:16.301Z",
+      "doc_extracted_at": null,
+      "retrieved_at": "2026-08-05T12:43:45.663Z",
       "retrieved_via": "local file",
       "feeds": "acquiring"
     },
@@ -44,7 +45,8 @@
       "doc_updated_at": "2026-07-27",
       "doc_updated_at_inferred": false,
       "doc_updated_at_note": null,
-      "retrieved_at": "2026-08-04T16:46:16.301Z",
+      "doc_extracted_at": null,
+      "retrieved_at": "2026-08-05T12:43:45.663Z",
       "retrieved_via": "local file",
       "feeds": "approval_matrix"
     },
@@ -56,21 +58,23 @@
       "doc_updated_at": null,
       "doc_updated_at_inferred": false,
       "doc_updated_at_note": null,
+      "doc_extracted_at": null,
       "retrieved_at": null,
       "retrieved_via": "pending",
       "feeds": "reference"
     },
     {
       "id": "src_mac",
-      "title": "MAC — Merchant Acquiring Costs",
+      "title": "MAC — Minimum Acceptance Criteria",
       "system": "Highspot",
       "url": "https://checkout.highspot.com/items/62e7bdd8f28282c82ae63b35?lfrm=srp.0#2",
       "doc_updated_at": null,
       "doc_updated_at_inferred": false,
-      "doc_updated_at_note": null,
-      "retrieved_at": null,
-      "retrieved_via": "pending",
-      "feeds": "reference"
+      "doc_updated_at_note": "The MAC deck carries no revision date. One section is stamped \"January 2026\".",
+      "doc_extracted_at": "2026-08-05",
+      "retrieved_at": "2026-08-05T12:43:45.663Z",
+      "retrieved_via": "converted markdown (Glean)",
+      "feeds": "mac"
     },
     {
       "id": "src_gateway_premium",
@@ -80,6 +84,7 @@
       "doc_updated_at": null,
       "doc_updated_at_inferred": false,
       "doc_updated_at_note": null,
+      "doc_extracted_at": null,
       "retrieved_at": null,
       "retrieved_via": "pending",
       "feeds": "gateway"
@@ -91,9 +96,10 @@
       "url": "https://checkout.highspot.com/items/647dde7dc4f2ebc1f397d615?lfrm=srp.0#1",
       "doc_updated_at": null,
       "doc_updated_at_inferred": false,
-      "doc_updated_at_note": null,
-      "retrieved_at": null,
-      "retrieved_via": "pending",
+      "doc_updated_at_note": "The deck carries no revision date. Ask Strategic Pricing for one.",
+      "doc_extracted_at": "2026-08-05",
+      "retrieved_at": "2026-08-05T12:43:45.663Z",
+      "retrieved_via": "converted markdown (Glean)",
       "feeds": "vas:network_tokens"
     },
     {
@@ -103,9 +109,10 @@
       "url": "https://checkout.highspot.com/items/647ddf5780ff58cb0fb43391?lfrm=srp.1#1",
       "doc_updated_at": null,
       "doc_updated_at_inferred": false,
-      "doc_updated_at_note": null,
-      "retrieved_at": null,
-      "retrieved_via": "pending",
+      "doc_updated_at_note": "The deck carries no revision date. Ask Strategic Pricing for one.",
+      "doc_extracted_at": "2026-08-05",
+      "retrieved_at": "2026-08-05T12:43:45.663Z",
+      "retrieved_via": "converted markdown (Glean)",
       "feeds": "vas:rtau"
     },
     {
@@ -115,7 +122,8 @@
       "url": "https://checkout.highspot.com/items/668e9333f3aea59c05c394bb?lfrm=srp.0#1",
       "doc_updated_at": null,
       "doc_updated_at_inferred": false,
-      "doc_updated_at_note": null,
+      "doc_updated_at_note": "No pricing framework supplied for this product yet.",
+      "doc_extracted_at": null,
       "retrieved_at": null,
       "retrieved_via": "pending",
       "feeds": "vas:forward_vault"
@@ -125,11 +133,12 @@
       "title": "Integrated Platforms",
       "system": "Highspot",
       "url": "https://checkout.highspot.com/items/64cd76ed34cc409788c6e0d2?lfrm=srp.0#1",
-      "doc_updated_at": null,
-      "doc_updated_at_inferred": false,
-      "doc_updated_at_note": null,
-      "retrieved_at": null,
-      "retrieved_via": "pending",
+      "doc_updated_at": "2023-01-01",
+      "doc_updated_at_inferred": true,
+      "doc_updated_at_note": "The deck states \"Year: 2023\". Dated to the start of that year and marked inferred. This is the oldest source in the book and the staleness check will flag it.",
+      "doc_extracted_at": "2026-08-05",
+      "retrieved_at": "2026-08-05T12:43:45.663Z",
+      "retrieved_via": "converted markdown (Glean)",
       "feeds": "vas:integrated_platforms"
     },
     {
@@ -139,21 +148,23 @@
       "url": "https://checkout.highspot.com/items/6543caf903357cebea0bfda8?lfrm=srp.0#1",
       "doc_updated_at": null,
       "doc_updated_at_inferred": false,
-      "doc_updated_at_note": null,
+      "doc_updated_at_note": "No pricing framework supplied for this product yet.",
+      "doc_extracted_at": null,
       "retrieved_at": null,
       "retrieved_via": "pending",
       "feeds": "vas:settlement"
     },
     {
       "id": "src_vas_fraud",
-      "title": "Fraud Detection",
+      "title": "Fraud Detection Pro",
       "system": "Highspot",
       "url": "https://checkout.highspot.com/items/63d7afa15769ea57b607767c?lfrm=srp.0#1",
-      "doc_updated_at": null,
-      "doc_updated_at_inferred": false,
-      "doc_updated_at_note": null,
-      "retrieved_at": null,
-      "retrieved_via": "pending",
+      "doc_updated_at": "2026-01-01",
+      "doc_updated_at_inferred": true,
+      "doc_updated_at_note": "The deck states \"2026\" on its cover and no finer date. Dated to the start of the year and marked inferred.",
+      "doc_extracted_at": "2026-08-05",
+      "retrieved_at": "2026-08-05T12:43:45.663Z",
+      "retrieved_via": "converted markdown (Glean)",
       "feeds": "vas:fraud_detection"
     },
     {
@@ -163,9 +174,10 @@
       "url": "https://checkout.highspot.com/items/62f147b00bfa5c8457fddd7c?lfrm=srp.0#2",
       "doc_updated_at": null,
       "doc_updated_at_inferred": false,
-      "doc_updated_at_note": null,
-      "retrieved_at": null,
-      "retrieved_via": "pending",
+      "doc_updated_at_note": "The deck carries no revision date. Ask Strategic Pricing for one.",
+      "doc_extracted_at": "2026-08-05",
+      "retrieved_at": "2026-08-05T12:43:45.663Z",
+      "retrieved_via": "converted markdown (Glean)",
       "feeds": "vas:authentication"
     },
     {
@@ -173,11 +185,12 @@
       "title": "APMs — Alternative Payment Methods",
       "system": "Highspot",
       "url": "https://checkout.highspot.com/items/6409b86eedc1c8eef79161c9?lfrm=srp.0#4",
-      "doc_updated_at": null,
-      "doc_updated_at_inferred": false,
-      "doc_updated_at_note": null,
-      "retrieved_at": null,
-      "retrieved_via": "pending",
+      "doc_updated_at": "2026-01-01",
+      "doc_updated_at_inferred": true,
+      "doc_updated_at_note": "The deck is titled \"APM Pricing Framework 2026\" with no finer date. Dated to the start of the year and marked inferred.",
+      "doc_extracted_at": "2026-08-05",
+      "retrieved_at": "2026-08-05T12:43:45.663Z",
+      "retrieved_via": "converted markdown (Glean)",
       "feeds": "vas:apms"
     }
   ],
@@ -23667,112 +23680,2154 @@
       "confidence": "high"
     }
   ],
+  "vas_bands": [
+    {
+      "index": 0,
+      "min": 0.5,
+      "max": 1,
+      "label": "500k - 1m"
+    },
+    {
+      "index": 1,
+      "min": 1,
+      "max": 2,
+      "label": "1m - 2m"
+    },
+    {
+      "index": 2,
+      "min": 2,
+      "max": 5,
+      "label": "2m - 5m"
+    },
+    {
+      "index": 3,
+      "min": 5,
+      "max": 10,
+      "label": "5m - 10m"
+    },
+    {
+      "index": 4,
+      "min": 10,
+      "max": 20,
+      "label": "10m - 20m"
+    },
+    {
+      "index": 5,
+      "min": 20,
+      "max": null,
+      "label": "20m+"
+    }
+  ],
   "vas_catalogue": [
     {
       "key": "network_tokens",
       "label": "Network Tokens",
-      "unit": "per_txn",
-      "amount": 0.0079,
-      "currency": "USD",
-      "default_attach_rate": 1,
-      "attach_rate_note": "Applies to every tokenised transaction.",
       "source_id": "src_vas_network_tokens",
-      "needs_extraction": true,
-      "confidence": "unverified",
-      "notes": "[DEMO DATA — obfuscated] PLACEHOLDER amount. Extract from Highspot before quoting."
+      "source_locator": "CKO Network Tokens Pricing Framework (IC++)",
+      "doc_updated_at": null,
+      "doc_updated_at_inferred": false,
+      "doc_updated_at_note": "The deck carries no revision date. Ask Strategic Pricing for one.",
+      "doc_extracted_at": "2026-08-05",
+      "confidence": "high",
+      "confidence_note": null,
+      "pricing_model": "IC++",
+      "mandatory": true,
+      "free_trials_allowed": false,
+      "approval_below_floor": [
+        "Regional Revenue Leader"
+      ],
+      "approval_above_ceiling": [
+        "Regional Revenue Leader"
+      ],
+      "approval_verbatim": "For pricing below the floor or above the ceiling limits, the approval of the Regional Revenue Leader is required",
+      "scope": null,
+      "needs_extraction": false,
+      "blended_uplift": {
+        "note": "If the merchant is on Blended pricing for Card Acquiring (Visa & MC), Network Tokens is Blended too — add the CKO fee below on top of the scheme fees.",
+        "scheme_fees": [
+          {
+            "scheme": "Visa",
+            "basis": "NT Updates",
+            "amount": 0.12,
+            "currency": "EUR"
+          },
+          {
+            "scheme": "Mastercard",
+            "basis": "NT Updates",
+            "amount": 0.125,
+            "currency": "EUR"
+          }
+        ]
+      },
+      "notes": [
+        "[DEMO DATA — obfuscated] Rates below are deliberately wrong.",
+        "Only the Network Token Provisioning Fixed Fee and the Network Token Update Fixed Fee are applicable, and only for the Network Token Public API product.",
+        "Scheme fees charged on non-tokenized transactions are separate and already passed through for IC++ merchants.",
+        "Market range is $0.08 - $0.15, with the concentration of fees between $0.03 - $0.07."
+      ],
+      "fees": [
+        {
+          "key": "nt_event",
+          "label": "Provisioning & update",
+          "unit": "per_request",
+          "currency": "LOCAL",
+          "basis": "per Network Token provisioned or updated",
+          "driver": "attached_transactions",
+          "default_attach_rate": 1,
+          "attach_rate_note": "One provisioning or update event per tokenized transaction is the conservative read. Dial it to the merchant's tokenized share.",
+          "not_modelled_reason": null,
+          "verbatim": "Pricing per Network Token Provisioning & Update (IC++)",
+          "tiers": {
+            "standard": {
+              "recommended": [
+                0.099,
+                0.082,
+                0.074,
+                0.066,
+                0.057,
+                0.049
+              ],
+              "floor": [
+                0.066,
+                0.049,
+                0.041,
+                0.033,
+                0.033,
+                0.025
+              ],
+              "ceiling": [
+                0.123,
+                0.123,
+                0.123,
+                0.123,
+                0.123,
+                0.123
+              ]
+            },
+            "other": {
+              "recommended": [
+                0.124,
+                0.115,
+                0.107,
+                0.099,
+                0.09,
+                0.082
+              ],
+              "floor": [
+                0.083,
+                0.074,
+                0.066,
+                0.058,
+                0.049,
+                0.041
+              ],
+              "ceiling": [
+                0.165,
+                0.165,
+                0.165,
+                0.165,
+                0.164,
+                0.164
+              ]
+            }
+          }
+        }
+      ]
     },
     {
       "key": "rtau",
-      "label": "RTAU",
-      "unit": "per_request",
-      "amount": 0.2038,
-      "currency": "USD",
-      "default_attach_rate": 0.05,
-      "attach_rate_note": "Only fires on transactions that fail and are retried. 5% is a starting assumption — set it per merchant.",
+      "label": "RTAU — Real Time Account Updater",
       "source_id": "src_vas_rtau",
-      "needs_extraction": true,
-      "confidence": "unverified",
-      "notes": "[DEMO DATA — obfuscated] PLACEHOLDER amount and attach rate. Both must be confirmed."
-    },
-    {
-      "key": "forward_vault",
-      "label": "Forward API & Vault",
-      "unit": "per_request",
-      "amount": 0.017,
-      "currency": "USD",
-      "default_attach_rate": 1,
-      "attach_rate_note": "One forward request per transaction on a vaulted flow.",
-      "source_id": "src_vas_forward_vault",
-      "needs_extraction": true,
-      "confidence": "unverified",
-      "notes": "[DEMO DATA — obfuscated] PLACEHOLDER amount."
-    },
-    {
-      "key": "integrated_platforms",
-      "label": "Integrated Platforms",
-      "unit": "bps",
-      "amount": 4.1328,
-      "currency": "USD",
-      "default_attach_rate": 1,
-      "attach_rate_note": "Applies across platform volume.",
-      "source_id": "src_vas_integrated_platforms",
-      "needs_extraction": true,
-      "confidence": "unverified",
-      "notes": "[DEMO DATA — obfuscated] PLACEHOLDER amount."
-    },
-    {
-      "key": "settlement",
-      "label": "Settlement Fees",
-      "unit": "monthly_flat",
-      "amount": 210.945,
-      "currency": "USD",
-      "default_attach_rate": 1,
-      "attach_rate_note": "Per settlement cycle; modelled monthly.",
-      "source_id": "src_vas_settlement",
-      "needs_extraction": true,
-      "confidence": "unverified",
-      "notes": "[DEMO DATA — obfuscated] PLACEHOLDER amount. Real pricing is per payout and depends on cycle and currency."
+      "source_locator": "CKO RTAU Pricing Framework per Successful Update (IC++)",
+      "doc_updated_at": null,
+      "doc_updated_at_inferred": false,
+      "doc_updated_at_note": "The deck carries no revision date. Ask Strategic Pricing for one.",
+      "doc_extracted_at": "2026-08-05",
+      "confidence": "high",
+      "confidence_note": null,
+      "pricing_model": "IC++",
+      "mandatory": true,
+      "free_trials_allowed": false,
+      "approval_below_floor": [
+        "Regional Sales Leader"
+      ],
+      "approval_above_ceiling": [
+        "Regional Sales Leader"
+      ],
+      "approval_verbatim": "Approval required from the Regional Sales Leader to price below the floor or above the ceiling.",
+      "scope": null,
+      "needs_extraction": false,
+      "blended_uplift": {
+        "note": "If the merchant is on Blended pricing for Card Acquiring (Visa & MC), RTAU is blended too — add the CKO fee below on top of the scheme fees.",
+        "scheme_fees": [
+          {
+            "scheme": "Visa",
+            "basis": "per update",
+            "amount": 0.12,
+            "currency": "USD"
+          },
+          {
+            "scheme": "Mastercard",
+            "basis": "per update",
+            "amount": 0.125,
+            "currency": "USD"
+          }
+        ]
+      },
+      "notes": [
+        "[DEMO DATA — obfuscated] Rates below are deliberately wrong.",
+        "Market range is $0.10 - $0.35, with the concentration of fees between $0.15 - $0.25.",
+        "Adyen prices IC++ in the £0.15 - €0.20 range and does not discount RTAU materially even when discounting other services.",
+        "Stripe's standard approach is $/£/€ 0.25; one data point shows $0.10 for a merchant at roughly $250m/year."
+      ],
+      "fees": [
+        {
+          "key": "rtau_update",
+          "label": "Successful update",
+          "unit": "per_request",
+          "currency": "LOCAL",
+          "basis": "per successful account update",
+          "driver": "attached_transactions",
+          "default_attach_rate": 0.05,
+          "attach_rate_note": "Only fires on transactions that fail and are retried. 5% is a starting assumption — set it per merchant. Charging this against 100% of volume overprices the deal by roughly 20x.",
+          "not_modelled_reason": null,
+          "verbatim": "CKO RTAU Pricing Framework per Successful Update (IC++)",
+          "tiers": {
+            "standard": {
+              "recommended": [
+                0.166,
+                0.166,
+                0.166,
+                0.125,
+                0.125,
+                0.125
+              ],
+              "floor": [
+                0.125,
+                0.116,
+                0.108,
+                0.1,
+                0.092,
+                0.083
+              ],
+              "ceiling": [
+                0.208,
+                0.208,
+                0.208,
+                0.208,
+                0.208,
+                0.209
+              ]
+            },
+            "other": {
+              "recommended": [
+                0.207,
+                0.207,
+                0.207,
+                0.166,
+                0.166,
+                0.166
+              ],
+              "floor": [
+                0.165,
+                0.157,
+                0.149,
+                0.141,
+                0.133,
+                0.125
+              ],
+              "ceiling": [
+                0.29,
+                0.29,
+                0.29,
+                0.29,
+                0.291,
+                0.291
+              ]
+            }
+          }
+        }
+      ]
     },
     {
       "key": "fraud_detection",
-      "label": "Fraud Detection",
-      "unit": "per_txn",
-      "amount": 0.0164,
-      "currency": "USD",
-      "default_attach_rate": 1,
-      "attach_rate_note": "Screened on every transaction.",
+      "label": "Fraud Detection Pro",
       "source_id": "src_vas_fraud",
-      "needs_extraction": true,
-      "confidence": "unverified",
-      "notes": "[DEMO DATA — obfuscated] PLACEHOLDER amount."
+      "source_locator": "CKO Fraud Detection Pro Pricing Framework per Screened Transaction",
+      "doc_updated_at": "2026-01-01",
+      "doc_updated_at_inferred": true,
+      "doc_updated_at_note": "The deck states \"2026\" on its cover and no finer date. Dated to the start of the year and marked inferred.",
+      "doc_extracted_at": "2026-08-05",
+      "confidence": "high",
+      "confidence_note": null,
+      "pricing_model": "IC++",
+      "mandatory": true,
+      "free_trials_allowed": false,
+      "approval_below_floor": [
+        "Regional Revenue Leader"
+      ],
+      "approval_above_ceiling": [
+        "Regional Revenue Leader"
+      ],
+      "approval_verbatim": "Approval required from the Regional Revenue Leader to price below the floor or above the ceiling.",
+      "scope": null,
+      "needs_extraction": false,
+      "blended_uplift": null,
+      "notes": [
+        "[DEMO DATA — obfuscated] Rates below are deliberately wrong.",
+        "Market range is $0.01 - $0.12, with the concentration of fees between $0.03 - $0.07.",
+        "Adyen's standard approach is tiered with a starting tier of $0.10, going as low as $0.01 for large enterprises.",
+        "Fraud Detection Pro is the feature equivalent of Stripe Radar for Fraud Teams, usually $0.02 above Radar Standard."
+      ],
+      "fees": [
+        {
+          "key": "fd_screen",
+          "label": "Screened transaction",
+          "unit": "per_request",
+          "currency": "LOCAL",
+          "basis": "per screened transaction",
+          "driver": "attached_transactions",
+          "default_attach_rate": 1,
+          "attach_rate_note": "Screened on every transaction unless the merchant routes only part of its traffic through Fraud Detection Pro.",
+          "not_modelled_reason": null,
+          "verbatim": "CKO Fraud Detection Pro Pricing Framework per Screened Transaction",
+          "tiers": {
+            "standard": {
+              "recommended": [
+                0.032,
+                0.032,
+                0.024,
+                0.024,
+                0.016,
+                0.016
+              ],
+              "floor": [
+                0.024,
+                0.016,
+                0.016,
+                0.016,
+                0.008,
+                0.004
+              ],
+              "ceiling": [
+                0.055,
+                0.055,
+                0.055,
+                0.055,
+                0.055,
+                0.055
+              ]
+            },
+            "other": {
+              "recommended": [
+                0.048,
+                0.04,
+                0.032,
+                0.032,
+                0.024,
+                0.024
+              ],
+              "floor": [
+                0.032,
+                0.024,
+                0.024,
+                0.024,
+                0.016,
+                0.008
+              ],
+              "ceiling": [
+                0.079,
+                0.079,
+                0.079,
+                0.079,
+                0.079,
+                0.079
+              ]
+            }
+          }
+        }
+      ]
     },
     {
       "key": "authentication",
       "label": "Authentication (3DS)",
-      "unit": "per_request",
-      "amount": 0.0337,
-      "currency": "USD",
-      "default_attach_rate": 0.35,
-      "attach_rate_note": "Only transactions routed to 3DS. Varies hugely by region and SCA exemption strategy.",
       "source_id": "src_vas_authentication",
-      "needs_extraction": true,
-      "confidence": "unverified",
-      "notes": "[DEMO DATA — obfuscated] PLACEHOLDER amount and attach rate."
+      "source_locator": "CKO Authentication Pricing Framework per Authentication Attempt (IC++)",
+      "doc_updated_at": null,
+      "doc_updated_at_inferred": false,
+      "doc_updated_at_note": "The deck carries no revision date. Ask Strategic Pricing for one.",
+      "doc_extracted_at": "2026-08-05",
+      "confidence": "medium",
+      "confidence_note": "The extraction could not see which pricing table was labelled Standard MCCs and which Other. Mapped by price level — the cheaper table is Standard, matching the other five decks. Per-tier ceilings were also not visible; the single stated ceiling is repeated across bands.",
+      "pricing_model": "IC++",
+      "mandatory": true,
+      "free_trials_allowed": false,
+      "approval_below_floor": [
+        "Regional Revenue Leader"
+      ],
+      "approval_above_ceiling": [
+        "Regional Revenue Leader"
+      ],
+      "approval_verbatim": "Approval is required from the Regional Revenue Leader to price below the floor or above the ceiling.",
+      "scope": null,
+      "needs_extraction": false,
+      "blended_uplift": {
+        "note": "If acquiring is on blended pricing, authentication must be blended too — add the scheme fees to the premium fee.",
+        "scheme_fees": []
+      },
+      "notes": [
+        "[DEMO DATA — obfuscated] Rates below are deliberately wrong.",
+        "Price standalone merchants above the recommended level: CKO earns no revenue from other products on those deals.",
+        "Market range is $0.01 - $0.06. Providers introduced 3DS fees on the back of 3DS2.",
+        "Adyen sometimes waives the 3DS fee for merchants taking Processing, Revenue Protect and Acquiring together."
+      ],
+      "fees": [
+        {
+          "key": "auth_attempt",
+          "label": "Authentication attempt",
+          "unit": "per_request",
+          "currency": "LOCAL",
+          "basis": "per authentication attempt",
+          "driver": "attached_transactions",
+          "default_attach_rate": 0.35,
+          "attach_rate_note": "Only transactions routed to 3DS. Varies hugely by region and SCA exemption strategy — an EEA merchant with a weak exemption strategy can be near 1.0.",
+          "not_modelled_reason": null,
+          "verbatim": "CKO Authentication Pricing Framework per Authentication Attempt (IC++)",
+          "tiers": {
+            "standard": {
+              "recommended": [
+                0.024,
+                0.024,
+                0.024,
+                0.024,
+                0.016,
+                0.016
+              ],
+              "floor": [
+                0.016,
+                0.016,
+                0.016,
+                0.016,
+                0.008,
+                0.004
+              ],
+              "ceiling": [
+                0.056,
+                0.056,
+                0.056,
+                0.056,
+                0.056,
+                0.056
+              ]
+            },
+            "other": {
+              "recommended": [
+                0.04,
+                0.04,
+                0.032,
+                0.032,
+                0.024,
+                0.024
+              ],
+              "floor": [
+                0.024,
+                0.024,
+                0.024,
+                0.024,
+                0.016,
+                0.008
+              ],
+              "ceiling": [
+                0.08,
+                0.08,
+                0.08,
+                0.08,
+                0.08,
+                0.08
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "key": "integrated_platforms",
+      "label": "Integrated Platforms",
+      "source_id": "src_vas_integrated_platforms",
+      "source_locator": "CKO IP Fees Pricing Framework",
+      "doc_updated_at": "2023-01-01",
+      "doc_updated_at_inferred": true,
+      "doc_updated_at_note": "The deck states \"Year: 2023\". Dated to the start of that year and marked inferred. This is the oldest source in the book and the staleness check will flag it.",
+      "doc_extracted_at": "2026-08-05",
+      "confidence": "high",
+      "confidence_note": "The fee tables came through as clean markdown. The competitive-landscape slides did not and are not carried.",
+      "pricing_model": null,
+      "mandatory": false,
+      "free_trials_allowed": false,
+      "approval_below_floor": [
+        "Regional Revenue Leader",
+        "Platform Underwriting",
+        "Strategic Pricing"
+      ],
+      "approval_above_ceiling": [],
+      "approval_verbatim": "For pricing below the floor limits, or to deviate from the Pricing Framework, the following sequential approvals are required: Approval of the Regional Revenue Leader, Approval from Platform Underwriting and Strategic Pricing teams",
+      "scope": "EEA / UK / US",
+      "needs_extraction": false,
+      "blended_uplift": null,
+      "notes": [
+        "[DEMO DATA — obfuscated] Rates below are deliberately wrong.",
+        "No ceilings are stated for any IP fee — the framework is floor-only.",
+        "The Balance Transfer Fee is the fee to discount, and to waive if needed, in order to defend the Platform Fee.",
+        "Approvals below floor are sequential, not parallel: Regional Revenue Leader first, then Platform Underwriting and Strategic Pricing."
+      ],
+      "fees": [
+        {
+          "key": "ip_platform_fee",
+          "label": "Platform fee (% on payout volume)",
+          "unit": "pct_of_value",
+          "currency": "LOCAL",
+          "basis": "% on payout volume",
+          "driver": "volume_share",
+          "default_attach_rate": 1,
+          "attach_rate_note": "Share of billable volume that is paid out to sellers. 100% is the conservative read; lower it if the platform retains a cut.",
+          "not_modelled_reason": null,
+          "verbatim": "Platform Fee (% on payout vol) - Recommended",
+          "tiers": {
+            "standard": {
+              "recommended": [
+                0.168,
+                0.168,
+                0.168,
+                0.126,
+                0.126,
+                0.084
+              ],
+              "floor": [
+                0.126,
+                0.126,
+                0.084,
+                0.084,
+                0.084,
+                0.042
+              ],
+              "ceiling": [
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+              ]
+            },
+            "other": {
+              "recommended": [
+                0.211,
+                0.211,
+                0.211,
+                0.168,
+                0.126,
+                0.126
+              ],
+              "floor": [
+                0.169,
+                0.169,
+                0.168,
+                0.126,
+                0.084,
+                0.084
+              ],
+              "ceiling": [
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+              ]
+            }
+          }
+        },
+        {
+          "key": "ip_monthly_seller_fee",
+          "label": "Monthly fee (per seller)",
+          "unit": "monthly_flat",
+          "currency": "LOCAL",
+          "basis": "per active seller, per month",
+          "driver": "per_seller_month",
+          "default_attach_rate": 1,
+          "attach_rate_note": "Share of sellers actually billed.",
+          "not_modelled_reason": null,
+          "verbatim": "Monthly Fee (per seller) - Recommended ($/£/€)",
+          "tiers": {
+            "standard": {
+              "recommended": [
+                0.855,
+                0.854,
+                0.854,
+                0.853,
+                0.639,
+                0.426
+              ],
+              "floor": [
+                0.641,
+                0.641,
+                0.64,
+                0.426,
+                0.426,
+                0.213
+              ],
+              "ceiling": [
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+              ]
+            },
+            "other": {
+              "recommended": [
+                1.717,
+                1.715,
+                1.714,
+                1.712,
+                1.283,
+                0.854
+              ],
+              "floor": [
+                1.288,
+                1.287,
+                1.285,
+                0.856,
+                0.855,
+                0.641
+              ],
+              "ceiling": [
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+              ]
+            }
+          }
+        },
+        {
+          "key": "ip_balance_transfer_fee",
+          "label": "Balance transfer fee (% on internal transfer)",
+          "unit": "pct_of_value",
+          "currency": "LOCAL",
+          "basis": "% on internal transfer volume",
+          "driver": "unmodelled",
+          "default_attach_rate": 1,
+          "attach_rate_note": "",
+          "not_modelled_reason": "Charged on internal transfer volume, which this tool does not collect. Shown for the rep to price by hand.",
+          "verbatim": "Balance Transfer Fee (% on internal transfer) - Recommended",
+          "floor_waived_from_band": 4,
+          "tiers": {
+            "standard": {
+              "recommended": [
+                0.165,
+                0.165,
+                0.165,
+                0.123,
+                0.082,
+                0.082
+              ],
+              "floor": [
+                0.041,
+                0.041,
+                0.041,
+                0.041,
+                0,
+                0
+              ],
+              "ceiling": [
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+              ]
+            },
+            "other": {
+              "recommended": [
+                0.207,
+                0.207,
+                0.207,
+                0.165,
+                0.124,
+                0.124
+              ],
+              "floor": [
+                0.041,
+                0.041,
+                0.041,
+                0.041,
+                0,
+                0
+              ],
+              "ceiling": [
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+              ]
+            }
+          }
+        },
+        {
+          "key": "ip_bank_payout_fee",
+          "label": "Bank payout fee",
+          "unit": "per_request",
+          "currency": "LOCAL",
+          "basis": "per bank payout",
+          "driver": "unmodelled",
+          "default_attach_rate": 1,
+          "attach_rate_note": "",
+          "not_modelled_reason": "Charged per payout, and payout count does not follow from transaction count. Shown for the rep to price by hand.",
+          "verbatim": "Bank Payout Fee - Recommended ($/£/€)",
+          "tiers": {
+            "standard": {
+              "recommended": [
+                0.208,
+                0.208,
+                0.208,
+                0.208,
+                0.15,
+                0.15
+              ],
+              "floor": [
+                0.15,
+                0.15,
+                0.15,
+                0.15,
+                0.133,
+                0.134
+              ],
+              "ceiling": [
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+              ]
+            },
+            "other": {
+              "recommended": [
+                0.248,
+                0.248,
+                0.249,
+                0.249,
+                0.208,
+                0.208
+              ],
+              "floor": [
+                0.165,
+                0.166,
+                0.166,
+                0.166,
+                0.15,
+                0.15
+              ],
+              "ceiling": [
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+              ]
+            }
+          }
+        }
+      ]
     },
     {
       "key": "apms",
-      "label": "APMs",
-      "unit": "bps",
-      "amount": 7.8146,
-      "currency": "USD",
-      "default_attach_rate": 1,
-      "attach_rate_note": "Applies to the APM share of volume — set attach rate to that share.",
+      "label": "APMs — Alternative Payment Methods",
       "source_id": "src_vas_apms",
-      "needs_extraction": true,
+      "source_locator": "APM Pricing Framework 2026",
+      "doc_updated_at": "2026-01-01",
+      "doc_updated_at_inferred": true,
+      "doc_updated_at_note": "The deck is titled \"APM Pricing Framework 2026\" with no finer date. Dated to the start of the year and marked inferred.",
+      "doc_extracted_at": "2026-08-05",
+      "confidence": "medium",
+      "confidence_note": "The FX rule and the gateway floor came through unambiguously. The per-method fee tables lost their column structure in places; only rows whose cells map cleanly to the stated column order are carried, and SEPA DD / SEPA B2B are marked partial.",
+      "pricing_model": null,
+      "mandatory": false,
+      "free_trials_allowed": true,
+      "approval_below_floor": [
+        "Regional Revenue Leader"
+      ],
+      "approval_above_ceiling": [],
+      "approval_verbatim": "Regional Revenue Leader approval required to price other MCCs, or to price below the floor",
+      "scope": null,
+      "needs_extraction": false,
+      "blended_uplift": null,
+      "notes": [
+        "[DEMO DATA — obfuscated] Rates below are deliberately wrong.",
+        "For Collecting APMs charge gateway fees AND payment-method specific fees. For Gateway-only APMs charge gateway fees only, consistently across all payment methods.",
+        "Gateway fees align to the regional acquiring pricing framework, with a floor of €0.02 in consideration of APM processing buy rates.",
+        "FX is mandatory at 1.99% and applies whenever the processing currency differs from the merchant's settlement currency — including when the APM settles CKO like-for-like but CKO settles the merchant in another currency.",
+        "Below 1.99% FX needs treasury.markets@checkout.com, not Strategic Pricing.",
+        "For an EPS ATV below €50, go to Strategic Pricing.",
+        "High risk merchant MCCs named in the deck: 5967, 7841, 7995, 6012, 6051.",
+        "Buy rates are held separately — apmpartnerships@checkout.com."
+      ],
+      "fees": [
+        {
+          "key": "apm_fx",
+          "label": "FX markup",
+          "unit": "pct_of_value",
+          "currency": "LOCAL",
+          "basis": "% on volume processed in a currency other than the settlement currency",
+          "driver": "volume_share",
+          "default_attach_rate": 0,
+          "attach_rate_note": "Share of volume where the processing currency differs from the merchant's settlement currency. Starts at 0 because guessing it is worse than asking — set it from the merchant's currency mix.",
+          "not_modelled_reason": null,
+          "verbatim": "FX pricing is mandatory at 1.99%",
+          "tiers": {
+            "standard": {
+              "recommended": [
+                1.591,
+                1.589,
+                1.588,
+                1.586,
+                1.584,
+                1.583
+              ],
+              "floor": [
+                1.591,
+                1.589,
+                1.588,
+                1.586,
+                1.584,
+                1.583
+              ],
+              "ceiling": [
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+              ]
+            },
+            "other": {
+              "recommended": [
+                1.598,
+                1.596,
+                1.594,
+                1.593,
+                1.591,
+                1.589
+              ],
+              "floor": [
+                1.598,
+                1.596,
+                1.594,
+                1.593,
+                1.591,
+                1.589
+              ],
+              "ceiling": [
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+              ]
+            }
+          }
+        },
+        {
+          "key": "apm_gateway_floor",
+          "label": "Gateway fee floor",
+          "unit": "per_txn",
+          "currency": "EUR",
+          "basis": "per transaction, all payment methods",
+          "driver": "unmodelled",
+          "default_attach_rate": 1,
+          "attach_rate_note": "",
+          "not_modelled_reason": "The gateway fee itself comes from the regional acquiring framework and is already inside the guidance take rate. Only the €0.02 floor is a separate constraint.",
+          "verbatim": "A floor of €0.02, in consideration of applicable buy rates on processing for APMs",
+          "tiers": {
+            "standard": {
+              "recommended": [
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+              ],
+              "floor": [
+                0.016,
+                0.016,
+                0.016,
+                0.016,
+                0.016,
+                0.016
+              ],
+              "ceiling": [
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+              ]
+            },
+            "other": {
+              "recommended": [
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+              ],
+              "floor": [
+                0.015,
+                0.015,
+                0.016,
+                0.016,
+                0.016,
+                0.016
+              ],
+              "ceiling": [
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "key": "forward_vault",
+      "label": "Forward API & Vault",
+      "source_id": "src_vas_forward_vault",
+      "source_locator": "pending",
+      "doc_updated_at": null,
+      "doc_updated_at_inferred": false,
+      "doc_updated_at_note": "No pricing framework supplied for this product yet.",
+      "doc_extracted_at": null,
       "confidence": "unverified",
-      "notes": "[DEMO DATA — obfuscated] PLACEHOLDER amount. APM cost is scheme-specific and largely pass-through."
+      "confidence_note": null,
+      "pricing_model": null,
+      "mandatory": false,
+      "free_trials_allowed": true,
+      "approval_below_floor": [],
+      "approval_above_ceiling": [],
+      "approval_verbatim": null,
+      "scope": null,
+      "needs_extraction": true,
+      "blended_uplift": null,
+      "notes": [
+        "[DEMO DATA — obfuscated] Rates below are deliberately wrong.",
+        "No framework deck has been supplied. The attach check cannot price this product."
+      ],
+      "fees": [
+        {
+          "key": "forward_request",
+          "label": "Forward request",
+          "unit": "per_request",
+          "currency": "LOCAL",
+          "basis": "per forward request",
+          "driver": "attached_transactions",
+          "default_attach_rate": 1,
+          "attach_rate_note": "One forward request per transaction on a vaulted flow.",
+          "not_modelled_reason": "No framework supplied — no rate to quote.",
+          "verbatim": "",
+          "tiers": null
+        }
+      ]
+    },
+    {
+      "key": "settlement",
+      "label": "Settlement Fees",
+      "source_id": "src_vas_settlement",
+      "source_locator": "pending",
+      "doc_updated_at": null,
+      "doc_updated_at_inferred": false,
+      "doc_updated_at_note": "No pricing framework supplied for this product yet.",
+      "doc_extracted_at": null,
+      "confidence": "unverified",
+      "confidence_note": null,
+      "pricing_model": null,
+      "mandatory": false,
+      "free_trials_allowed": true,
+      "approval_below_floor": [],
+      "approval_above_ceiling": [],
+      "approval_verbatim": null,
+      "scope": null,
+      "needs_extraction": true,
+      "blended_uplift": null,
+      "notes": [
+        "[DEMO DATA — obfuscated] Rates below are deliberately wrong.",
+        "No framework deck has been supplied. Real pricing is per payout and depends on cycle and currency."
+      ],
+      "fees": [
+        {
+          "key": "settlement_payout",
+          "label": "Settlement / payout",
+          "unit": "per_request",
+          "currency": "LOCAL",
+          "basis": "per payout",
+          "driver": "unmodelled",
+          "default_attach_rate": 1,
+          "attach_rate_note": "",
+          "not_modelled_reason": "No framework supplied, and payout count does not follow from transaction count.",
+          "verbatim": "",
+          "tiers": null
+        }
+      ]
     }
   ],
+  "mcc_tier_rule": {
+    "other": [
+      "Merchants with a Chargeback Ratio above 1%",
+      "or line of business with a CKO risk rating of \"Restricted\" or \"High\" as listed in the MCC Risk List"
+    ],
+    "standard": [
+      "Line of business with a CKO risk rating of \"Medium\" or \"Low\" as listed in the MCC Risk List"
+    ],
+    "verbatim": "Other MCCs: Merchants with a Chargeback Ratio above 1% or line of business with a CKO risk rating of \"Restricted\" or \"High\" as listed in this MCC Risk List. Standard MCCs: Line of business with a CKO risk rating of \"Medium\" or \"Low\".",
+    "note": "Identical wording in all six decks. This tool derives the tier from the intake risk level and, when supplied, the merchant's chargeback ratio."
+  },
+  "mac": {
+    "source_id": "src_mac",
+    "source_locator": "Minimum Acceptance Criteria — Guidance for the Commercial Team",
+    "pre_submission_checklist": [
+      "Have you checked that the business is not in a sector prohibited by Checkout (see [MCC Risk List](https://docs.google.com/spreadsheets/d/1aQzNq84_O1ee0cTDo8M-g9SA_BKwF6zyjGEdLx0gDDE/edit#gid=0) and [Checkout Declined Lines of Business](https://www.checkout.com/legal/terms-and-policies))?",
+      "Have you checked that the business model does not fall within the prohibited categories listed in the MAC for this particular sector?",
+      "Have you ensured that the Net Revenue (“NR”) requirements for this particular sector meet the expectations of the MAC?",
+      "Have you checked that the longevity of the business conforms with the expectations in the MAC?",
+      "Have you checked that the longevity of their card processing history conforms with the expectations in the MAC?",
+      "Have you checked that chargebacks are below 0.9%?",
+      "Have you checked the online reputation of this merchant and are you comfortable with it?"
+    ],
+    "chargeback_ceiling_pct": 0.9,
+    "chargeback_verbatim": "Have you checked that chargebacks are below 0.9%?",
+    "sectors": [
+      {
+        "key": "cbd",
+        "number": 2,
+        "title": "CBD",
+        "verticals": [
+          "Retail",
+          "Food and Groceries"
+        ],
+        "mccs": [
+          "5499",
+          "5912",
+          "5977",
+          "5999"
+        ],
+        "mcc_note": "Multiple · Common MCCs used: 5499, 5912, 5977, 5999",
+        "mccs_exclusive": false,
+        "min_monthly_net_revenue_usd": 6500,
+        "net_revenue_verbatim": "[DEMO DATA — obfuscated] $7.5k Expected Monthly Net Revenue (Tier 3)",
+        "net_revenue_detail": "Minimum Billing required if the merchant cannot demonstrate their existing PV matches the eNR · Checkout only supports CBD merchants in the US, UK and France based on the framework provided by our internal Legal & Regulatory team. · The nuanced requirements vary by region but are generally around the nature of the products sold (topical vs. ingestible), the level of THC in products, as well as the general marketing / claims made by the business.",
+        "criteria": [
+          "Established: Checkout will only support established business (i.e. investor funding, experienced management team, sold in well established brick and mortar stores, etc).",
+          "Controls: must have internal control framework showing ability to meet Legal/Regulatory requirements.",
+          "Legal Restrictions: must be able to provide evidence for the legal basis for their operation in each country in which they plan to sell their product.",
+          "Reputation: does not have a track record of fraud, misappropriation, cheating, forgery or money laundering."
+        ],
+        "prohibited": [],
+        "notes": [],
+        "source_locator": "MAC section 2 — CBD"
+      },
+      {
+        "key": "cryptocurrency",
+        "number": 3,
+        "title": "Cryptocurrency",
+        "verticals": [
+          "Crypto"
+        ],
+        "mccs": [
+          "6051"
+        ],
+        "mcc_note": null,
+        "mccs_exclusive": true,
+        "min_monthly_net_revenue_usd": 5900,
+        "net_revenue_verbatim": "[DEMO DATA — obfuscated] $7.5k Expected Monthly Net Revenue (Tier 3)",
+        "net_revenue_detail": "Minimum Billing required if the merchant cannot demonstrate their existing PV matches the eNR · Supported lines of business / activities: · Exchanges · On-Ramp · Requires pre-review: · Lending · Staking",
+        "criteria": [
+          "The prevention and detection of fraud is a core requirement for Checkout to protect the card networks and consumers:",
+          "Cryptocurrency merchants must have real-time risk monitoring processes to identify fraud attacks and users causing repeat issues on the platform.",
+          "Chargeback rates must fall within scheme thresholds.",
+          "AML Program: Merchants must have appropriate AML/CTF policies, systems and controls. They will also be subject to a deepend financial crime framework review and subject to enhanced periodic review",
+          "Licenses & Legal Opinions: Merchants must have the required licenses and registrations for all In-Scope Countries. Required licenses and registrations are listed in Checkout’s Crypto License/Registration Assessment Matrix. If the merchant does not have the required license/registration, or the In-Scope Country is not included in the Matrix, the merchant must provide an explanation for why a license/registration does not apply to their business model",
+          "Reputation: Merchants must not have a track record of fraud, misappropriation, cheating, forgery, money laundering, or similar.",
+          "Geoblocking: demonstrate adequate controls to process only in allowed jurisdictions",
+          "Storage of Crypto: demonstrate the majority of crypto assets are held in cold storage (or an alternative, acceptable mechanism)",
+          "Access to Crypto: Merchants must demonstrate adequate controls for management to access crypto asset keys"
+        ],
+        "prohibited": [
+          "The following business models are prohibited:"
+        ],
+        "notes": [],
+        "source_locator": "MAC section 3 — Cryptocurrency"
+      },
+      {
+        "key": "cryptocurrency_on_ramps",
+        "number": 4,
+        "title": "Cryptocurrency On Ramps",
+        "verticals": [
+          "Crypto",
+          "Financial Services / Fintech"
+        ],
+        "mccs": [
+          "6051",
+          "6012",
+          "5815"
+        ],
+        "mcc_note": "Conversion Affiliates MCC(s) · 6051, 6012 and 5815* - All other MCCs are prohibited",
+        "mccs_exclusive": true,
+        "min_monthly_net_revenue_usd": 8000,
+        "net_revenue_verbatim": "[DEMO DATA — obfuscated] $15k Expected Monthly Net Revenue · ($10K to be exceptionally considered for merchants with established and strong controls in place)",
+        "net_revenue_detail": "Minimum Billing required if the merchant cannot demonstrate their existing PV matches the eNR · Crypto (6051, 6012) · NFT (5815 ) will be supported for NFT affiliates selling digital goods only, with no utility or links to physical items. NFT Marketplace affiliates are out of scope. · Verifiable Brand association: The NFT affiliate’s link to an established brand is publicly and verifiably confirmed by the brand through its official channels, supported by clear licensing or contractual evidence. Unconfirmed brand claims are not accepted.",
+        "criteria": [
+          "Established: The Merchant should either be established crypto or NFT player with at least 12 months of trading history or be a significant player within the Fintech space and have an experience management team, notable investors etc.",
+          "Credit Risk Assessment: Crypto merchants will be subject to a credit risk assessment in accordance with Checkout’s Credit Risk Appetite Framework and any specific sector guidance which may be applicable from time to time (Appendix 1). As part of the credit risk assessment, the on ramp flow will be evaluated.",
+          "Ongoing Risk Management: must have systems in place for the onboarding and ongoing monitoring of all affiliate partners.",
+          "AML Program: Merchants must have appropriate AML/CTF policies, systems and controls both for themselves and for all affiliate partners. On Ramp must perform the appropriate level of diligence on their affiliates. They will also be subject to a deep end financial crime framework review and subject to enhanced periodic review",
+          "Licenses & Legal Opinions: Merchants must have the required licenses and registrations for all In-Scope Countries. Required licenses and registrations are listed in Checkout’s Crypto License/Registration Assessment Matrix. If the merchant does not have the required license/registration, or the In-Scope Country is not included in the Matrix, the merchant must provide an explanation for why a license/registration does not apply to their business model.",
+          "Internal Controls: Must have internal control framework showing ability to:",
+          "Monitor Affiliates LOB and Location",
+          "Monitor Website Content - both at onboarding and through lifecycle",
+          "Reputation: Merchants must not have a track record of fraud, misappropriation, cheating, forgery, money laundering, or similar.",
+          "Geoblocking: demonstrate adequate controls to process only in allowed jurisdictions. For Gambling Affiliates, additional country blocks will be applied to the respective processing channel",
+          "Storage of Crypto: demonstrate all crypto is sent immediately to Affiliate Partner or customer own wallets",
+          "Cardholder Rights: On Ramp is responsible for cardholder disputes and other cardholder customer service related issues caused by the conversion affiliates"
+        ],
+        "prohibited": [
+          "6051, 6012 and 5815* - All other MCCs are prohibited"
+        ],
+        "notes": [],
+        "source_locator": "MAC section 4 — Cryptocurrency On Ramps"
+      },
+      {
+        "key": "cyberlockers_and_file_sharing",
+        "number": 5,
+        "title": "Cyberlockers and File Sharing",
+        "verticals": [
+          "Digital",
+          "SaaS"
+        ],
+        "mccs": [],
+        "mcc_note": null,
+        "mccs_exclusive": false,
+        "min_monthly_net_revenue_usd": null,
+        "net_revenue_verbatim": "[DEMO DATA — obfuscated] Tier 3 and above",
+        "net_revenue_detail": "Minimum Billing required if the merchant cannot demonstrate their existing PV matches the eNR · Cyberlocker merchants cannot be considered for onboarding if they engage in or demonstrate one or more of the following (high risk / prohibited) activities: · Prohibited activities: · Provide rewards, cash payments, or other incentives to uploaders. · Provide URL codes to uploaders to facilitate sharing and the incorporation of such links on third-party indexing or linking websites. · Have links to prohibited content stored in the cyberlocker often found on third-party indexing or linking sites, or by search engine queries. · Purge files stored within the cyberlocker unless the user purchases a premium membership. · Incentivise premium cyberlocker memberships based on faster download speed or removing ads, as opposed to storage space. · Provide a “link checker” that allows users to determine whether a link has been removed, and if so, allows the user to promptly re-upload that content. · Have file owners who are typically anonymous, not required to provide any identifying information, and not aware of the identity of those users who have access to or view their files. · Emphasise file distribution and sharing on the cyberlocker site. · Promote storage or transfer of specific copyrighted file types such as movies, videos, or music on the cyberlocker site. · Include frequent display advertisements during video playback without the purchase of a premium membership.",
+        "criteria": [
+          "Controls: Given the nature of this business there are a significant amount of bespoke controls which are outline in Section 3.1.3c of the policy ([Cyberlockers and e-file sharing services policy](https://drive.google.com/file/d/11BdZ8B4re8RlqOHpjtmdfBZBqvRwCoHd/view?usp=sharing))",
+          "Licenses & Legal Opinions: No requirements for licenses or legal opinions",
+          "Monitoring: Merchant must have monitoring and screening capabilities that support detection, identification, blocking and remediation of illegal activity.",
+          "Complaint process: Merchant must have a complaint process in place to receive reports of illegal activity, and a clear remediation plan of review and action",
+          "Established: Checkout will only support businesses that can evidence 12 months of card processing history",
+          "Acquiring relationship: Account must not have been terminated for risk / conduct reasons over the last 12 months by any of their acquiring relationships",
+          "Processing conduct: Dispute ratios over the last 6 months must be below the schemes chargeback acceptable threshold"
+        ],
+        "prohibited": [
+          "Cyberlocker merchants cannot be considered for onboarding if they engage in or demonstrate one or more of the following (high risk / prohibited) activities:",
+          "Prohibited activities:",
+          "Have links to prohibited content stored in the cyberlocker often found on third-party indexing or linking sites, or by search engine queries."
+        ],
+        "notes": [],
+        "source_locator": "MAC section 5 — Cyberlockers and File Sharing"
+      },
+      {
+        "key": "dating_services",
+        "number": 6,
+        "title": "Dating Services",
+        "verticals": [
+          "Digital"
+        ],
+        "mccs": [
+          "7273"
+        ],
+        "mcc_note": null,
+        "mccs_exclusive": true,
+        "min_monthly_net_revenue_usd": null,
+        "net_revenue_verbatim": "[DEMO DATA — obfuscated] Tier 3 and above",
+        "net_revenue_detail": "For new business, $7.5k+ minimum billing must be enforced if the merchant cannot demonstrate the existing volumes with their current acquirer are sufficient to achieve target net revenue · Supported Lines of Business · Dating services where users subscribe to a service/platform to meet other people who subscribe to the same service/platform (no P2P payments) e.g. Tinder, Match.com · Services offering video chat functionalities, excluding 'hints' of adult (suggestive previews) · Prohibited activities: · Escort services · Adult content · Companies that promote meeting up for 'adult engagement' · Dating 'promoting' extra marital affairs · Dating service leads to P2P Payment incl paying for virtual gifts · Services offering video chat functionalities which allow adult activities · Chatting services where additional payments (including virtual gifts) are made to continue talking to people at the other end (including bots/employees/affiliates/contractors or other users of the site).",
+        "criteria": [
+          "Website policies: Must have policies outlining prohibited activities, data privacy, community guidelines, age controls etc",
+          "Risk controls: Must have adequate risk controls either through adoption of third party risk tools or Checkout’s custom rules",
+          "Monitoring: Validate that the merchant has monitoring and screening capabilities that support detection, identification, blocking and remediation of illegal activity",
+          "Disclosures: The Merchant website should clearly display:",
+          "A statement on the Modern Slavery Act or applicable laws",
+          "Site Community and Content guidelines,",
+          "Channels to report suspected/actual violation of laws & platform rules",
+          "A code of conduct.",
+          "Guidelines: Platform guidelines should include the following and be able to demonstrate adherence: prohibit nudity, sexual content, sexual desires, or looking for sex on a user’s public profile",
+          "Verification: Merchant must perform age validation",
+          "KYB: Website traffic is aligned with target market(s), product prices should be reasonable (i.e. not overpriced)",
+          "Reviews: Online reviews must not consistently refer to the business as being a 'scam','fake' or similar accusations",
+          "Established: Checkout will only support businesses that can evidence 12 months of card processing history",
+          "Acquiring relationship: Account must not have been terminated for risk/conduct reasons over the last 12 months by any of their acquiring relationships",
+          "Processing conduct: Fraud/dispute ratios over the last 6 months must be below the schemes chargeback acceptable threshold",
+          "Pricing: Average ticket value should align with website prices",
+          "Declaration: Merchants providing chatting services which are between a user and a paid human employee must explicitly market themselves as such to avoid the potential for misleading or misrepresenting the service to customers"
+        ],
+        "prohibited": [
+          "Prohibited activities:",
+          "Website policies: Must have policies outlining prohibited activities, data privacy, community guidelines, age controls etc"
+        ],
+        "notes": [],
+        "source_locator": "MAC section 6 — Dating Services"
+      },
+      {
+        "key": "debt_repayment",
+        "number": 7,
+        "title": "Debt Repayment",
+        "verticals": [
+          "Financial Services / Fintech",
+          "Financial Services Misc."
+        ],
+        "mccs": [],
+        "mcc_note": null,
+        "mccs_exclusive": false,
+        "min_monthly_net_revenue_usd": null,
+        "net_revenue_verbatim": "[DEMO DATA — obfuscated] Tier 3 and above",
+        "net_revenue_detail": "Minimum Billing required if the merchant cannot demonstrate their existing PV matches the eNR · Prohibited: · Checkout does not support shell banks (i.e. banks that do not have a physical · presence in the country in which it is incorporated/licensed, and which is unaffiliated with a · regulated financial group that is subject to effective consolidated supervision. · Restricted: · Collections agencies fall under this category, which are restricted by Checkout. This · includes businesses engaged in the collection of: · Mortgage reduction services, mortgage, loan modification · Recovering, collecting past due · Debt consolidation, interest consolidation or reduction services · Payment of last resort where prior method of payment has been difficult to collect or has been uncollectable as defined by the Card Brands or deemed uncollectible by another merchant · Payment for a dishonored check",
+        "criteria": [
+          "AML Program: must have appropriate AML/CTF policies, systems and controls",
+          "Licenses & Legal Opinions: must be licensed and in compliance with all applicable laws/regulations. Able to produce the appropriate License(s) and/or Legal Opinion(s) for each jurisdiction where the merchant wants to operate",
+          "Reputation: does not have a track record of fraud, misappropriation, cheating, forgery or money laundering.",
+          "Complaint process: Merchant must have a complaint process in place to receive reports of illegal activity, and a clear remediation plan of review and action",
+          "Mature Risk Practices: merchants should have an established record operating in this space and should therefore be able to demonstrate clean processing activity (i.e. chargebacks within acceptable parameters etc.)"
+        ],
+        "prohibited": [
+          "Prohibited:"
+        ],
+        "notes": [],
+        "source_locator": "MAC section 7 — Debt Repayment"
+      },
+      {
+        "key": "dietary_supplements_and_nutraceuticals",
+        "number": 8,
+        "title": "Dietary Supplements and Nutraceuticals",
+        "verticals": [
+          "Retail",
+          "Food and Groceries"
+        ],
+        "mccs": [
+          "5499"
+        ],
+        "mcc_note": null,
+        "mccs_exclusive": true,
+        "min_monthly_net_revenue_usd": 6000,
+        "net_revenue_verbatim": "[DEMO DATA — obfuscated] $7.5k monthly net revenue",
+        "net_revenue_detail": "Minimum Billing required if the merchant cannot demonstrate their existing PV matches the eNR",
+        "criteria": [
+          "Internal Controls: must have controls to validate/monitor the legitimacy of products supplied by pharmacies and wholesalers",
+          "Regulatory Controls: must comply with all applicable laws in the jurisdiction where the products are sold from, and the jurisdiction where it offers to dispense or ship products to",
+          "LegitScript screening: Results must not show any ingredients that are prohibited in the merchant’s target markets.",
+          "Adverse media: must not have a history of disciplinary action (actual or ongoing) taken against it for the sale of illegal or undeclared ingredients, deceptive marketing or inflicting adverse medical harm to consumers",
+          "Benefits claimed (no misleading customers): Promotional material and products cannot make unsupported claims or include language that implies that they cure, treat, or prevent a medical condition.",
+          "- Any claim made in the marketing/advertising must be substantiated by the advertiser/manufacturer with relevant data or been approved for that purpose by the relevant safety authority and evidenced",
+          "- If the product only “may help in conjunction with a healthy diet/lifestyle” this must clearly be stated in the product page - not as a fine print or bullet point below the main benefits listing",
+          "Established: Checkout will only support businesses that can evidence 12 months of card processing history(6 months of card processing statements are required)",
+          "Website: must look and feel professional",
+          "- Terms and conditions to include additional disclosures as required by Regulators and Schemes to govern the sale of such products",
+          "- Site traffic is aligned with target markets",
+          "- Product prices should be reasonable (i.e. not overpriced)",
+          "- Online reviews should exist and without clear red flags",
+          "- If subscription sales are offered (non-US), no negative option billing practices permitted",
+          "Clean processing profile: historical processing should not be erratic or subject to sudden spikes",
+          "- Account must not be terminated for risk/conduct reasons over the last 12 months",
+          "- Dispute ratios over the last 6 months must be below Scheme program thresholds",
+          "- ATV should align with website prices"
+        ],
+        "prohibited": [
+          "CRB (US) Approval and Prohibited Categories::",
+          "Prohibited:",
+          "As part of the review, the DBA, legal name, product name, and management needs to be screened through both the FDA and FTC websites (findings are prohibited)",
+          "LegitScript screening: Results must not show any ingredients that are prohibited in the merchant’s target markets."
+        ],
+        "notes": [],
+        "source_locator": "MAC section 8 — Dietary Supplements and Nutraceuticals"
+      },
+      {
+        "key": "digital_goods",
+        "number": 9,
+        "title": "Digital Goods",
+        "verticals": [
+          "Digital",
+          "Gaming",
+          "SaaS"
+        ],
+        "mccs": [
+          "5735",
+          "5815",
+          "5816",
+          "5818"
+        ],
+        "mcc_note": "Multiple",
+        "mccs_exclusive": false,
+        "min_monthly_net_revenue_usd": 5800,
+        "net_revenue_verbatim": "[DEMO DATA — obfuscated] $7.5k Expected Monthly Net Revenue",
+        "net_revenue_detail": "Minimum Billing required if the merchant cannot demonstrate their existing PV matches the eNR · Prohibited LOBs: · Second hand accounts / accessories that artificially “boost” player skill/scores · LOBs that are out-of-scope for this MAC: · Game of Skills (please apply the Fantasy Sports & Game of Skills MAC) · Non Fungible Tokens (please apply the Non Fungible Tokens MAC)",
+        "criteria": [
+          "Internal Controls: must have policies outlining prohibited activities, and controls to monitor for misconduct or sale of counterfeit goods/services",
+          "Fraud Risk Controls: must have adequate risk controls either through adoption of third party risk tools or Checkout’s custom rules for Digital Goods",
+          "AML Controls: where encashment is allowed on the platform, the merchant must have appropriate AML/CTF policies and controls",
+          "- AML questionnaire/policies required",
+          "- Payouts must be capped at $1K/transaction and facilitated by traditional (no virtual) banks",
+          "- KYC checks on users to be conducted either at account initiation or before withdrawal",
+          "Management: The management team needs to have relevant experience if the trading entity is newly incorporated",
+          "Operations: scale of operations has to be meaningful vis-a-vis the size of the merchant’s processing",
+          "Violation Reporting: For live streaming/dating services, there must be clear channels for users to report suspected/actual violation of platform rules and ability to terminate/block non-compliant users",
+          "Established: Checkout will only support businesses that can evidence 12m of clean card processing history, as follows:",
+          "- HK / Japan: rule applied to all digital goods",
+          "- RoW: rule applies to merchants selling skins, e-books, video / audio on demand / subscriptions, CV creators / editors, diet / nutrition plans, gaming keys.",
+          "Website: website must look and feel professional, website traffic is aligned with target market(s), product prices should be reasonable (i.e. not overpriced)",
+          "Reputation: online reviews must be satisfactory (i.e. a Trustpilot score of 3+, or equivalent)",
+          "Traffic: Similarweb results must be consistent with the application data, both in terms of target countries and number of expected clients",
+          "Processing Attributes:",
+          "- Account must not be terminated for risk/conduct reasons over the last 12 months",
+          "- Dispute ratios over the last 6 months must be below the VFMP / VDMP threshold",
+          "- ATV should align with website prices"
+        ],
+        "prohibited": [
+          "Prohibited LOBs:",
+          "Internal Controls: must have policies outlining prohibited activities, and controls to monitor for misconduct or sale of counterfeit goods/services"
+        ],
+        "notes": [],
+        "source_locator": "MAC section 9 — Digital Goods"
+      },
+      {
+        "key": "dropshippers",
+        "number": 10,
+        "title": "Dropshippers",
+        "verticals": [
+          "Retail"
+        ],
+        "mccs": [],
+        "mcc_note": "Multiple",
+        "mccs_exclusive": false,
+        "min_monthly_net_revenue_usd": 6500,
+        "net_revenue_verbatim": "[DEMO DATA — obfuscated] $7.5k Monthly Net Revenue",
+        "net_revenue_detail": "Minimum Billing required if the merchant cannot demonstrate their existing PV matches the eNR · Supported dropshipping lines of business will need to adhere to Checkout AUP",
+        "criteria": [
+          "Internal Controls: Merchant must have internal controls to ensure that no high brand risk product or counterfeit products are sold by them and the entity is sourcing products only from reliable suppliers",
+          "Dutch Law Compliance: Dutch dropshipping websites should contain the following:",
+          "Contact info: minimum of two different means of contact",
+          "Merchants must display their registration number on the website",
+          "Proof of Substance: Compliance with Proof of Substance requirement is compulsory and must not to be satisfied via exemptions or waivers.",
+          "Operations: The scale of operations has to be meaningful vis-a-vis the size of the merchant's processing, there should be no history or trend of account migrations.",
+          "Geolocation Consistency: The location of the UBO (residential address) and the place of registered business, supplier or warehouse or operation location and target markets should all make logistical sense",
+          "Established: merchant must have at least 2 years of demonstrated experience in dropshipping.",
+          "Website: Product descriptions are not misleading, website traffic is aligned with target market(s), product prices reasonable, i.e. not overpriced, online reviews must be supportive/absent red flags",
+          "Processing Attributes:",
+          "i) Chargeback ratio < 0.9% in the last 6 months.",
+          "ii) Account must not be terminated for risk or conduct reasons or flagged in any VMSS/MATCH checks over the last 12 months.",
+          "iii) Merchants on VDMP/VFMP or ECM/EFM will be automatically declined",
+          "Financial profile: The business must have a healthy financial profile.",
+          "i) Streamlined Approval not permitted.",
+          "ii) Rolling Reserves will be mandatory"
+        ],
+        "prohibited": [],
+        "notes": [],
+        "source_locator": "MAC section 10 — Dropshippers"
+      },
+      {
+        "key": "fantasy_sports_games_of_skill",
+        "number": 11,
+        "title": "Fantasy Sports & Games of Skill",
+        "verticals": [
+          "Gaming",
+          "Gambling"
+        ],
+        "mccs": [
+          "7994",
+          "5816"
+        ],
+        "mcc_note": "7994 (Mastercard), 5816 (Visa)",
+        "mccs_exclusive": true,
+        "min_monthly_net_revenue_usd": 6100,
+        "net_revenue_verbatim": "[DEMO DATA — obfuscated] $7.5k Monthly Net Revenue",
+        "net_revenue_detail": "Minimum Billing required if the merchant cannot demonstrate their existing PV matches the eNR · Subject to the four tests above, Games of Skill may include the following game models (among others): · Daily fantasy sports · Arcade games · Video games · Word games · Strategy games · Card games",
+        "criteria": [
+          "Internal Controls: Merchant must have internal control framework showing ability to meet Fincrime Compliance and Legal/Regulatory requirements.",
+          "Licenses & Legal Opinion(s): able to produce the appropriate License(s) or Legal Opinion(s) for each jurisdiction where the merchant wants to operate.",
+          "Other: Please review the Mastercard Security Rules & Procedures (p 103-105) for additional guidance",
+          "Proof of Substance: Compliance with Proof of Substance requirement is compulsory and must not to be satisfied via exemptions or waivers.",
+          "Reputation: does not have a track record of fraud, misappropriation, cheating, forgery or money laundering.",
+          "Client Funds Segregation: must provide evidence of client fund segregation arrangements, satisfactory to Checkout.",
+          "Established: they will either demonstrate at least a year in business with the ability to produce processing statements and financial statements, or, if they are a start-up. a compelling story must be evidenced (i.e. investor funding, experienced management team, etc.).",
+          "Fraud / CB Rates: Fraud and CB rates must fall within acceptable thresholds. A start-up or young merchant must evidence sound risk management practices"
+        ],
+        "prohibited": [],
+        "notes": [],
+        "source_locator": "MAC section 11 — Fantasy Sports & Games of Skill"
+      },
+      {
+        "key": "furniture_and_furnishings",
+        "number": 12,
+        "title": "Furniture and Furnishings",
+        "verticals": [
+          "Retail"
+        ],
+        "mccs": [
+          "5712",
+          "7641",
+          "5021",
+          "5719",
+          "5722",
+          "5937"
+        ],
+        "mcc_note": "5712, 7641, 5021, 5719, 5722 (for long delivery items only), 5937 (for long delivery items only)",
+        "mccs_exclusive": true,
+        "min_monthly_net_revenue_usd": 6100,
+        "net_revenue_verbatim": "[DEMO DATA — obfuscated] $7.5k Monthly Net Revenue",
+        "net_revenue_detail": "Minimum Billing required if the merchant cannot demonstrate their existing PV matches the eNR · The primary risks associated with Dropshippers include the following: · Extended delivery times: Many merchants in this sector offer customization of products, which can lead to a longer fulfillment timeframe (6+ months) · Fulfillment risk: as a middleman between the customer and the fulfillment company, dropshippers have very little control over the quality of the products shipped, and overall fulfillment timelines. This gives rise to higher refunds and chargebacks than standard industries, and poor customer reviews · Supplier risk and concentration: Merchants may work with a handful of suppliers to manufacture their products, many of which are located overseas. Issues with a single supplier can put a merchant under pressure, even out of business. · High average ticket / high ticket: Due to the nature of the products sold, the average sales price can be substantial. Merchants must have adequate liquidity to cover standard refund and chargeback risk. · Potential for long con fraud / break out: Merchant builds up track record of clean processing by delivering legitimately, but then suddenly ceases to fulfil orders, enabling them to clear 2-3 months of sales volume before any issues are flagged.",
+        "criteria": [
+          "Consumer reviews: The merchant must have positive online reviews with no indication of recent delivery or quality issues.",
+          "Processing Attributes: Clean processing for the latest 3 month period, with refunds <10% and chargebacks <0.5%.",
+          "Financial Profile: Minimum 2 years of independently prepared and audited financials with Credit Rating 4 or better, in addition to up to date management accounts.",
+          "Stock/Custom: Minimal appetite for companies selling custom / bespoke items.",
+          "Online only: retailers must demonstrate ability to fulfil majority of orders from owned inventory."
+        ],
+        "prohibited": [],
+        "notes": [],
+        "source_locator": "MAC section 12 — Furniture and Furnishings"
+      },
+      {
+        "key": "gambling",
+        "number": 13,
+        "title": "Gambling",
+        "verticals": [
+          "Gambling"
+        ],
+        "mccs": [
+          "7995",
+          "7800",
+          "7801",
+          "7802",
+          "9406"
+        ],
+        "mcc_note": null,
+        "mccs_exclusive": true,
+        "min_monthly_net_revenue_usd": 6000,
+        "net_revenue_verbatim": "[DEMO DATA — obfuscated] $7.5k Monthly Net Revenue",
+        "net_revenue_detail": "Minimum Billing required if the merchant cannot demonstrate their existing PV matches the eNR · Note: “payment agent” or similar constructs for Curacao gambling operators are not supported.",
+        "criteria": [
+          "Internal Controls: must have internal control framework showing ability to meet Fincrime Compliance and Legal/Regulatory requirements",
+          "AML Program: must have appropriate AML/CTF policies, systems and controls.",
+          "Licenses & Legal Opinions: must be licensed and in compliance with all applicable laws/regulations. Able to produce the appropriate license(s) and/or legal opinion(s) for each jurisdiction where the merchant wants to operate",
+          "Reputation: does not have a track record of fraud, misappropriation, cheating, forgery or money laundering.",
+          "Client Funds Segregation: must provide evidence of client fund segregation arrangements, satisfactory to Checkout.",
+          "Established: they will either demonstrate at least a year in business with the ability to produce processing statements and financial statements, or, if they are a start-up. a compelling story must be evidenced (i.e. investor funding, experienced management team, etc.).",
+          "Fraud / CB Rates: Fraud and CB rates must fall within acceptable thresholds. A start-up or young merchant must evidence sound risk management practices."
+        ],
+        "prohibited": [
+          "Note: “payment agent” or similar constructs for Curacao gambling operators are not supported."
+        ],
+        "notes": [],
+        "source_locator": "MAC section 13 — Gambling"
+      },
+      {
+        "key": "gift_cards_stored_value_vouchers",
+        "number": 14,
+        "title": "Gift Cards & Stored Value Vouchers",
+        "verticals": [
+          "Retail",
+          "Financial Services Misc."
+        ],
+        "mccs": [],
+        "mcc_note": null,
+        "mccs_exclusive": false,
+        "min_monthly_net_revenue_usd": 6000,
+        "net_revenue_verbatim": "[DEMO DATA — obfuscated] $7.5k Monthly Net Revenue",
+        "net_revenue_detail": "Minimum Billing required if the merchant cannot demonstrate their existing PV matches the eNR",
+        "criteria": [
+          "Licensing: Closed-loop merchants are generally not considered money transmitters and, therefore, do not need specific money transmitter licenses. If this is confirmed this will generally not trigger EDD. A legal opinion may be prudent to confirm this in complex cross-jurisdictional cases. For the issuance and sale of open-loop gift cards we must have obtained the applicable licence authorization(s) and be able to provide the required evidence.",
+          "Agreements: Merchant must be able to provide signed reseller agreements or content creator agreements to address IP rights concerns",
+          "Appropriate controls: Merchant must have controls in place to monitor platform activities for breach of terms or prohibited activities",
+          "AML Program: (for open loop gift cards) have appropriate AML/CTF policies, systems and controls.",
+          "Third-party loading prohibited: Funds being loaded onto a open loop card by someone other than the cardholder.",
+          "Cash Redemption : Restriction on Cash withdrawal / redemptions for Closed loop cards/stored value voucher.",
+          "HK market specifically: If any closed loop card has multiple end uses then check for necessary authorisation/licenses and if unavailable check for any Legal opinion /comment confirming such card services do not qualify for any regulatory clearance/authorisation.",
+          "Online Reputation: A thorough online check must be conducted to assess business perceptions. A merchant should be declined if there are numerous, verifiable complaints regarding unhonoured gift cards, poor customer service, or fraudulent activity.",
+          "Proof of Substance: Compliance with Proof of Substance requirement is compulsory and must not to be satisfied via exemptions or waivers.",
+          "Website Quality and Disclosures: All gift card terms and conditions, including expiration dates and fees, must be clearly and accurately displayed.",
+          "Balance Reconciliation: Regular reconciliation of gift card liability accounts is key to ensure that the book balance of unredeemed cards matches the amount of cash received for them.",
+          "Established: Checkout will only support businesses that can evidence 6 months of card processing history",
+          "Processing Attributes:",
+          "i) Chargeback ratio < 0.9% in the last 6 months.",
+          "ii) Account must not be terminated for risk or conduct reasons or flagged in any VMSS/MATCH checks over the last 12 months.",
+          "Financial Profile: Minimum 2 years of independently prepared and audited financials with Credit Rating 6 or better, in addition to up to date management accounts.",
+          "Merchant Operating Model / open loop gift cards: Apply PayFac MAC criteria with merchants purportedly selling gift cards, if their operating model allows them to function essentially as a high-risk wallet or payfac. This includes situations where they enable third-party websites to embed their offering via API, allowing users to pay directly on the third-party site using the gift card. Decline if those third-party sites are high-risk e.g., skins gaming, crypto casinos.",
+          "Referral Traffic Sources: Check the referral traffic sources (e.g. via Similarweb). A high percentage of traffic originating from high-risk industries like \"casinos\" should be a significant red flag.",
+          "MAC: If an entity also operates as a marketplace then both Gift Card and Marketplace MAC to apply."
+        ],
+        "prohibited": [
+          "AMEX - Prohibited",
+          "Card-to-Card Sales: Using a gift card to purchase another gift card is prohibited.",
+          "Marketplaces: No high risk industries. No open loop. Evidencing controls to prevent prohibited & restricted LoB sale via platform",
+          "Appropriate controls: Merchant must have controls in place to monitor platform activities for breach of terms or prohibited activities",
+          "Third-party loading prohibited: Funds being loaded onto a open loop card by someone other than the cardholder."
+        ],
+        "notes": [],
+        "source_locator": "MAC section 14 — Gift Cards & Stored Value Vouchers"
+      },
+      {
+        "key": "live_streaming",
+        "number": 15,
+        "title": "Live Streaming",
+        "verticals": [
+          "Digital"
+        ],
+        "mccs": [
+          "4899",
+          "5815",
+          "5967"
+        ],
+        "mcc_note": null,
+        "mccs_exclusive": true,
+        "min_monthly_net_revenue_usd": 6500,
+        "net_revenue_verbatim": "[DEMO DATA — obfuscated] $7.5k monthly net revenue (Tier 3 & Above)",
+        "net_revenue_detail": "Minimum Billing required if the merchant cannot demonstrate their existing PV matches the eNR",
+        "criteria": [
+          "Content Review Controls: Must have an internal control framework showing ability to monitor streaming content and ensuring it does not promote inappropriate content. Content must be reviewed before publication or in real-time if it's live-streamed",
+          "Platform Control: Merchants must operate a platform they can fully control and monitor in real-time, including the ability to remove content if necessary",
+          "Content Provider Verification: Merchants must only allow content uploads from verified content providers. This includes reviewing and validating government-issued identification",
+          "Marketing: Merchants must not market content in a way that implies it contains exploitation material or non-consensual activities",
+          "Limited Use of In-app Assets: Keeping flows linear / single-purpose, i.e. a purchased eCoin A may be used to purchase eCoin B on the app, but eCoin B should not be able to then purchase eCoin A again. The In-app Assets also must not be able to be traded outside the platform, e.g. on crypto exchanges or as NFT on decentralised platforms.",
+          "*Ref. Mastercard Security rules & procedures p.103.",
+          "a) Reputation: There should be clear channels for users to report suspected / actual violation of platform rules and ability to terminate/block non-compliant users",
+          "b) Complaint process: Merchant should have a complaint process in place to receive reports of illegal activity, and a clear remediation plan of review and action",
+          "c) Clear Acceptable Use Policy: The platform should detail a clear acceptable use policy.",
+          "d) Disclosure of paid endorsements: Influencers should disclose any paid sponsorships, endorsements, or material connections with brands or products they feature in their streams.",
+          "e) Consent: Content providers should obtain written consent from all people depicted in the content",
+          "f) Licensing: content being streamed, such as music, movies, or video games, may be subject to copyright protection and may need to ensure they hold permission from the copyright holder",
+          "g) Use of Legitimate Talent Agencies: Where talent agencies may be engaged directly by the app to provide content creators, the platform should display means of ensuring the agencies are operating in a reputable or non-exploitative manner.",
+          "Established: The Merchant will either demonstrate at least a year in business with the ability to produce processing statements and financial statements, or, if they are a start-up. A compelling story must be evidenced. Means of revenue generation should be clear and economically sound.",
+          "Fraud/CB Rates: Fraud and CB rates must fall within acceptable thresholds. A start-up or young merchant must evidence sound risk management practices",
+          "Termination: Account must not have been terminated for risk / conduct reasons over the last 12 months by any of their acquiring relationships"
+        ],
+        "prohibited": [
+          "Accepted,Restricted,Prohibited / Unsupported"
+        ],
+        "notes": [],
+        "source_locator": "MAC section 15 — Live Streaming"
+      },
+      {
+        "key": "marketplaces",
+        "number": 16,
+        "title": "Marketplaces",
+        "verticals": [
+          "Retail",
+          "Digital"
+        ],
+        "mccs": [],
+        "mcc_note": "Multiple",
+        "mccs_exclusive": false,
+        "min_monthly_net_revenue_usd": 6200,
+        "net_revenue_verbatim": "[DEMO DATA — obfuscated] $7.5k Monthly Net Revenue",
+        "net_revenue_detail": "Minimum Billing required if the merchant cannot demonstrate their existing PV matches the eNR · The primary risks associated with Marketplaces include the following: · AML Risk: Considering the fact that Checkout maintains a relationship with the MP and not the underlying merchant, it becomes more difficult for Checkout to know on whose behalf it is processing a transaction.Some MPs may be vulnerable to money laundering, identity theft, fraud, or other illicit transactions, including those prohibited by OFAC. Risks are heightened when the MP does not perform adequate due diligence on the merchants for which they are originating payments. · Card Scheme Requirements: Due to the nature of their businesses, Marketplaces are required to comply with various card scheme requirements",
+        "criteria": [
+          "Internal Controls: Internal Controls: Must have internal control framework evidencing an ability to:",
+          "Perform delegated underwriting",
+          "Monitor transaction-level data",
+          "Demonstrate seller’s LOB is low risk*",
+          "Monitor Website Content",
+          "AML Program: must have appropriate AML/CTF policies, systems and controls.",
+          "License: regulated marketplaces must have obtained the applicable authorization(s) and be able to provide the required evidence.",
+          "Checkout Guidance Compliance: must be able to comply with all requirements as laid out within the [Checkout Marketplace Guidance](https://docs.google.com/document/d/1oV941BY60jAD6rzsylhKhTNf_PQ0khIOGNRSnMDBMjc/edit?tab=t.0#heading=h.dni4sxz6g5hj).",
+          "Reputation: does not have a track record of fraud, misappropriation, cheating, forgery or money laundering.",
+          "Established: no new Marketplaces will be accepted unless they are able to evidence an experienced management team or notable investors etc.",
+          "Financial Profile: must have a healthy financial profile.",
+          "If unprofitable, with immediate delivery then risk/reward decision",
+          "If unprofitable with future delivery then the merchant should have at least 12 months of cash runway or security will be considered.",
+          "Ongoing Risk Management: must use either a 3rd party system, in house, or Prism for the management of cardholder fraud. For higher risk Marketplaces, allowing sellers from multiple jurisdictions to sign up and sell a variety of product categories, the Marketplace must have processes in place to monitor seller activity."
+        ],
+        "prohibited": [
+          "AML Risk: Considering the fact that Checkout maintains a relationship with the MP and not the underlying merchant, it becomes more difficult for Checkout to know on whose behalf it is processing a transaction.Some MPs may be vulnerable to money laundering, identity theft, fraud, or other illicit transactions, including those prohibited by OFAC. Risks are heightened when the MP does not perform adequate due diligence on the merchants for which they are originating payments."
+        ],
+        "notes": [],
+        "source_locator": "MAC section 16 — Marketplaces"
+      },
+      {
+        "key": "merchant_of_record_mor",
+        "number": 17,
+        "title": "Merchant of Record (MOR)",
+        "verticals": [
+          "SaaS",
+          "Digital",
+          "Professional Services"
+        ],
+        "mccs": [],
+        "mcc_note": "Primary MCC which corresponds most to the underlying goods or services sold · High AML Risk and High Integrity / High Brand Risk lines of business are prohibited",
+        "mccs_exclusive": false,
+        "min_monthly_net_revenue_usd": 10000,
+        "net_revenue_verbatim": "[DEMO DATA — obfuscated] Standard MOR: $12.5k per month · High Risk MOR: $25k per month",
+        "net_revenue_detail": "Minimum Billing required if the MOR is not already processing at defined NR levels with their current provider · The primary risks associated with a MOR include the following: · Scheme Risk: A MOR is an industry-standard categorization not formally recognised by the card schemes. There is a risk that the card schemes view the business as an aggregator, imposing non-compliance assessments. · AML Risk: Depending on jurisdiction, MORs may be deemed to be facilitating payments on behalf of third parties as opposed to acting as a true principal in the sale of goods or services. By categorizing the business under a single or a few MCCs, our Customer Risk Assessment score may not be accurately reflecting the enhanced level of risk that their aggregator model brings. · Regulatory: MORs are often times not licensed despite their role in facilitating money movement. This introduction has an added element of risk for Checkout as the regulated entity sitting in the funds flow.",
+        "criteria": [
+          "(a) Reputation: The customer must not have any material adverse media relating to fraud, misappropriation, cheating, forgery or money laundering.",
+          "(b) Sound Financial Profile: Must demonstrate positive EBITDA and a Current Ratio > 1.00x. Balance sheet strength to be assessed for ability to withstand large losses of its top 5 merchants at the underwrite stage.",
+          "(c) Ongoing Risk Management: The customer must have transaction-level monitoring, monitor credit exposure (where appropriate) and regularly review portfolio activity for compliance with Scheme rules, chargeback rates, and dispute trends. Processing statements should be collected to evidence clean processing in the last 6 months.",
+          "(d) Regional Call-outs",
+          "US Only: MCCs requiring CRB/PW pre-review/pre-approvals will remain subject to final bank approval.",
+          "(a) Onboarding: The customer should have controls in place to ensure it works only with business models that adhere to our acceptable use policy or where higher risk lines of activity is supported, demonstrate adequate controls or direct licensing for the regulated activity (if required by law).",
+          "(b) Appropriate Controls & Licensing",
+          "AML Program: Must have appropriate level of AML/CTF policies, systems and controls.",
+          "Compliance with Laws: The customer must be authorised to conduct its business or be able to provide reasonable assurances as to why they are not required to hold a license for this activity. Licensing / legal opinions (internal / external) required only if the merchant is unable to satisfy the 3-pronged test as outlined in the definition.",
+          "(c) Processing Attributes:",
+          "Dispute ratios over the last 6 months must be below the VAMP threshold",
+          "Definition: Internally, Checkout defines a Merchant of Record as one that meets all of the following criteria:",
+          "The merchant is the sole entity that contracts with cardholders and presents itself as the seller of the goods or services.",
+          "The merchant owns owns (i.e. takes title) and bears full liability for the goods or services.",
+          "The merchant provides dispute recourse to the cardholders, including handling all refunds, chargebacks and customer support.",
+          "The merchant adheres to all applicable tax laws and regulations, and pays taxes.",
+          "The merchant appears on the cardholder’s card statement and the transaction receipt. Where dynamic Billing Descriptors are required, do not use the PF format (PF*sub-merchant). Instead, use the MoR's name and some attributes of the suppliers other than their name/DBA.",
+          "Items 1-3 form the mandatory 3-pronged test required to determine exemption from licensing or requirement to submit a legal opinion."
+        ],
+        "prohibited": [
+          "High AML Risk and High Integrity / High Brand Risk lines of business are prohibited"
+        ],
+        "notes": [],
+        "source_locator": "MAC section 17 — Merchant of Record (MOR)"
+      },
+      {
+        "key": "money_transfer_services",
+        "number": 18,
+        "title": "Money Transfer Services",
+        "verticals": [
+          "Money Remittance"
+        ],
+        "mccs": [
+          "4829"
+        ],
+        "mcc_note": null,
+        "mccs_exclusive": true,
+        "min_monthly_net_revenue_usd": 6100,
+        "net_revenue_verbatim": "[DEMO DATA — obfuscated] $7.5k Monthly Net Revenue",
+        "net_revenue_detail": "Minimum Billing required if the merchant cannot demonstrate their existing PV matches the eNR · The scrutiny to which MSBs are subject can vary greatly per jurisdiction, in large part due to the ease with which some MSBs can set up business. · Additionally, many MSBs are small (i.e., local one-store operators) and may not have robust AML programs compared to their larger counterparts. MSBs can be used in the placement, layering, and integration stages of money laundering. This is why one of the most important aspects of due diligence for Checkout when establishing a relationship with an MSB is to confirm that the MSB has implemented a sufficient AML program (e.g., procedures, training and suspicious activity monitoring) and is properly licensed and/or registered in the jurisdictions it operates in. · This LOB can attract fraudsters, hencing making the merchant subject to high fraud levels.",
+        "criteria": [
+          "Internal Controls: Merchant must have internal control framework showing ability to meet Credit Risk, Risk, Fincrime Compliance and Legal/Regulatory requirements..",
+          "AML Program: must have appropriate AML/CTF policies, systems and controls.",
+          "Licenses & Legal Opinions: must be licensed and in compliance with all applicable laws/regulations. Able to produce the appropriate License(s) and/or Legal Opinion(s) for each jurisdiction where the merchant wants to operate",
+          "Reputation: does not have a track record of fraud, misappropriation, cheating, forgery or money laundering.",
+          "Established: they will either demonstrate at least a year in business with the ability to produce processing statements and financial statements, or, if they are a start-up. a compelling story must be evidenced (i.e. investor funding, experienced management team, etc.).",
+          "Fraud / CB Rates: Fraud and CB rates must fall within acceptable thresholds. A start-up or young merchant must evidence sound risk management practices"
+        ],
+        "prohibited": [],
+        "notes": [],
+        "source_locator": "MAC section 18 — Money Transfer Services"
+      },
+      {
+        "key": "multi_level_marketing_mlm",
+        "number": 19,
+        "title": "Multi-Level Marketing (MLM)",
+        "verticals": [
+          "Retail",
+          "Professional Services"
+        ],
+        "mccs": [],
+        "mcc_note": "Multiple (depends on the underlying products sold)",
+        "mccs_exclusive": false,
+        "min_monthly_net_revenue_usd": 6300,
+        "net_revenue_verbatim": "[DEMO DATA — obfuscated] $7.5k monthly net revenue",
+        "net_revenue_detail": "Minimum Billing required if the merchant cannot demonstrate their existing PV matches the eNR",
+        "criteria": [
+          "Internal Controls:",
+          "Publicly available compensation plan",
+          "Publicly available income disclosure on their website",
+          "Any income claims must be substantiated, accurately represent the business opportunity, and recognize necessary expenses to be incurred operating the business opportunity",
+          "i.e. the company should not promise any level of income and/or associated likelihood that it cannot back up",
+          "Regarding expenses: This does not need to be down to the dollar, but should call out that there are/could be related expenses to operating",
+          "Reputation: does not have a track record of fraud, misappropriation, cheating, forgery or money laundering.",
+          "Client Funds Segregation: does not have a track record of fraud, misappropriation, cheating, forgery or money laundering.",
+          "Useful resources:",
+          "https://behindmlm.com/",
+          "https://truthinadvertising.org/",
+          "https://www.dsa.org/",
+          "If a US merchant, check if the company is registered with the Direct Selling Association (DSA). This is not a requirement, but is a good practice as these companies are recognized and supported by the industry",
+          "Established: Checkout will only support businesses capable of evidencing:",
+          "24 months of trading history (6 months of card processing statements are required)",
+          "Website: must look and feel professional",
+          "Site traffic is aligned with target markets",
+          "Product prices should be reasonable (i.e. not overpriced)",
+          "Online reviews should exist and without clear red flags",
+          "If subscription sales are offered,, no negative option billing practices permitted",
+          "Clean processing profile: historical processing should not be erratic or subject to sudden spikes",
+          "Account must not be terminated for risk/conduct reasons over the last 12 months",
+          "Dispute ratios over the last 6 months must be below Scheme program thresholds",
+          "ATV should align with website prices",
+          "Financial statements: must have a healthy financial profile.",
+          "Required regardless of requested APV or exposure",
+          "Must demonstrate positive EBITDA and a Current Ratio >1x",
+          "Declining sales can be an indication that the business has reached a critical mass of new members and/or that it’s product has plateaued"
+        ],
+        "prohibited": [
+          "Accepted,Requires Undersriting Pre-Review Approval,Prohibited / Unsupported"
+        ],
+        "notes": [],
+        "source_locator": "MAC section 19 — Multi-Level Marketing (MLM)"
+      },
+      {
+        "key": "negative_option_subscriptions",
+        "number": 20,
+        "title": "Negative Option Subscriptions",
+        "verticals": [
+          "Digital",
+          "SaaS",
+          "Retail"
+        ],
+        "mccs": [
+          "5968"
+        ],
+        "mcc_note": "Typical MCC is 5968 (but other MCCs are allowed if they better reflect the underlying goods or services sold)",
+        "mccs_exclusive": false,
+        "min_monthly_net_revenue_usd": 6200,
+        "net_revenue_verbatim": "[DEMO DATA — obfuscated] $7.5k Monthly Net Revenue",
+        "net_revenue_detail": "Minimum Billing required if the merchant cannot demonstrate their existing PV matches the eNR · Checkout has a negative appetite for Negative Option businesses which display one or more of the following characteristics: · Free trials are followed by goods or services which are clearly overpriced · A small initial payment is followed by significantly more expensive subscriptions (usually taken a few days later) · Online or Similarweb presence is inconsistent with their target volume or number of transactions",
+        "criteria": [
+          "Customer Protection: Merchants must demonstrate they have adequate disclosures and controls to ensure customers are not misled.",
+          "Licenses and Legal Opinions: Licensing or legal opinion is only required if the underlying product being sold requires it.",
+          "Scheme Controls: The Merchant must conduct age verification where the products sold require age verification by law",
+          "Established: Checkout will only support businesses that can evidence 12 months of card processing history",
+          "Acquiring relationship: Account must not have been terminated for risk / conduct reasons over the last 12 months by any of their acquiring relationships",
+          "Processing conduct: Dispute ratios over the last 6 months must be below Visa and Mastercard’s (the “Card Networks”, “Card Schemes” or “Schemes”) acceptable chargeback threshold",
+          "in the event of evidence of elevated chargeback rates, a small rolling reserve is likely to be applied if approved.",
+          "Monitoring: Merchant must have monitoring and screening capabilities that support detection, identification, blocking and remediation of illegal activity.",
+          "Complaint process: Merchant must have a complaint process in place to receive reports of illegal activity, and a clear remediation plan of review and action"
+        ],
+        "prohibited": [],
+        "notes": [],
+        "source_locator": "MAC section 20 — Negative Option Subscriptions"
+      },
+      {
+        "key": "non_fungible_tokens_nfts",
+        "number": 21,
+        "title": "Non-Fungible Tokens (NFTs)",
+        "verticals": [
+          "Crypto",
+          "Digital"
+        ],
+        "mccs": [
+          "5815"
+        ],
+        "mcc_note": null,
+        "mccs_exclusive": true,
+        "min_monthly_net_revenue_usd": 4100,
+        "net_revenue_verbatim": "[DEMO DATA — obfuscated] $5k Monthly Net Revenue",
+        "net_revenue_detail": "Minimum Billing required if the merchant cannot demonstrate their existing PV matches the eNR · Merchants in this category may only contract with Checkout for the direct sale of NFTs. · Utility value NFTs are deemed higher risk with extended delivery exposure, requiring a more in-depth review. · Utility NFTs will be underwritten based upon the underlying service provided (i.e. a ticketing utility NFT provider will be subject to the ticketing MAC) · NFT marketplaces and merchants selling NFTs exceeding 10k in value must go through a full AML Review / Approval.",
+        "criteria": [
+          "Non-Fungible Tokens (NFT’s)",
+          "AML Program: must have appropriate AML/CTF policies, systems and controls*.",
+          "*Note: only applicable for NFT marketplaces and high transaction value NFT sellers.",
+          "Reputation: does not have a track record of fraud, misappropriation, cheating, forgery or money laundering or similar.",
+          "Insolvency Protection: Where NFT providers also offer custodial services, they should satisfy us that access to NFTs will be protected in case of merchant insolvency.",
+          "Trading Businesses: must have a sound balance sheet with adequate capitalisation.",
+          "Pre-Revenue Startups: must be well capitalised, have an experienced management team and a cash runway of at least 9 months.",
+          "Fraud/CB Rates: Fraud and CB rates must fall within acceptable thresholds. A start-up or young merchant must evidence sound risk management practices."
+        ],
+        "prohibited": [],
+        "notes": [],
+        "source_locator": "MAC section 21 — Non-Fungible Tokens (NFTs)"
+      },
+      {
+        "key": "payment_facilitators",
+        "number": 22,
+        "title": "Payment Facilitators",
+        "verticals": [
+          "Financial Services / Fintech",
+          "Financial Services Misc."
+        ],
+        "mccs": [],
+        "mcc_note": "Multiple - Cannot be High Risk MCCs (unless they meet the High Risk PayFac MAC)",
+        "mccs_exclusive": false,
+        "min_monthly_net_revenue_usd": 8600,
+        "net_revenue_verbatim": "[DEMO DATA — obfuscated] $10k Monthly Net Revenue",
+        "net_revenue_detail": "Minimum billing will be applied if the PayFac is not already processing at $10k NR levels with their current provider. This applies to all PayFacs, regulated & unregulated, regardless of the product being used (includes IP). · The primary risks associated with Payment Facilitators include the following: · Third Party Risk: PayFacs process on behalf of third parties. If PayFacs do not have solid processes to mitigate risks of fraud and chargebacks for their sub-merchants, the situation may quickly get out of control and this may lead to: · multiple sub-merchants flagged by the schemes for high fraud and chargeback levels together with heavy fines · risk of Checkout.com breaching acquirer-level fraud/chargeback thresholds · increased financial exposure to Checkout.com · AML Risk: Considering the fact that Checkout maintains a relationship with the PF and not the underlying merchant, it becomes more difficult for Checkout to know on whose behalf it is processing a transaction.",
+        "criteria": [
+          "Established: The Merchant should either already be registered as a PayFac with another acquirer, or be a significant player within the Fintech space and have an experience management team, notable investors etc.",
+          "Sound Financial Profile: Must demonstrate positive EBITDA and a Current Ratio > 1.00x. Balance sheet strength to be assessed for ability to withstand large losses of its top 5 merchants or merchants collectively accounting for 10% of APV (whichever is greater) at the underwrite stage.",
+          "Ongoing Credit & Fraud Risk Management: Must have transaction-level monitoring, monitor overall credit exposure (where appropriate), and have clear processes in place to monitor their potential liability. Must also use either a 3rd party system, in house, or Prism for the management of cardholder fraud.",
+          "Processing: Dispute ratios over the last 6 months must be below VAMP threshold",
+          "Onboarding Policy: Must have an existing onboarding process and policy in place.",
+          "Internal Controls: must have internal control framework showing ability to:",
+          "Perform delegated underwriting",
+          "Monitor transaction-level data and exposure/liabilities.",
+          "Monitor Sub-Merchants LOB and Location.",
+          "Monitor Website Content",
+          "External MMSP service provider to monitor content compliance & transaction laundering",
+          "AML Program: have appropriate AML/CTF policies, systems and controls.",
+          "Licence*: Must have obtained the applicable authorization(s) and be able to provide the required evidence.",
+          "Note: PayFac on PayFac processing prohibited",
+          "Note: For High Risk Payfacs, please go to the next slide.",
+          "*License requirements are tied to regulated payfacs only.",
+          "Checkout Guidance Compliance: must be able to comply with all requirements as laid out within the [Checkout PayFac Guidance](https://docs.google.com/document/d/1AQcuGtoPvtITbJgyX6YaOkALpoyB4Nw-/edit).",
+          "Reputation: does not have a track record of fraud, misappropriation, cheating, forgery or money laundering.",
+          "Japan, Canada, Brazil: Payfacs/High Risk Payfacs are not currently supported.",
+          "USA: CRB does not allow high risk payment facilitators, i.e. those with sub-merchants requiring high risk registration with the schemes.",
+          "UAE: A payment facilitator must enter into the Payment Facilitator Agreement with Visa and be certified by Visa within Visa Ready Acceptance Certification in every country of operation or enter into a Conditional Participation Agreement (CPA) with Visa prior to completing the Certification.",
+          "Visa: Payfacs looking to sponsor [High Integrity Risk merchants](https://checkout.atlassian.net/wiki/spaces/CHEC/pages/1298694533/Visa+High+Integrity+Risk+Acquiring+Program) are required to be registered as a High Risk Payment Facilitator with Visa. Refer to further internal guidance here",
+          "Mastercard: Effective 1st May 2026, Payfacs looking to sponsor [Speciality Merchants](https://checkout.atlassian.net/wiki/spaces/CHEC/pages/4393796617/Mastercard+Specialty+Merchant+Registration+Program) are now required to be enrolled as a Network Enablement Partner with Mastercard ([NEP List](https://www.mastercard.com/gb/en/business/support/network-enablement-partners.html)). This applies also to existing Mastercard Payfacs with registered specialty merchants as of 1st May 2026.",
+          "In exceptional cases where Checkout may consider high risk activity under a payfac, the following strict prerequisites will apply:",
+          "Track Record: In exceptional cases where High-Risk activity is considered, the PayFac must have typically processed with Checkout for at least 1 year (fully ramped) with satisfactory conduct.",
+          "Audit Record: The PayFac must have undergone at least one PayFac audit and emerged with either an A or B audit rating.",
+          "Previous Registration: Alternatively, the PayFac must already be registered as a high-risk PayFac with another acquirer and maintain a longstanding, clean track record.",
+          "Robust controls: Policies, procedures and controls for high risk acceptance will need to be very strong and enforced",
+          "Pricing: $25k MMB enforced",
+          "A high risk payment facilitator is a payment facilitator seeking to process transactions for sub-merchants operating in sectors which the Schemes consider as high risk (see MCC Risk List). These payment facilitators require registration with the schemes as ‘high risk’, and their sub-merchants also require registration if operating in high brand risk industries. As a result of the risks associated with this activity, Checkout’s appetite for these payfacs is generally negative.",
+          "Hong Kong: The prohibition on PayFacs/High Risk Payfacs using the Hong Kong BIN remains in effect until further notice.",
+          "Japan, Canada, Brazil: Payfacs/High Risk Payment Facilitators are not currently supported.",
+          "USA: CRB does not currently support High Risk Payment Facilitators. Standard Payfacs allowed.",
+          "UAE: A payment facilitator must either (i) enter into a Payment Facilitator Agreement with Visa and be certified by Visa within Visa Ready Acceptance Certification in every country of operation or (ii) enter into a Conditional Participation Agreement (CPA) with Visa prior to completing the Certification.",
+          "IP Lite structure involving a FBO Account",
+          "Checkout Guidance Compliance: must be able to comply with all requirements as laid out within the [Checkout PayFac Guidance](https://docs.google.com/document/d/1AQcuGtoPvtITbJgyX6YaOkALpoyB4Nw-/edit).",
+          "Reputation: does not have a track record of fraud, misappropriation, cheating, forgery or money laundering.",
+          "Evidence confirming appointment of the FBO/Third Party Payout Provider.",
+          "The payment facilitator shall (via the FBO Account provider) provide Checkout with visibility into the final leg of settlement to the sub-merchants. This can be in the form of bank statements and/or transaction logs.",
+          "CRB does not allow high risk payment facilitators, i.e. those with sub-merchants requiring high risk registration with the schemes.",
+          "Established: The Merchant should either already be registered as a PayFac with another acquirer, or be a significant player within the Fintech space and have an experience management team, notable investors etc.",
+          "Sound Financial Profile: Must demonstrate positive EBITDA and a Current Ratio > 1.00x. Balance sheet strength to be assessed for ability to withstand large losses of its top 5 merchants at the underwrite stage.",
+          "Ongoing Credit & Fraud Risk Management: Must have transaction-level monitoring, monitor overall credit exposure (where appropriate), and have clear processes in place to monitor their potential liability. Must also use either a 3rd party system, in house, or Prism for the management of cardholder fraud.",
+          "Processing: Dispute ratios over the last 6 months must be below VAMP threshold",
+          "Note: PayFac on PayFac processing prohibited",
+          "Onboarding Policy: Must have an existing onboarding process and policy in place.",
+          "Internal Controls: must have internal control framework showing ability to:",
+          "Perform delegated underwriting",
+          "Monitor transaction-level data and exposure/liabilities.",
+          "Monitor Sub-Merchants LOB and Location",
+          "Monitor Website Content (see Note).",
+          "AML Program: have appropriate AML/CTF policies, systems and controls.",
+          "FBO/Third Party Payout Provider: The FBO/payout account must be opened with a regulated financial institution that:",
+          "is licensed to handle customer funds",
+          "is subject to supervision by a federal functional regulatory authority",
+          "is required to maintain and comply with AML/CTF and Sanctions compliance",
+          "conducts transaction-level monitoring",
+          "is not subject to negative adverse media"
+        ],
+        "prohibited": [
+          "NOTE - January 2026: Payfacs on our Hong Kong BIN are prohibited until further notice",
+          "Note: PayFac on PayFac processing prohibited",
+          "Note: PayFac on PayFac processing prohibited"
+        ],
+        "notes": [],
+        "source_locator": "MAC section 22 — Payment Facilitators"
+      },
+      {
+        "key": "pharmaceuticals",
+        "number": 23,
+        "title": "Pharmaceuticals",
+        "verticals": [
+          "Retail"
+        ],
+        "mccs": [
+          "5122",
+          "5912"
+        ],
+        "mcc_note": null,
+        "mccs_exclusive": true,
+        "min_monthly_net_revenue_usd": 6100,
+        "net_revenue_verbatim": "[DEMO DATA — obfuscated] $7.5k monthly net revenue",
+        "net_revenue_detail": "Minimum Billing required if the merchant cannot demonstrate their existing PV matches the eNR",
+        "criteria": [
+          "Internal Controls: Merchants must demonstrate controls to ensure products are legal in each jurisdiction and controls to ensure customers are not engaged in illicit or illegal activity via KYC and activity monitoring",
+          "Licenses & Legal Opinions: The merchant must have licences to operate in accordance with each jurisdiction in which it provides services and complies with the legal requirements of each jurisdiction in which it sells its products.",
+          "Applicable Law: The Merchant must have proper controls to ensure it only dispenses and ships prescription or controlled drugs to cardholders where the pharmacy is legally permitted to dispense drugs in line with Applicable Laws",
+          "Age Verification: Merchant must have age validation controls",
+          "Monitoring: Merchant must have monitoring and screening capabilities that support detection, identification, blocking and remediation of illegal activity.",
+          "Complaint process: Merchant must have a complaint process in place to receive reports of illegal activity, and a clear remediation plan of review and action",
+          "Established: Checkout will only support businesses that can evidence 12 months of card processing history",
+          "Acquiring relationship: Account must not have been terminated for risk / conduct reasons over the last 12 months by any of their acquiring relationships",
+          "Processing conduct: Dispute ratios over the last 6 months must be below the schemes chargeback acceptable threshold"
+        ],
+        "prohibited": [
+          "Accepted,Requires Underwriting Pre-Review Approval,Prohibited / Unsupported"
+        ],
+        "notes": [],
+        "source_locator": "MAC section 23 — Pharmaceuticals"
+      },
+      {
+        "key": "prop_firms",
+        "number": 24,
+        "title": "Prop Firms",
+        "verticals": [
+          "Brokers/Dealers",
+          "Financial Services / Fintech"
+        ],
+        "mccs": [
+          "8299",
+          "5817"
+        ],
+        "mcc_note": "8299 (with educational element) · 5817 (no educational element)",
+        "mccs_exclusive": true,
+        "min_monthly_net_revenue_usd": 6000,
+        "net_revenue_verbatim": "[DEMO DATA — obfuscated] $7.5k Monthly Net Revenue (Tier 3 & Above)",
+        "net_revenue_detail": "Minimum Billing required if the merchant cannot demonstrate their existing PV matches the eNR · The scrutiny Cardholders who pass the evaluation or achieve the set out targets become eligible to gain real money. This is achieved through numerous methods: · i) The Prop Trading entity will pay out of its own capital, with all trades only happening on a demo account · ii) The Prop Trading entity will copy the simulated trades onto a Master account with a brokerage firm; OR · iii) provide the cardholder with access to a 3rd party brokerage account",
+        "criteria": [
+          "Regulatory restrictions: India must be BIN blocked. We are not aware of regulatory restrictions elsewhere but this remains under review.",
+          "Management Experience: The management team needs to have relevant experience (e.g. no ‘get rich quick’ opportunities linked to white label solutions)",
+          "No misleading customers. Terms and conditions and promotional material need to be:",
+          "Consistent with the underlying business model",
+          "Very clear on whether real trades will take place, or whether the offering is “demo only”",
+          "Established: Checkout will only support businesses capable of evidencing:",
+          "12 months of card processing history of which at least the last 3 must be clean (acceptable refunds and chargebacks).",
+          "Ideally, historical processing should not be erratic or subject to sudden spikes",
+          "ROLLING RESERVES WILL BE REQUIRED BY DEFAULT FOR THIS LINE OF BUSINESS"
+        ],
+        "prohibited": [
+          "**** Onboarding of new prop firms is prohibited until further notice ****"
+        ],
+        "notes": [],
+        "source_locator": "MAC section 24 — Prop Firms"
+      },
+      {
+        "key": "security_brokers",
+        "number": 25,
+        "title": "Security Brokers",
+        "verticals": [
+          "Brokers/Dealers"
+        ],
+        "mccs": [
+          "6211"
+        ],
+        "mcc_note": null,
+        "mccs_exclusive": true,
+        "min_monthly_net_revenue_usd": 6000,
+        "net_revenue_verbatim": "[DEMO DATA — obfuscated] $7.5k monthly net revenue Tier 3 and above · Or $20k minimum if “offshore construct”",
+        "net_revenue_detail": "Minimum Billing required if the merchant cannot demonstrate their existing PV matches the eNR",
+        "criteria": [
+          "Internal Controls: must have internal control framework showing ability to meet Fincrime Compliance and Legal/Regulatory requirements",
+          "AML Program: must have appropriate AML/CTF policies, systems and controls.",
+          "Licenses & Legal Opinions: must be licensed and in compliance with all applicable laws/regulations. Able to produce the appropriate License(s) and/or Legal Opinion(s) for each jurisdiction where the merchant wants to operate",
+          "Trading Businesses: they must have a supportive balance sheet.",
+          "Pre-Revenue Startups: evidence of an experienced management team in the industry, paired with adequate funding with cash runway at least 9 months.",
+          "Fraud / CB Rates: Fraud and CB rates must fall within acceptable thresholds. A start-up or young merchant must evidence sound risk management practices",
+          "Reputation: does not have a track record of fraud, misappropriation, cheating, forgery or money laundering."
+        ],
+        "prohibited": [
+          "Accepted,Restricted Requires Underwriting Pre-Review Approval,Prohibited / Unsupported"
+        ],
+        "notes": [],
+        "source_locator": "MAC section 25 — Security Brokers"
+      },
+      {
+        "key": "social_media_management_agencies",
+        "number": 26,
+        "title": "Social Media Management Agencies",
+        "verticals": [
+          "Professional Services"
+        ],
+        "mccs": [
+          "7311",
+          "4816"
+        ],
+        "mcc_note": null,
+        "mccs_exclusive": true,
+        "min_monthly_net_revenue_usd": 6000,
+        "net_revenue_verbatim": "[DEMO DATA — obfuscated] $7.5k Monthly Net Revenue (Tier 3 & Above)",
+        "net_revenue_detail": "Minimum Billing required if the merchant cannot demonstrate their existing PV matches the eNR · The primary risks associated with this vertical include: · Reputational Risk: Damaged reputation arising from association with deceptive practices · Fraud Risk: Includes transaction laundering, high chargebacks from dissatisfied clients, identity fraud, and contribution to broader ad/click fraud schemes. · Credit Risk: Unstable, volatile revenue streams due to reliance on deceptive practices, leading to financial instability and a lack of tangible business value.",
+        "criteria": [
+          "Transparency with Clients: Merchants should be able to demonstrate transparent reporting to their clients about performance metrics and the methods used to achieve them.",
+          "Customer Support: Accessible and responsive customer support channels.",
+          "Appropriate Terms of Service: Ensure their client contracts and website terms of service are legally sound and reflect ethical practices.",
+          "Adverse Media: No adverse Media linking the merchant nor any associated individuals have links to modern slavery nor human trafficking.",
+          "Service Description Clarity: The services offered must be clearly defined and demonstrably legitimate. Any offerings related to \"guaranteed followers,\" \"likes,\" \"views,\" or \"engagement boosts\" without a clear explanation of business growth methodologies should be declined.",
+          "Sound Financial Profile: must demonstrate positive EBITDA and a Current Ratio > 1.00x (i.e. we cannot support businesses that are technically insolvent)",
+          "Marketing Practices: Scrutinize advertising and marketing claims. Decline merchants making unrealistic promises of rapid growth or \"guaranteed\" viral content.",
+          "Product/Service Review: Services that directly facilitate artificial engagement must be declined.",
+          "Merchant Controls: Where the merchant is engaged in Artificial engagement services, a clear attestation that the merchant stays informed on legislative changes and takes action to ensure services are not used in territories where they are not permitted.",
+          "BIN Blocks: Where the merchant is engaged in Artificial engagement services, Checkout will undertake proactive blocking of activity in territories where it knows such services to be prohibited e.g USA or fake reviews in the UK",
+          "Enhanced Adverse Media Screening: Checkout will undertake enhanced adverse media screening with a particular focus on modern slavery and human trafficking along with breach of local legislation related to social media"
+        ],
+        "prohibited": [
+          "BIN Blocks: Where the merchant is engaged in Artificial engagement services, Checkout will undertake proactive blocking of activity in territories where it knows such services to be prohibited e.g USA or fake reviews in the UK"
+        ],
+        "notes": [],
+        "source_locator": "MAC section 26 — Social Media Management Agencies"
+      },
+      {
+        "key": "staged_digital_wallet_operators_sdwo",
+        "number": 27,
+        "title": "Staged Digital Wallet Operators (SDWO)",
+        "verticals": [
+          "Financial Services / Fintech",
+          "Financial Services Misc."
+        ],
+        "mccs": [
+          "6051",
+          "6540"
+        ],
+        "mcc_note": "AFTs: 6051 (Visa), 6540 (Mastercard) · For “pay” transactions: Multiple (High-Risk MCCs prohibited)",
+        "mccs_exclusive": false,
+        "min_monthly_net_revenue_usd": 8600,
+        "net_revenue_verbatim": "[DEMO DATA — obfuscated] $10k Monthly Net Revenue",
+        "net_revenue_detail": "Minimum billing will be applied if the SDWO is not already processing at $10k NR levels with their current provider. This applies to all SDWOs regardless of the integration method (IP or otherwise). · The primary risks associated with a SDWO include the following: · Third Party Risk: SDWOs process on behalf of third parties. If SDWOs do not have robust processes to maintain oversight over the activity and performance of their sub-merchants, this may prove catastrophic for acquirers, and could potentially result in financial losses, brand damage, regulatory intervention or in extreme cases, the revocation of our license. · AML Risk: Considering the fact that Checkout maintains a relationship with the SDWO and not the underlying sub-merchant, it becomes more difficult for Checkout to monitor the performance and conduct of a sub-merchant.",
+        "criteria": [
+          "Onboarding Policy: Must have an existing sub-merchant onboarding policy and process.",
+          "Internal Controls: Must have a robust internal control and monitoring framework that monitors:",
+          "i) For website content compliance",
+          "ii) Sub-merchant LOB and substance",
+          "iii) Transaction-level data and trends",
+          "iv) Sub-merchant exposure and liability",
+          "AML Program: Must have appropriate AML/CTF policies, systems and controls.",
+          "License: The customer must be licensed and authorized to conduct its business as a SDWO or be able to provide a legal opinion confirming why it is not required to hold a license for this activity.",
+          "Checkout AUP Compliance: The SDWO shall only onboard sub-merchants that fall within Checkout’s own internal risk appetite for Platform customers.",
+          "Reputation: does not have a track record of fraud, misappropriation, cheating, forgery or money laundering.",
+          "Merchant Data Standards",
+          "a) Integration: SDWOs are required to pass TPA ID and sub-merchant ID / details in their processing fields.",
+          "Note: Checkout’s IP product has not been formally approved for the SDWO use case, therefore all SDWOs will require additional configuration to meet the above Scheme requirements.",
+          "Established: The customer should either already be registered as a SDWO with another acquirer, or be a significant player within the Fintech space and have an experience management team, notable investors etc.",
+          "Financial Profile: must have a healthy financial profile.",
+          "If unprofitable, with immediate delivery then risk/reward decision",
+          "If unprofitable with future delivery then the merchant should have at least 12 months of cash runway or security will be considered.",
+          "Ongoing Risk Management: The customer must have transaction-level monitoring, monitor overall credit exposure (where appropriate), and have clear processes in place to monitor its sub-merchant performance and liability. Regularly review sub-merchant activity for compliance with Visa’s rules, chargeback rates, and dispute trends"
+        ],
+        "prohibited": [
+          "For “pay” transactions: Multiple (High-Risk MCCs prohibited)"
+        ],
+        "notes": [],
+        "source_locator": "MAC section 27 — Staged Digital Wallet Operators (SDWO)"
+      },
+      {
+        "key": "tickets_events",
+        "number": 28,
+        "title": "Tickets & Events",
+        "verticals": [
+          "Travel & Ticketing"
+        ],
+        "mccs": [
+          "7922",
+          "7996"
+        ],
+        "mcc_note": null,
+        "mccs_exclusive": true,
+        "min_monthly_net_revenue_usd": 6400,
+        "net_revenue_verbatim": "[DEMO DATA — obfuscated] $7.5k Monthly Net Revenue (Tier 3 & Above)",
+        "net_revenue_detail": "Minimum Billing required if the merchant cannot demonstrate their existing PV matches the eNR · The primary risks associated with this vertical include: · Extended delivery timeframe: Customers tend to purchase tickets > 30 days out, resulting in extended NDX for payment processors. · Third party risk: Both event organizers and platforms for ticket sales are reliant on third parties to fulfill services. Issues with a single vendor or event organizer can result in material losses for merchants and processors. · Macroeconomic factors: The events industry is highly susceptible to swings based on the overall health of the economy (and other unforeseen events such as pandemic, weather, etc.).",
+        "criteria": [
+          "Restricted Activity: no Third Party Processing elements to the business model",
+          "Liability Awareness: merchant is able to clearly explain how they are mitigating their refund and chargeback risk (i.e. favorable payout terms with vendors - after check in, holding a % of processing back from vendors to cover refunds/chargebacks, ring fencing customer funds from operating accounts, vetting their vendors, insurance coverage, using VCC's to pay vendors providing them with some chargeback rights)",
+          "Documentation: able to produce documentation around event timing, concentration, seasonality, etc.",
+          "Established: Merchant must be in business for at least 1 year. Single event merchants will only be considered on a full reserve basis / 100% risk coverage.",
+          "Sound Financial Profile: must demonstrate positive EBITDA and a Current Ratio > 1.00x",
+          "Clean processing profile"
+        ],
+        "prohibited": [],
+        "notes": [],
+        "source_locator": "MAC section 28 — Tickets & Events"
+      },
+      {
+        "key": "tobacco_merchants",
+        "number": 29,
+        "title": "Tobacco Merchants",
+        "verticals": [
+          "Retail"
+        ],
+        "mccs": [
+          "5993"
+        ],
+        "mcc_note": null,
+        "mccs_exclusive": true,
+        "min_monthly_net_revenue_usd": 6500,
+        "net_revenue_verbatim": "[DEMO DATA — obfuscated] $7.5k monthly net revenue Tier 3 and above",
+        "net_revenue_detail": "Minimum Billing required if the merchant cannot demonstrate their existing PV matches the eNR",
+        "criteria": [
+          "Established: Checkout will only support businesses that can evidence 12 months of card processing history",
+          "Clean conduct: The account must not have been terminated for risk/conduct reasons over the last 12 months by any of their acquiring relationships",
+          "Dispute Ratios: Dispute ratios over the last 6 months must be below the Visa and Mastercard’s (the “Schemes”) chargeback acceptable threshold",
+          "Age Verification: Merchant must have age validation controls",
+          "Licenses: The Merchant must have licences or registrations to operate in accordance with each jurisdiction in which it provides services and complies with the legal requirements of each jurisdiction in which it sells its products.",
+          "BIN Blocking: BIN Blocking will be applied by default by Checkout, with only domestic cardholders allowed",
+          "Monitoring: Merchant must have monitoring and screening capabilities that support detection, identification, blocking and remediation of illegal activity.",
+          "Complaint process: Merchant must have a complaint process in place to receive reports of illegal activity, and a clear remediation plan of review and action"
+        ],
+        "prohibited": [
+          "Accepted,Restricted Requires Underwriting Pre-Review Approval,Prohibited / Unsupported"
+        ],
+        "notes": [],
+        "source_locator": "MAC section 29 — Tobacco Merchants"
+      },
+      {
+        "key": "travel",
+        "number": 30,
+        "title": "Travel",
+        "verticals": [
+          "Travel & Ticketing"
+        ],
+        "mccs": [
+          "4722",
+          "4723",
+          "7011",
+          "4511",
+          "7012",
+          "4411",
+          "5962",
+          "7032",
+          "7033"
+        ],
+        "mcc_note": null,
+        "mccs_exclusive": true,
+        "min_monthly_net_revenue_usd": 5900,
+        "net_revenue_verbatim": "[DEMO DATA — obfuscated] $7.5k Monthly Net Revenue (Tier 3 & Above)",
+        "net_revenue_detail": "Minimum Billing required if the merchant cannot demonstrate their existing PV matches the eNR · The primary risks associated with this vertical include: · Extended delivery timeframe: Customers tend to book vacations > 60 days out, resulting in extended NDX for payment processors. · Third party risk: For merchants that act as a platform, they are reliant on third party vendors (i.e. hotels, tour guides, airlines, etc.) to fulfill services. · Macroeconomic factors: The travel industry is highly susceptible to swings based on the overall health of the economy (and other unforeseen events such as pandemic, weather, etc.). · Airlines: Pre-vets required for ALL airlines.",
+        "criteria": [
+          "Restricted Activity: no Third Party Processing elements to the business model",
+          "Liability Awareness: merchant is able to clearly explain how they are mitigating their refund and chargeback risk (i.e. favorable payout terms with vendors - after check in, holding a % of processing back from vendors to cover refunds/chargebacks, ring fencing customer funds from operating accounts, vetting their vendors, insurance coverage, using VCC's to pay vendors providing them with some chargeback rights)",
+          "Established: merchant must be in business for at least 3 years",
+          "Sound Financial Profile: must demonstrate positive EBITDA and a Current Ratio > 1.00x",
+          "Clean processing profile"
+        ],
+        "prohibited": [],
+        "notes": [],
+        "source_locator": "MAC section 30 — Travel"
+      },
+      {
+        "key": "japan_country_specific_guidance",
+        "number": 31,
+        "title": "Japan — Country-Specific Guidance",
+        "verticals": [],
+        "mccs": [],
+        "mcc_note": null,
+        "mccs_exclusive": false,
+        "min_monthly_net_revenue_usd": null,
+        "net_revenue_verbatim": null,
+        "net_revenue_detail": null,
+        "criteria": [
+          "CKO risk rating: No Prohibited or Restricted merchants",
+          "No merchants requiring Scheme registration: only LOBs allowed in Japan by the schemes will be supported (refer to [Scheme High Risk Merchants](https://checkout.atlassian.net/wiki/spaces/CHEC/pages/1670939628/Scheme+High+Risk+Merchants))",
+          "Must be a recognisable brand in Japan, with at least 3 years in operation in Japan or globally (unless it’s a more recent brand, but with already a significant brand recognition)",
+          "No negative online reviews (related to scams, fake reviews etc)",
+          "Direct Seller only",
+          "No TPAs or aggregators (including wallets, MoR etc)",
+          "At least 6 months card processing history",
+          "Clean card processing profile (chargeback rate <0.5%)",
+          "Appetite is also subject to Bank Partner acceptance",
+          "The below criteria applies to pure domestic* merchants. Merchant Risk Committee (MRC) is required to approve exceptions to policy, with the request being supported by the Japan Country Manager (or APAC General Manager) or the Head of Underwriting, International. All business model / LoB MAC must be met, where applicable",
+          "* Companies whose legal entity is in Japan and the majority of their processing will be on our Japanese BIN (irrespective of whether cardholders are Japanese or cross-border)"
+        ],
+        "prohibited": [
+          "CKO risk rating: No Prohibited or Restricted merchants"
+        ],
+        "notes": [],
+        "source_locator": "MAC section 31 — Japan — Country-Specific Guidance"
+      }
+    ]
+  },
   "approval_matrix": {
     "source_id": "src_guidance_email",
     "source_locator": "Approval Processes section",
@@ -23915,11 +25970,19 @@
     "rows_not_reconciling": 43,
     "rows_missing_reference_atv": 72,
     "rows_with_assumed_risk_level": 28,
-    "vas_pending_extraction": 8,
+    "vas_frameworks_total": 8,
+    "vas_frameworks_documented": 6,
+    "vas_pending_extraction": 2,
+    "vas_prices_verified_against_source": 272,
+    "mac_sectors": 30,
+    "mac_sectors_with_net_revenue_floor": 26,
     "notes": [
       "Total take rate is carried through verbatim from the CSV and is authoritative.",
       "43 rows have Acquiring + Other != Total (rounding in the Other column). Flagged per row as reconciles: false.",
-      "VAS list prices are placeholders pending Glean extraction and do not affect the guidance take rate."
+      "6 of 8 product frameworks are documented, banded on monthly volume and tiered Standard/Other MCC. Every price was checked back against the text of its source document at compile time.",
+      "Product prices still do not affect the guidance take rate. The framework Other line already carries the VAS and FX uplift; these drive the attach check and the floor/ceiling approvals.",
+      "Forward API & Vault and Settlement Fees still has no framework document.",
+      "MAC: 30 sectors, 26 with a stated monthly net revenue floor."
     ]
   },
   "skipped_rows": [],

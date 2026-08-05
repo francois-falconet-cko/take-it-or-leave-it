@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { ArrowLeft, Check, Clipboard, Lock, Mail, Printer } from 'lucide-react';
 import { useQuote, useStore } from '@/lib/store';
 import { DEMO_MODE, book, oldestSourceDate } from '@/lib/book';
-import { bps, bpsAsPct, dateLabel, int, money, moneyCompact, pct } from '@/lib/format';
+import { bps, bpsAsPct, dateLabel, feeAmount, int, money, moneyCompact, pct } from '@/lib/format';
 import { buildEmail } from '@/lib/email';
 import { Card, Chip, FindingList, SourceLink, Tile } from './ui/primitives';
 
@@ -185,6 +185,61 @@ export function DealOnAPage() {
           </table>
         </Card>
 
+        {/* 4b — Products quoted. A rate on its own is not the deal; the merchant
+            signs for these too, and each one carries its own approval floor. */}
+        {quote.vasCheck && quote.vasCheck.lines.length > 0 && (
+          <Card
+            title="Value-added services quoted"
+            subtitle={`${quote.vasCheck.tier === 'other' ? 'Other' : 'Standard'} MCCs · ${cur} ${quote.vasCheck.band?.label ?? 'no band'} · these do not change the take rate above`}
+          >
+            <table className="w-full text-left text-[0.8125rem]">
+              <thead>
+                <tr className="chip-mono print-muted text-faint">
+                  <th className="px-5 py-2 font-medium">Product</th>
+                  <th className="px-3 py-2 font-medium">Fee</th>
+                  <th className="px-3 py-2 text-right font-medium">Quoted</th>
+                  <th className="px-3 py-2 text-right font-medium">Floor</th>
+                  <th className="px-3 py-2 text-right font-medium">bps</th>
+                  <th className="px-5 py-2 font-medium">Source</th>
+                </tr>
+              </thead>
+              <tbody>
+                {quote.vasCheck.lines.map((l) => (
+                  <tr key={`${l.frameworkKey}-${l.key}`} className="print-rule border-t border-line/60">
+                    <td className="print-ink px-5 py-2 font-medium text-ink">{l.frameworkLabel}</td>
+                    <td className="print-muted px-3 py-2 text-muted">{l.label}</td>
+                    <td
+                      className="print-ink px-3 py-2 text-right tnum font-semibold"
+                      style={{
+                        color:
+                          l.verdict === 'below_floor' || l.verdict === 'above_ceiling'
+                            ? 'var(--color-orange)'
+                            : 'var(--color-ink)',
+                      }}
+                    >
+                      {feeAmount(l.amount, l.currency, l.unit)}
+                    </td>
+                    <td className="print-muted px-3 py-2 text-right tnum text-faint">
+                      {l.floorWaived ? 'waived' : feeAmount(l.floor, l.currency, l.unit)}
+                    </td>
+                    <td className="print-ink px-3 py-2 text-right tnum text-ink">
+                      {l.bps == null ? '—' : bps(l.bps)}
+                    </td>
+                    <td className="px-5 py-2">
+                      <SourceLink sourceId={l.sourceId} locator={l.sourceLocator} today={today} />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {quote.vasCheck.lines.some((l) => l.verdict === 'below_floor' || l.verdict === 'above_ceiling') && (
+              <p className="print-ink border-t border-line px-5 py-2.5 text-[0.75rem] text-orange">
+                One or more products are priced outside their framework range and need separate sign-off — see Flags.
+              </p>
+            )}
+          </Card>
+        )}
+
         {/* 5 — Approvals */}
         <Card title="Approval path">
           <div className="p-5">
@@ -259,6 +314,82 @@ export function DealOnAPage() {
             <div className="p-4">
               <FindingList findings={quote.findings} levels={['warning']} />
             </div>
+          </Card>
+        )}
+
+        {/* 7b — MAC. On the printed page because this is the sheet that goes into
+            the MAF conversation, and the eNR floor is the thing that decides
+            whether the rate above ever gets to matter. */}
+        {quote.macCheck && quote.macCheck.sectors.length > 0 && (
+          <Card
+            title="Minimum Acceptance Criteria"
+            subtitle={quote.macCheck.sectors.map((s) => s.title).join(' · ')}
+          >
+            <div className="grid gap-4 border-b border-line px-5 py-4 sm:grid-cols-3">
+              <Tile
+                label="Monthly net revenue"
+                value={
+                  quote.macCheck.monthlyNetRevenueUsd == null
+                    ? '—'
+                    : moneyCompact(quote.macCheck.monthlyNetRevenueUsd, 'USD')
+                }
+                sub="at the requested rate"
+              />
+              <Tile
+                label="MAC expects"
+                value={
+                  quote.macCheck.requiredMonthlyNetRevenueUsd == null
+                    ? 'tier only'
+                    : moneyCompact(quote.macCheck.requiredMonthlyNetRevenueUsd, 'USD')
+                }
+                tone={quote.macCheck.clearsNetRevenue === false ? 'orange' : quote.macCheck.clearsNetRevenue ? 'lime' : 'neutral'}
+                sub={quote.macCheck.requiredBy ?? 'no figure stated'}
+              />
+              <Tile
+                label="Chargebacks"
+                value={quote.macCheck.chargebackRatioPct == null ? 'not supplied' : pct(quote.macCheck.chargebackRatioPct, 2)}
+                tone={quote.macCheck.clearsChargebacks === false ? 'orange' : quote.macCheck.clearsChargebacks ? 'lime' : 'neutral'}
+                sub={`ceiling ${pct(quote.macCheck.chargebackCeilingPct, 1)}`}
+              />
+            </div>
+            {/* Criteria are printed only when the MCC and the vertical agreed on a
+                single sector. Nine candidate sectors is 117 criteria, and printing
+                all of them turns a deal on a page into a deal on nine pages — the
+                rep stops printing it, which costs more than the omission does. */}
+            {quote.macCheck.sectors.length === 1 ? (
+              <ul className="space-y-1.5 p-5">
+                {quote.macCheck.sectors[0].criteria.map((c, i) => (
+                  <li key={i} className="print-muted flex gap-2 text-[0.75rem] leading-relaxed text-muted">
+                    <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-line-strong" />
+                    <span>{c}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <div className="p-5">
+                <p className="print-muted text-[0.8125rem] leading-relaxed text-muted">
+                  Matched on vertical rather than MCC, so{' '}
+                  <strong className="print-ink text-ink">
+                    {quote.macCheck.sectors.reduce((n, s) => n + s.criteria.length, 0)} criteria across{' '}
+                    {quote.macCheck.sectors.length} candidate sectors
+                  </strong>{' '}
+                  could apply and this page does not print them all. Enter the merchant&apos;s MCC on the merchant screen
+                  to narrow it to the one sector that names it, or read the MAC directly.
+                </p>
+                <ul className="mt-2.5 flex flex-wrap gap-x-4 gap-y-1">
+                  {quote.macCheck.sectors.map((s) => (
+                    <li key={s.key} className="print-muted text-[0.75rem] text-faint">
+                      {s.title}
+                      <span className="ml-1 text-line-strong">({s.criteria.length})</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            <p className="print-muted border-t border-line px-5 py-2.5 text-[0.6875rem] leading-relaxed text-faint">
+              Source: {book.mac.source_locator}. Not pricing — the criteria this merchant has to demonstrate before a MAF
+              should be submitted.
+            </p>
           </Card>
         )}
 

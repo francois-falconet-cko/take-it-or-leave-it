@@ -1,5 +1,5 @@
 {
-  "$comment": "Every pricing source the book is compiled from. `glean_query` is what the compile script asks Glean for when GLEAN_API_TOKEN is set; without a token the script reads sources/raw/<id>.txt instead. See PRD 8.2 / 8.3.",
+  "$comment": "Every pricing source the book is compiled from. `local_path` + `extractor: \"md\"` means the document has already been converted to markdown under pricing-files/ and is read at compile time — six product pricing frameworks and the MAC arrived that way. `extractor: \"claude\"` sources still have no document; `glean_query` is what compile-pricing-book.ts asks Glean for when GLEAN_API_TOKEN is set. See PRD 8.2 / 8.3.",
   "sources": [
     {
       "id": "src_acq_framework",
@@ -32,12 +32,14 @@
     },
     {
       "id": "src_mac",
-      "title": "MAC — Merchant Acquiring Costs",
+      "$note": "This was registered as \"Merchant Acquiring Costs\". The Highspot item at this URL is the Minimum Acceptance Criteria deck — same id as the one the converted markdown cites.",
+      "title": "MAC — Minimum Acceptance Criteria",
       "system": "Highspot",
       "url": "https://checkout.highspot.com/items/62e7bdd8f28282c82ae63b35?lfrm=srp.0#2",
+      "local_path": "pricing-files/minimum-acceptance-criteria.md",
       "glean_query": "MAC merchant acquiring cost pricing",
-      "feeds": "reference",
-      "extractor": "claude"
+      "feeds": "mac",
+      "extractor": "md"
     },
     {
       "id": "src_gateway_premium",
@@ -53,18 +55,20 @@
       "title": "Network Tokens",
       "system": "Highspot",
       "url": "https://checkout.highspot.com/items/647dde7dc4f2ebc1f397d615?lfrm=srp.0#1",
+      "local_path": "pricing-files/network_tokens_pricing_framework.md",
       "glean_query": "Network Tokens pricing per transaction",
       "feeds": "vas:network_tokens",
-      "extractor": "claude"
+      "extractor": "md"
     },
     {
       "id": "src_vas_rtau",
       "title": "RTAU — Real Time Account Updater",
       "system": "Highspot",
       "url": "https://checkout.highspot.com/items/647ddf5780ff58cb0fb43391?lfrm=srp.1#1",
+      "local_path": "pricing-files/rtau_pricing_framework.md",
       "glean_query": "RTAU real time account updater pricing per request",
       "feeds": "vas:rtau",
-      "extractor": "claude"
+      "extractor": "md"
     },
     {
       "id": "src_vas_forward_vault",
@@ -80,9 +84,10 @@
       "title": "Integrated Platforms",
       "system": "Highspot",
       "url": "https://checkout.highspot.com/items/64cd76ed34cc409788c6e0d2?lfrm=srp.0#1",
+      "local_path": "pricing-files/integrated-platforms-pricing-framework.md",
       "glean_query": "Integrated Platforms pricing",
       "feeds": "vas:integrated_platforms",
-      "extractor": "claude"
+      "extractor": "md"
     },
     {
       "id": "src_vas_settlement",
@@ -95,30 +100,33 @@
     },
     {
       "id": "src_vas_fraud",
-      "title": "Fraud Detection",
+      "title": "Fraud Detection Pro",
       "system": "Highspot",
       "url": "https://checkout.highspot.com/items/63d7afa15769ea57b607767c?lfrm=srp.0#1",
+      "local_path": "pricing-files/fraud_detection_pro_pricing_framework_2026.md",
       "glean_query": "Fraud Detection pricing per transaction",
       "feeds": "vas:fraud_detection",
-      "extractor": "claude"
+      "extractor": "md"
     },
     {
       "id": "src_vas_authentication",
       "title": "Authentication (3DS)",
       "system": "Highspot",
       "url": "https://checkout.highspot.com/items/62f147b00bfa5c8457fddd7c?lfrm=srp.0#2",
+      "local_path": "pricing-files/authentication_pricing_framework.md",
       "glean_query": "Authentication 3DS pricing per authentication",
       "feeds": "vas:authentication",
-      "extractor": "claude"
+      "extractor": "md"
     },
     {
       "id": "src_vas_apms",
       "title": "APMs — Alternative Payment Methods",
       "system": "Highspot",
       "url": "https://checkout.highspot.com/items/6409b86eedc1c8eef79161c9?lfrm=srp.0#4",
+      "local_path": "pricing-files/apm_pricing_framework_2026_extracted.md",
       "glean_query": "APM alternative payment methods pricing",
       "feeds": "vas:apms",
-      "extractor": "claude"
+      "extractor": "md"
     }
   ]
 }

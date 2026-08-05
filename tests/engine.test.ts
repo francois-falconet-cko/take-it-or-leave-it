@@ -19,6 +19,8 @@ import { toBps, effectiveMonthlyTpv, volumeDisagreement, mmbImpliedFloorBps } fr
 import { discountPct, money } from '../src/lib/engine/variance.ts';
 import { routeApproval, topApprover } from '../src/lib/engine/approvals.ts';
 import { bandContains } from '../src/lib/engine/select.ts';
+import { mccTierFor, vasBandFor } from '../src/lib/engine/vas.ts';
+import { macSectorsFor } from '../src/lib/engine/mac.ts';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const book: PricingBook = JSON.parse(readFileSync(resolve(ROOT, 'data/pricing-book.json'), 'utf8'));
@@ -34,6 +36,7 @@ function intake(over: Partial<Intake> = {}): Intake {
     region: 'UK',
     countryScope: null,
     riskLevel: 'STD',
+    chargebackRatioPct: null,
     currentAcceptanceRate: null,
     platform: '',
     currentProviders: '',
@@ -52,6 +55,10 @@ function intake(over: Partial<Intake> = {}): Intake {
     vasFreeTrialMonths: null,
     spException: 'none',
     vas: {},
+    activeSellers: null,
+    acquirerMarkupPct: null,
+    gatewayFee: null,
+    gatewayFeeCurrency: 'USD',
     repName: 'Test Rep',
     ...over,
   };
@@ -84,8 +91,153 @@ describe('pricing book integrity', () => {
     assert.equal(bands.at(-1)!.max, null);
   });
 
-  test('ships unapproved until a human signs it off', () => {
-    assert.equal(book.reviewed_by, null);
+  test('approval is all-or-nothing, and only a human can grant it', () => {
+    // This used to assert reviewed_by === null, which held only until someone ran
+    // book:approve. The invariant that actually matters is that a signature and a
+    // date travel together: a book claiming a reviewer with no timestamp, or a
+    // timestamp with no reviewer, is a book nobody can be held to.
+    if (book.reviewed_by == null) {
+      assert.equal(book.reviewed_at, null, 'no reviewer, but a review date');
+    } else {
+      assert.ok(book.reviewed_at, `signed off by ${book.reviewed_by} with no date`);
+      assert.ok(!Number.isNaN(Date.parse(book.reviewed_at)), 'review date is not a date');
+    }
+  });
+});
+
+describe('product pricing framework integrity', () => {
+  test('VAS bands tile the volume axis without gaps or overlaps', () => {
+    const bands = book.vas_bands;
+    for (let i = 1; i < bands.length; i++) assert.equal(bands[i].min, bands[i - 1].max);
+    assert.equal(bands[0].min, 0.5);
+    assert.equal(bands.at(-1)!.max, null);
+  });
+
+  test('the VAS band ladder is NOT the acquiring band ladder', () => {
+    // Both exist in the book and both are "monthly volume bands". Anything that
+    // treats them as interchangeable prices the wrong cell, so this asserts they
+    // are genuinely different rather than trusting a comment to say so.
+    assert.notEqual(book.vas_bands[0].min, book.monthly_tpv_bands_musd[0].min);
+    assert.notDeepEqual(
+      book.vas_bands.map((b) => b.min),
+      book.monthly_tpv_bands_musd.slice(0, book.vas_bands.length).map((b) => b.min),
+    );
+  });
+
+  test('every documented framework prices both MCC tiers across every band', () => {
+    for (const fw of book.vas_catalogue) {
+      if (fw.needs_extraction) continue;
+      for (const fee of fw.fees) {
+        if (fee.tiers == null) continue;
+        for (const tier of ['standard', 'other'] as const) {
+          for (const level of ['recommended', 'floor', 'ceiling'] as const) {
+            assert.equal(
+              fee.tiers[tier][level].length,
+              book.vas_bands.length,
+              `${fw.key}/${fee.key}/${tier}/${level} has ${fee.tiers[tier][level].length} values for ${book.vas_bands.length} bands`,
+            );
+          }
+        }
+      }
+    }
+  });
+
+  test('Other MCCs is never cheaper than Standard MCCs', () => {
+    // The whole point of the tier split. If a transcription ever inverts a pair,
+    // a high-chargeback merchant gets quoted the clean-merchant price.
+    for (const fw of book.vas_catalogue) {
+      if (fw.needs_extraction) continue;
+      for (const fee of fw.fees) {
+        if (fee.tiers == null) continue;
+        fee.tiers.standard.recommended.forEach((std, i) => {
+          const other = fee.tiers!.other.recommended[i];
+          if (std == null || other == null) return;
+          assert.ok(other >= std, `${fw.key}/${fee.key} at ${book.vas_bands[i].label}: other ${other} < standard ${std}`);
+        });
+      }
+    }
+  });
+
+  test('floor never exceeds recommended, ceiling never falls below it', () => {
+    for (const fw of book.vas_catalogue) {
+      for (const fee of fw.fees) {
+        if (fee.tiers == null) continue;
+        for (const tier of ['standard', 'other'] as const) {
+          const t = fee.tiers[tier];
+          t.recommended.forEach((rec, i) => {
+            if (rec == null) return;
+            const label = `${fw.key}/${fee.key}/${tier} at ${book.vas_bands[i].label}`;
+            if (t.floor[i] != null) assert.ok(t.floor[i]! <= rec, `${label}: floor ${t.floor[i]} > rec ${rec}`);
+            if (t.ceiling[i] != null) assert.ok(t.ceiling[i]! >= rec, `${label}: ceiling ${t.ceiling[i]} < rec ${rec}`);
+          });
+        }
+      }
+    }
+  });
+
+  test('every framework carries provenance, and undocumented ones say so', () => {
+    for (const fw of book.vas_catalogue) {
+      assert.ok(fw.source_id, `${fw.key} missing source_id`);
+      if (fw.needs_extraction) {
+        assert.equal(fw.confidence, 'unverified', `${fw.key} needs extraction but is not unverified`);
+        assert.ok(fw.fees.every((f) => f.tiers == null), `${fw.key} needs extraction but carries prices`);
+      } else {
+        assert.notEqual(fw.confidence, 'unverified', `${fw.key} is documented but still unverified`);
+        assert.ok(fw.approval_verbatim, `${fw.key} is documented but states no approval path`);
+      }
+    }
+  });
+
+  test('six of the eight products now have a framework', () => {
+    const documented = book.vas_catalogue.filter((v) => !v.needs_extraction).map((v) => v.key).sort();
+    assert.deepEqual(documented, [
+      'apms',
+      'authentication',
+      'fraud_detection',
+      'integrated_platforms',
+      'network_tokens',
+      'rtau',
+    ]);
+    assert.deepEqual(
+      book.vas_catalogue.filter((v) => v.needs_extraction).map((v) => v.key).sort(),
+      ['forward_vault', 'settlement'],
+    );
+  });
+});
+
+describe('MAC integrity', () => {
+  test('parsed every sector and the pre-submission gate', () => {
+    assert.equal(book.mac.sectors.length, 30);
+    assert.equal(book.mac.chargeback_ceiling_pct, 0.9);
+    assert.ok(book.mac.pre_submission_checklist.length >= 7);
+  });
+
+  test('every sector has criteria and provenance', () => {
+    for (const s of book.mac.sectors) {
+      assert.ok(s.criteria.length > 0, `${s.key} has no criteria`);
+      assert.ok(s.source_locator, `${s.key} has no locator`);
+    }
+  });
+
+  test('a stated tier without a dollar figure asserts no floor', () => {
+    // Four sectors say "Tier 3 and above" and never name a number. Inventing one
+    // would put a fabricated threshold in front of a rep, so they carry null.
+    const tierOnly = book.mac.sectors.filter((s) => s.min_monthly_net_revenue_usd == null);
+    assert.equal(tierOnly.length, 4);
+    for (const s of tierOnly) {
+      assert.ok(
+        s.net_revenue_verbatim == null || !/\$/.test(s.net_revenue_verbatim),
+        `${s.key} has no floor but its verbatim names a figure: ${s.net_revenue_verbatim}`,
+      );
+    }
+  });
+
+  test('every mapped vertical is a vertical the framework actually has', () => {
+    for (const s of book.mac.sectors) {
+      for (const v of s.verticals) {
+        assert.ok(book.dimensions.verticals.includes(v), `${s.key} maps to unknown vertical "${v}"`);
+      }
+    }
   });
 });
 
@@ -445,15 +597,43 @@ describe('golden case 2 — NORAM Digital, 50% scope, per-request VAS', () => {
     assert.equal(q.emnrAnnual, 360_000);
   });
 
-  test('VAS attach check reports unverified list prices rather than a fake total', () => {
+  test('VAS is priced off the product frameworks, not a placeholder', () => {
     assert.ok(q.vasCheck);
-    assert.equal(q.vasCheck!.anyUnverified, true);
+    // All three of these products now have their framework document.
+    assert.equal(q.vasCheck!.anyUnverified, false);
     assert.equal(q.vasCheck!.lines.length, 3);
-    const rtau = q.vasCheck!.lines.find((l) => l.key === 'rtau')!;
+
+    // $10m/month in USD sits in the 10m-20m product band, which is index 4. Note
+    // this is NOT the acquiring Cat 4 above — the two ladders differ and happening
+    // to share a number here is a coincidence worth not relying on.
+    assert.equal(q.vasCheck!.band?.label, '10m - 20m');
+    assert.equal(q.vasCheck!.band?.index, 4);
+    assert.equal(q.vasCheck!.tier, 'standard');
+
+    const rtau = q.vasCheck!.lines.find((l) => l.frameworkKey === 'rtau')!;
     assert.equal(rtau.unit, 'per_request');
     assert.equal(rtau.attachRate, 0.05);
-    // $0.25 x 5% / $30 basket = 4.167 bps
-    assert.ok(Math.abs(rtau.bps! - 4.167) < 0.01, `got ${rtau.bps}`);
+    // RTAU Standard MCCs at 10m-20m: recommended 0.15, floor 0.11, ceiling 0.25.
+    assert.equal(rtau.recommended, 0.15);
+    assert.equal(rtau.floor, 0.11);
+    assert.equal(rtau.ceiling, 0.25);
+    assert.equal(rtau.verdict, 'at_recommended');
+    // $0.15 x 5% / $30 basket = 2.5 bps. Charged against every transaction instead
+    // of just the retried ones it would read 50 bps — the 20x error this guards.
+    assert.ok(Math.abs(rtau.bps! - 2.5) < 0.01, `got ${rtau.bps}`);
+  });
+
+  test('a per-request fee is not mistaken for the same number of basis points', () => {
+    const nt = q.vasCheck!.lines.find((l) => l.frameworkKey === 'network_tokens')!;
+    // Network Tokens Standard at 10m-20m is $0.07 per event, attach 1.0.
+    // $0.07 / $30 x 10,000 = 23.333 bps. Not 7, and not 0.07.
+    assert.equal(nt.amount, 0.07);
+    assert.ok(Math.abs(nt.bps! - 23.333) < 0.01, `got ${nt.bps}`);
+  });
+
+  test('the framework total is the sum of the priced products', () => {
+    // 23.333 (NT) + 2.5 (RTAU) + 6.667 (FD Pro at $0.02 / $30) = 32.5 bps.
+    assert.ok(Math.abs(q.vasCheck!.selectedListPriceBps! - 32.5) < 0.01, `got ${q.vasCheck!.selectedListPriceBps}`);
   });
 
   test('the VAS attach check does not change the guidance target', () => {
@@ -579,6 +759,357 @@ describe('golden case 6 — MMB conflict and Gold escalation end to end', () => 
     );
     assert.equal(topApprover(q.approval!), 'CEO');
     assert.equal(q.approval!.qtcGate, null);
+  });
+});
+
+describe('product framework banding and MCC tier', () => {
+  const withRtau = (over: Partial<Intake>) =>
+    price(intake({ vas: { rtau: { enabled: true, attachRate: 0.05 } }, ...over }), book, TODAY);
+
+  test('bands are read in the deal currency, not converted to USD', () => {
+    // £3m/month is $3.81m at the book's 1.27 rate. The VAS band must be the 2m-5m
+    // one either way here, but the ACQUIRING band differs — £3m converts to Cat 2
+    // ($2.5-5m) while the VAS ladder puts £3m in 2m-5m. This asserts the VAS side
+    // reads the pound figure: at £6m the two would diverge outright.
+    const gbp = withRtau({ currency: 'GBP', monthlyTpv: 6_000_000, region: 'UK' });
+    assert.equal(gbp.vasCheck!.band?.label, '5m - 10m');
+    // $7.62m in USD terms would fall in the same 5m-10m band, so push further:
+    const gbpBig = withRtau({ currency: 'GBP', monthlyTpv: 18_000_000, region: 'UK' });
+    assert.equal(gbpBig.vasCheck!.band?.label, '10m - 20m');
+    // Converted to USD, £18m is $22.86m, which would have been the 20m+ band.
+    const usd = withRtau({ currency: 'USD', monthlyTpv: 22_860_000, region: 'UK' });
+    assert.equal(usd.vasCheck!.band?.label, '20m+');
+  });
+
+  test('a merchant is priced up a band as volume grows', () => {
+    const small = withRtau({ monthlyTpv: 3_000_000 });
+    const large = withRtau({ monthlyTpv: 30_000_000 });
+    // RTAU Standard: 0.20 at 2m-5m, 0.15 at 20m+.
+    assert.equal(small.vasCheck!.lines[0].recommended, 0.2);
+    assert.equal(large.vasCheck!.lines[0].recommended, 0.15);
+    assert.ok(large.vasCheck!.lines[0].bps! < small.vasCheck!.lines[0].bps!);
+  });
+
+  test('chargebacks above 1% move the merchant to the Other MCCs table', () => {
+    const clean = withRtau({ monthlyTpv: 3_000_000, chargebackRatioPct: 0.4 });
+    const dirty = withRtau({ monthlyTpv: 3_000_000, chargebackRatioPct: 1.4 });
+    assert.equal(clean.vasCheck!.tier, 'standard');
+    assert.equal(dirty.vasCheck!.tier, 'other');
+    // RTAU at 2m-5m: Standard recommends 0.20, Other recommends 0.25.
+    assert.equal(clean.vasCheck!.lines[0].recommended, 0.2);
+    assert.equal(dirty.vasCheck!.lines[0].recommended, 0.25);
+  });
+
+  test('high risk also lands on the Other table, and says which test it used', () => {
+    const q = withRtau({ monthlyTpv: 3_000_000, riskLevel: 'HIGH', vertical: 'Gambling', region: 'EEA' });
+    assert.equal(q.vasCheck!.tier, 'other');
+    assert.match(q.vasCheck!.tierReason, /high risk/i);
+  });
+
+  test('the MCC tier is a different axis from the acquiring risk level', () => {
+    // Gambling rows are risk_level ALL — already priced as high risk on acquiring,
+    // so no uplift. That must not stop the product frameworks using Other MCCs.
+    const q = withRtau({ vertical: 'Gambling', region: 'EEA', riskLevel: 'HIGH', monthlyTpv: 3_000_000 });
+    assert.equal(q.match!.risk_level, 'ALL');
+    assert.equal(q.vasCheck!.tier, 'other');
+  });
+
+  test('below the 500k framework floor there is no band', () => {
+    // Tested against vasBandFor directly rather than through price(), because the
+    // two floors do not overlap: the product frameworks start at 500k local and
+    // acquiring guidance starts at $1m, and $1m is at least 787k in any currency
+    // the book carries. So a deal that reaches the VAS check has always cleared
+    // 500k already, and price() returns UNMAPPED before it gets here.
+    assert.equal(vasBandFor(book.vas_bands, 0.4), null);
+    assert.equal(vasBandFor(book.vas_bands, 0.5)?.label, '500k - 1m');
+  });
+
+  test('the tier rule reads chargebacks before it falls back to risk level', () => {
+    // Order matters: the chargeback ratio is a fact off a statement, the risk level
+    // is a classification. When both are present the ratio should be the reason
+    // given, so a rep reading the tooltip sees the evidence rather than the label.
+    const bothTrip = mccTierFor(intake({ riskLevel: 'HIGH', chargebackRatioPct: 2 }));
+    assert.equal(bothTrip.tier, 'other');
+    assert.match(bothTrip.reason, /2%/);
+
+    const onlyRisk = mccTierFor(intake({ riskLevel: 'HIGH', chargebackRatioPct: null }));
+    assert.match(onlyRisk.reason, /high risk/i);
+
+    // A high-risk vertical with clean chargebacks is still Other — the deck's rule
+    // is an OR, not an AND.
+    assert.equal(mccTierFor(intake({ riskLevel: 'HIGH', chargebackRatioPct: 0.2 })).tier, 'other');
+    assert.equal(mccTierFor(intake({ riskLevel: 'STD', chargebackRatioPct: 0.2 })).tier, 'standard');
+  });
+
+  test('exactly 1% is inside the line, not over it', () => {
+    // The deck says "above 1%". A merchant at precisely 1.0% keeps Standard pricing.
+    assert.equal(mccTierFor(intake({ chargebackRatioPct: 1 })).tier, 'standard');
+    assert.equal(mccTierFor(intake({ chargebackRatioPct: 1.01 })).tier, 'other');
+  });
+
+  test('the band boundaries are half-open, so a merchant sits in exactly one', () => {
+    assert.equal(vasBandFor(book.vas_bands, 2)?.label, '2m - 5m');
+    assert.equal(vasBandFor(book.vas_bands, 4.999)?.label, '2m - 5m');
+    assert.equal(vasBandFor(book.vas_bands, 5)?.label, '5m - 10m');
+    assert.equal(vasBandFor(book.vas_bands, 20)?.label, '20m+');
+    assert.equal(vasBandFor(book.vas_bands, 5_000)?.label, '20m+');
+  });
+});
+
+describe('product framework floors and ceilings', () => {
+  const quoteRtau = (amount: number) =>
+    price(
+      intake({ monthlyTpv: 3_000_000, vas: { rtau: { enabled: true, attachRate: 0.05, quotedAmount: amount } } }),
+      book,
+      TODAY,
+    );
+
+  // RTAU Standard MCCs at 2m-5m: floor 0.13, recommended 0.20, ceiling 0.25.
+  test('at the recommendation, nobody signs anything', () => {
+    const q = quoteRtau(0.2);
+    assert.equal(q.vasCheck!.lines[0].verdict, 'at_recommended');
+    assert.deepEqual(q.vasCheck!.lines[0].approvers, []);
+    assert.equal(q.findings.some((f) => f.code.startsWith('VAS_BELOW_FLOOR')), false);
+  });
+
+  test('below the recommendation but above the floor still needs nobody', () => {
+    const q = quoteRtau(0.15);
+    assert.equal(q.vasCheck!.lines[0].verdict, 'below_recommended');
+    assert.deepEqual(q.vasCheck!.lines[0].approvers, []);
+  });
+
+  test('below the floor routes to the approver the framework names', () => {
+    const q = quoteRtau(0.1);
+    const line = q.vasCheck!.lines[0];
+    assert.equal(line.verdict, 'below_floor');
+    // The RTAU deck says Regional Sales Leader, where the other five say Regional
+    // Revenue Leader. Carried as written rather than normalised.
+    assert.deepEqual(line.approvers, ['Regional Sales Leader']);
+    assert.ok(q.findings.some((f) => f.code === 'VAS_BELOW_FLOOR'));
+  });
+
+  test('above the ceiling is flagged too — the merchant will find out', () => {
+    const q = quoteRtau(0.4);
+    assert.equal(q.vasCheck!.lines[0].verdict, 'above_ceiling');
+    assert.ok(q.findings.some((f) => f.code === 'VAS_ABOVE_CEILING'));
+  });
+
+  test('a quoted price is marked as quoted, an unquoted one is not', () => {
+    assert.equal(quoteRtau(0.15).vasCheck!.lines[0].quoted, true);
+    const def = price(
+      intake({ monthlyTpv: 3_000_000, vas: { rtau: { enabled: true, attachRate: 0.05 } } }),
+      book,
+      TODAY,
+    );
+    assert.equal(def.vasCheck!.lines[0].quoted, false);
+    assert.equal(def.vasCheck!.lines[0].amount, def.vasCheck!.lines[0].recommended);
+  });
+
+  test('product prices never move the guidance take rate', () => {
+    const bare = price(intake({ monthlyTpv: 3_000_000 }), book, TODAY);
+    const loaded = quoteRtau(0.25);
+    assert.equal(bare.targetBps, loaded.targetBps);
+  });
+
+  test('a framework that forbids free trials flags one', () => {
+    const q = price(
+      intake({
+        monthlyTpv: 3_000_000,
+        vasFreeTrialMonths: 3,
+        vas: { rtau: { enabled: true, attachRate: 0.05 } },
+      }),
+      book,
+      TODAY,
+    );
+    assert.ok(q.findings.some((f) => f.code === 'VAS_FREE_TRIAL_NOT_ALLOWED'));
+  });
+
+  test('Integrated Platforms is out of scope outside EEA/UK/US', () => {
+    const apac = price(
+      intake({ region: 'APAC', vertical: 'Retail', monthlyTpv: 3_000_000, vas: { integrated_platforms: { enabled: true, attachRate: 1 } } }),
+      book,
+      TODAY,
+    );
+    assert.ok(apac.findings.some((f) => f.code === 'VAS_OUT_OF_SCOPE_REGION'));
+  });
+
+  test('a fee with no driver in the intake reports why, not a number', () => {
+    const q = price(
+      intake({ region: 'UK', monthlyTpv: 3_000_000, vas: { integrated_platforms: { enabled: true, attachRate: 1 } } }),
+      book,
+      TODAY,
+    );
+    const payout = q.vasCheck!.lines.find((l) => l.key === 'ip_bank_payout_fee')!;
+    // The rate is real and shown; the bps is not, because payout count does not
+    // follow from transaction count. A guess here would be indistinguishable.
+    assert.ok(payout.recommended != null);
+    assert.equal(payout.bps, null);
+    assert.ok(payout.notModelledReason);
+  });
+
+  test('the per-seller fee needs a seller count and says so when it has none', () => {
+    const base = { region: 'UK', monthlyTpv: 3_000_000, vas: { integrated_platforms: { enabled: true, attachRate: 1 } } };
+    const without = price(intake(base), book, TODAY);
+    const with2500 = price(intake({ ...base, activeSellers: 2500 }), book, TODAY);
+    const key = 'ip_monthly_seller_fee';
+    assert.equal(without.vasCheck!.lines.find((l) => l.key === key)!.bps, null);
+    // 2500 sellers x £1.00 = £2,500/month on £3m = 8.333 bps.
+    const bpsOut = with2500.vasCheck!.lines.find((l) => l.key === key)!.bps!;
+    assert.ok(Math.abs(bpsOut - 8.333) < 0.01, `got ${bpsOut}`);
+  });
+
+  test('APM FX applies only to the cross-currency share of volume', () => {
+    const q = price(
+      intake({ monthlyTpv: 3_000_000, vas: { apms: { enabled: true, attachRate: 0.3 } } }),
+      book,
+      TODAY,
+    );
+    const fx = q.vasCheck!.lines.find((l) => l.key === 'apm_fx')!;
+    assert.equal(fx.amount, 1.99);
+    // 1.99% of 30% of volume = 0.597% = 59.7 bps. Against all volume it would read
+    // 199 bps, which would swamp the take rate it sits next to.
+    assert.ok(Math.abs(fx.bps! - 59.7) < 0.05, `got ${fx.bps}`);
+  });
+});
+
+describe('Minimum Acceptance Criteria gate', () => {
+  test('an MCC that a sector names pins the sector down exactly', () => {
+    const q = price(intake({ mcc: '7995', vertical: 'Gambling', region: 'EEA', monthlyTpv: 3_000_000 }), book, TODAY);
+    assert.deepEqual(q.macCheck!.sectors.map((s) => s.title), ['Gambling']);
+  });
+
+  test('without an MCC every candidate sector for the vertical is offered', () => {
+    const q = price(intake({ vertical: 'Crypto', region: 'EEA', monthlyTpv: 3_000_000 }), book, TODAY);
+    const titles = q.macCheck!.sectors.map((s) => s.title);
+    assert.ok(titles.includes('Cryptocurrency'));
+    assert.ok(titles.length > 1, 'a vertical match should offer the rep the candidates');
+  });
+
+  test('a deal below its sector eNR floor is flagged, however good the rate', () => {
+    // Gambling expects $7.5k monthly net revenue. $1m/month at ~50 bps is ~$5k.
+    const q = price(
+      intake({ mcc: '7995', vertical: 'Gambling', region: 'EEA', monthlyTpv: 1_000_000, riskLevel: 'HIGH' }),
+      book,
+      TODAY,
+      { requestedBps: 40 },
+    );
+    assert.equal(q.macCheck!.requiredMonthlyNetRevenueUsd, 7500);
+    assert.equal(q.macCheck!.clearsNetRevenue, false);
+    assert.ok(q.findings.some((f) => f.code === 'MAC_BELOW_NET_REVENUE'));
+  });
+
+  test('the same sector clears at volume', () => {
+    const q = price(
+      intake({ mcc: '7995', vertical: 'Gambling', region: 'EEA', monthlyTpv: 20_000_000, riskLevel: 'HIGH' }),
+      book,
+      TODAY,
+      { requestedBps: 40 },
+    );
+    assert.equal(q.macCheck!.clearsNetRevenue, true);
+    assert.equal(q.findings.some((f) => f.code === 'MAC_BELOW_NET_REVENUE'), false);
+  });
+
+  test('the eNR test uses the requested rate, not guidance, when one is asked for', () => {
+    const base = { mcc: '7995', vertical: 'Gambling', region: 'EEA', monthlyTpv: 2_000_000, riskLevel: 'HIGH' as const };
+    const atGuidance = price(intake(base), book, TODAY);
+    const deeplyCut = price(intake(base), book, TODAY, { requestedBps: 5 });
+    assert.ok(atGuidance.macCheck!.monthlyNetRevenueUsd! > deeplyCut.macCheck!.monthlyNetRevenueUsd!);
+    assert.equal(deeplyCut.macCheck!.clearsNetRevenue, false);
+  });
+
+  test('the strictest floor governs when a merchant sits in two sectors', () => {
+    const q = price(intake({ vertical: 'SaaS', region: 'UK', monthlyTpv: 3_000_000 }), book, TODAY);
+    const floors = q.macCheck!.sectors.map((s) => s.min_monthly_net_revenue_usd).filter((n): n is number => n != null);
+    assert.equal(q.macCheck!.requiredMonthlyNetRevenueUsd, Math.max(...floors));
+  });
+
+  test('chargebacks over the MAC ceiling block the deal outright', () => {
+    const q = price(
+      intake({ mcc: '7995', vertical: 'Gambling', region: 'EEA', monthlyTpv: 20_000_000, chargebackRatioPct: 1.5 }),
+      book,
+      TODAY,
+    );
+    assert.equal(q.macCheck!.clearsChargebacks, false);
+    assert.equal(q.status, 'BLOCKED');
+    assert.ok(q.findings.some((f) => f.code === 'MAC_CHARGEBACKS' && f.level === 'blocking'));
+  });
+
+  test('a chargeback ratio between the two thresholds trips the MAC but not the tier', () => {
+    // 0.95% is over the MAC's 0.9% submission ceiling and under the frameworks'
+    // 1% pricing line. Two documents, two thresholds, and they do not agree.
+    const q = price(
+      intake({
+        mcc: '7995',
+        vertical: 'Gambling',
+        region: 'EEA',
+        monthlyTpv: 20_000_000,
+        chargebackRatioPct: 0.95,
+        vas: { rtau: { enabled: true, attachRate: 0.05 } },
+      }),
+      book,
+      TODAY,
+    );
+    assert.equal(q.macCheck!.clearsChargebacks, false);
+    // Still 'other' here, but because the merchant is high risk rather than the
+    // ratio. A standard-risk merchant at 0.95% would be 'standard'.
+    const stdRisk = price(intake({ monthlyTpv: 20_000_000, chargebackRatioPct: 0.95 }), book, TODAY);
+    assert.equal(stdRisk.vasCheck!.tier, 'standard');
+  });
+
+  test('a merchant with neither MCC nor vertical matches nothing', () => {
+    assert.deepEqual(macSectorsFor(book.mac, intake({ mcc: '', vertical: '' })), []);
+  });
+
+  test('a hedged MCC list cannot pin a sector on its own', () => {
+    // CBD says "Common MCCs used: 5499, 5912, 5977, 5999". 5999 is generic misc
+    // retail. Pinning on it would tell a clothing retailer it is selling CBD.
+    const cbd = book.mac.sectors.find((s) => s.key === 'cbd')!;
+    assert.ok(cbd.mccs.includes('5999'));
+    assert.equal(cbd.mccs_exclusive, false);
+
+    const hits = macSectorsFor(book.mac, intake({ mcc: '5999', vertical: 'Retail' }));
+    assert.ok(hits.length > 1, 'a hedged MCC must widen to candidates, not narrow to one');
+    assert.ok(hits.some((s) => s.key !== 'cbd'));
+  });
+
+  test('an unhedged MCC only pins when the vertical agrees with it', () => {
+    // 5817 is digital applications, and also how a prop firm books itself when
+    // there is no educational element. Two sectors, one MCC.
+    const propFirms = book.mac.sectors.find((s) => s.key === 'prop_firms')!;
+    assert.ok(propFirms.mccs.includes('5817'));
+    assert.equal(propFirms.mccs_exclusive, true);
+
+    // Vertical disagrees -> candidates, so a digital-goods merchant is not handed
+    // the prop firm criteria as though we were sure.
+    const asDigital = macSectorsFor(book.mac, intake({ mcc: '5817', vertical: 'Digital' }));
+    assert.ok(asDigital.length > 1, 'MCC and vertical disagreeing must not pin');
+    assert.ok(asDigital.some((s) => s.key === 'prop_firms'), 'but the MCC hit must still be offered');
+
+    // Vertical agrees -> pinned.
+    const asBroker = macSectorsFor(book.mac, intake({ mcc: '5817', vertical: 'Brokers/Dealers' }));
+    assert.deepEqual(asBroker.map((s) => s.key), ['prop_firms']);
+  });
+
+  test('candidate lists are deduplicated and lead with the MCC hit', () => {
+    const hits = macSectorsFor(book.mac, intake({ mcc: '5817', vertical: 'Digital' }));
+    assert.equal(hits.length, new Set(hits.map((s) => s.key)).size, 'no sector twice');
+    assert.equal(hits[0].key, 'prop_firms', 'the MCC hit comes first');
+  });
+
+  test('an MCC no sector names falls back to the vertical', () => {
+    // 5411 (grocery) is in no MAC sector. The vertical mapping has to carry it, or
+    // a Food and Groceries merchant silently escapes every criterion.
+    const byUnknownMcc = macSectorsFor(book.mac, intake({ mcc: '5411', vertical: 'Food and Groceries' }));
+    const byVertical = macSectorsFor(book.mac, intake({ mcc: '', vertical: 'Food and Groceries' }));
+    assert.deepEqual(byUnknownMcc, byVertical);
+    assert.ok(byVertical.length > 0);
+  });
+
+  test('a merchant the rate card cannot price still gets its MAC criteria', () => {
+    const q = price(intake({ region: 'LATAM', vertical: 'Retail', monthlyTpv: 5_000_000 }), book, TODAY);
+    assert.equal(q.status, 'UNMAPPED');
+    assert.ok(q.macCheck!.sectors.length > 0, 'UNMAPPED must still carry the MAC');
+    assert.equal(q.macCheck!.monthlyNetRevenueUsd, null, 'no rate means no net revenue to test');
   });
 });
 

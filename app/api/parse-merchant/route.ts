@@ -25,6 +25,7 @@ const ALLOWED = [
   'region',
   'countryScope',
   'riskLevel',
+  'chargebackRatioPct',
   'platform',
   'currentProviders',
   'currentAcceptanceRate',
@@ -37,9 +38,19 @@ const ALLOWED = [
   'contractTerm',
   'mmb',
   'isGold',
+  'activeSellers',
 ] as const;
 
-const NUMERIC = new Set(['currentAcceptanceRate', 'atv', 'monthlyTpv', 'annualTpv', 'scopePct', 'mmb']);
+const NUMERIC = new Set([
+  'currentAcceptanceRate',
+  'chargebackRatioPct',
+  'atv',
+  'monthlyTpv',
+  'annualTpv',
+  'scopePct',
+  'mmb',
+  'activeSellers',
+]);
 
 export async function POST(req: Request) {
   const key = process.env.ANTHROPIC_API_KEY;
@@ -76,6 +87,10 @@ export async function POST(req: Request) {
         region: { type: 'string', enum: [...regions, 'LATAM'] },
         countryScope: { type: 'string', description: 'Only if a country-specific scope is named.' },
         riskLevel: { type: 'string', enum: ['STD', 'HIGH'] },
+        chargebackRatioPct: {
+          type: 'number',
+          description: 'Chargeback ratio as a percent, e.g. 0.4 for 0.4%. Only if the text states one.',
+        },
         platform: { type: 'string' },
         currentProviders: { type: 'string' },
         currentAcceptanceRate: { type: 'number' },
@@ -88,6 +103,10 @@ export async function POST(req: Request) {
         contractTerm: { type: 'string' },
         mmb: { type: 'number', description: 'Monthly Minimum Bill.' },
         isGold: { type: 'boolean' },
+        activeSellers: {
+          type: 'number',
+          description: 'Number of active sellers or sub-merchants, for a platform or marketplace. Only if stated.',
+        },
       },
       required: [],
     },
@@ -104,6 +123,7 @@ export async function POST(req: Request) {
     `- vertical must be one of: ${verticals.join(', ')}.`,
     `- region must be one of: ${regions.join(', ')}, LATAM. Map "Europe"/"EU"/"EEA" to EEA, "US"/"USA"/"North America" to NORAM, "Middle East" to MENA, "United Kingdom" to UK.`,
     '- riskLevel HIGH only for genuinely high-risk businesses: crypto, gambling, money remittance, adult.',
+    '- chargebackRatioPct is a percent, not a fraction: "chargebacks of 0.4%" is 0.4, "40 bps of chargebacks" is 0.4. Never estimate it from the business type — a guessed chargeback ratio silently changes which pricing table the merchant is quoted from.',
     '',
     'Call merchant_fields exactly once.',
   ].join('\n');

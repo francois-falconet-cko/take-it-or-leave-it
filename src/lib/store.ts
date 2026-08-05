@@ -3,9 +3,9 @@
 import { useMemo } from 'react';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { Intake, Quote } from './types.ts';
+import type { Intake, Quote, VasFeeSelection } from './types.ts';
 import { book } from './book.ts';
-import { price, verticalForMcc } from './engine/index.ts';
+import { price, primaryFee, verticalForMcc } from './engine/index.ts';
 
 export type Step = 'intake' | 'recommendation' | 'challenge' | 'deal';
 
@@ -27,6 +27,7 @@ export function emptyIntake(): Intake {
     region: 'UK',
     countryScope: null,
     riskLevel: 'STD',
+    chargebackRatioPct: null,
     currentAcceptanceRate: null,
     platform: '',
     currentProviders: '',
@@ -47,9 +48,19 @@ export function emptyIntake(): Intake {
     vasFreeTrialMonths: null,
     spException: 'none',
 
+    // Attach rate comes off the framework's primary fee. The quoted amount stays
+    // undefined so the engine prices at the framework recommendation until the rep
+    // deliberately types something else.
     vas: Object.fromEntries(
-      book.vas_catalogue.map((v) => [v.key, { enabled: false, attachRate: v.default_attach_rate }]),
+      book.vas_catalogue.map((v) => [v.key, { enabled: false, attachRate: primaryFee(v)?.default_attach_rate ?? 1 }]),
     ),
+    activeSellers: null,
+
+    // Core acquiring starts empty rather than at a plausible default: the adjusted
+    // rate is meant to reflect what the rep has actually decided to charge.
+    acquirerMarkupPct: null,
+    gatewayFee: null,
+    gatewayFeeCurrency: 'GBP',
 
     repName: '',
   };
@@ -70,7 +81,9 @@ interface State {
   setStep: (s: Step) => void;
   patch: (p: Partial<Intake>) => void;
   setMcc: (mcc: string) => void;
-  setVas: (key: string, next: { enabled?: boolean; attachRate?: number }) => void;
+  setVas: (key: string, next: { enabled?: boolean; attachRate?: number; quotedAmount?: number | null }) => void;
+  /** Override one fee inside a multi-fee framework — Integrated Platforms, APMs. */
+  setVasFee: (key: string, feeKey: string, next: VasFeeSelection) => void;
   setRequestedBps: (bps: number | null) => void;
   setReason: (category: string, justification: string) => void;
   markAiFilled: (fields: string[]) => void;
@@ -113,13 +126,38 @@ export const useStore = create<State>()(
           };
         }),
 
+      // A deal loaded from a demo file may have no entry for a product at all, so
+      // the framework's own default attach rate is the fallback rather than 0.
       setVas: (key, next) =>
-        set((s) => ({
-          intake: {
-            ...s.intake,
-            vas: { ...s.intake.vas, [key]: { ...s.intake.vas[key], ...next } },
-          },
-        })),
+        set((s) => {
+          const fallback = {
+            enabled: false,
+            attachRate: primaryFee(book.vas_catalogue.find((v) => v.key === key)!)?.default_attach_rate ?? 1,
+          };
+          return {
+            intake: {
+              ...s.intake,
+              vas: { ...s.intake.vas, [key]: { ...fallback, ...s.intake.vas[key], ...next } },
+            },
+          };
+        }),
+
+      setVasFee: (key, feeKey, next) =>
+        set((s) => {
+          const current = s.intake.vas[key] ?? { enabled: false, attachRate: 1 };
+          return {
+            intake: {
+              ...s.intake,
+              vas: {
+                ...s.intake.vas,
+                [key]: {
+                  ...current,
+                  fees: { ...current.fees, [feeKey]: { ...current.fees?.[feeKey], ...next } },
+                },
+              },
+            },
+          };
+        }),
 
       setRequestedBps: (requestedBps) => set({ requestedBps }),
       setReason: (reasonCategory, justification) => set({ reasonCategory, justification }),
@@ -147,7 +185,10 @@ export const useStore = create<State>()(
 
     }),
     {
-      name: 'tiloi-v1',
+      // Bumped when the intake gained chargeback ratio, seller count and per-fee
+      // VAS overrides. A half-migrated deal restored from v1 would quote against a
+      // framework band it never had inputs for.
+      name: 'tiloi-v2',
       // Surviving a mid-demo refresh matters more than a clean slate.
       partialize: (s) => ({
         step: s.step,

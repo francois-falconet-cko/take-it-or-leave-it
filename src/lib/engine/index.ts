@@ -13,8 +13,10 @@
  */
 
 import type {
+  AdjustedRate,
   Finding,
   Intake,
+  MacCheck,
   PriceLine,
   PricingBook,
   Quote,
@@ -27,17 +29,20 @@ import {
   mmbImpliedFloorBps,
   monthlyTransactions,
   roundBps,
-  toBps,
   volumeDisagreement,
 } from './normalize.ts';
 import { bandForVolume, selectAcquiring } from './select.ts';
 import { discountPct as calcDiscountPct, money } from './variance.ts';
 import { routeApproval, sortApprovers } from './approvals.ts';
+import { buildAdjustedRate, coreAcquiringComponents, mccTierFor, primaryFee, vasBandFor, vasLinesFor } from './vas.ts';
+import { checkMac } from './mac.ts';
 
 export * from './normalize.ts';
 export * from './select.ts';
 export * from './variance.ts';
 export * from './approvals.ts';
+export * from './vas.ts';
+export * from './mac.ts';
 
 const EMPTY: Omit<Quote, 'status' | 'findings'> = {
   effectiveMonthlyTpv: null,
@@ -49,6 +54,7 @@ const EMPTY: Omit<Quote, 'status' | 'findings'> = {
   match: null,
   lines: [],
   targetBps: null,
+  adjusted: null,
   requestedBps: null,
   discountPct: null,
   annualRevenueAtRisk: null,
@@ -58,6 +64,7 @@ const EMPTY: Omit<Quote, 'status' | 'findings'> = {
   mmbBinds: false,
   approval: null,
   vasCheck: null,
+  macCheck: null,
   nearest: [],
   searchedFor: null,
 };
@@ -168,6 +175,10 @@ export function price(intake: Intake, book: PricingBook, today: string, opts: Pr
       billableMonthlyTpvUsd,
       monthlyTxns,
       band: band ? { ...band, catOnTotalVolume: bandOnTotal } : null,
+      // The rate card cannot price this merchant, but the MAC still governs it.
+      // A LATAM marketplace has the same criteria to clear as a covered one, and
+      // that is worth knowing before the deal goes to Strategic Pricing.
+      macCheck: buildMacCheck(intake, book, billableMonthlyTpvUsd, null, findings),
       nearest: sel.nearest,
       searchedFor,
     };
@@ -365,8 +376,24 @@ export function price(intake: Intake, book: PricingBook, today: string, opts: Pr
     }
   }
 
-  // --- VAS attach check ----------------------------------------------------
-  const vasCheck = buildVasCheck(intake, book, row.other_bps ?? 0, billableMonthlyTpv);
+  // --- Product pricing frameworks ------------------------------------------
+  const vasCheck = buildVasCheck(intake, book, row.other_bps ?? 0, billableMonthlyTpv, findings);
+
+  // --- Sales Rep Adjusted Take Rate ----------------------------------------
+  // Bottom-up: core acquiring as the rep prices it, plus the VAS actually on the
+  // deal at their framework prices. Runs alongside the guidance recommendation and
+  // never feeds it — approvals still measure the requested rate against guidance.
+  const adjusted = buildAdjustedRate(
+    coreAcquiringComponents(intake, book, billableMonthlyTpv),
+    vasCheck.lines,
+    roundBps(targetBps),
+  );
+
+  // --- Minimum Acceptance Criteria -----------------------------------------
+  // Evaluated at the rate actually on the table: the requested one if the rep has
+  // named one, otherwise guidance. A deal that clears the eNR floor at guidance
+  // and misses it at the requested rate is precisely the case worth surfacing.
+  const macCheck = buildMacCheck(intake, book, billableMonthlyTpvUsd, requestedBps ?? targetBps, findings);
 
   return {
     status: findings.some((f) => f.level === 'blocking') ? 'BLOCKED' : 'OK',
@@ -380,6 +407,7 @@ export function price(intake: Intake, book: PricingBook, today: string, opts: Pr
     match: row,
     lines,
     targetBps: roundBps(targetBps),
+    adjusted,
     requestedBps,
     discountPct: discount,
     annualRevenueAtRisk: m?.annualRevenueAtRisk ?? null,
@@ -389,64 +417,123 @@ export function price(intake: Intake, book: PricingBook, today: string, opts: Pr
     mmbBinds,
     approval,
     vasCheck,
+    macCheck,
     nearest: [],
     searchedFor,
   };
 }
 
 /**
- * Does the selected VAS bundle plausibly deliver the uplift the framework assumes?
+ * Prices the selected products off their own frameworks, and checks the bundle
+ * against the uplift the guidance assumes.
  *
- * This is the one place product list pricing appears, and it is deliberately
- * advisory. The framework's "Other" line already carries expected VAS and FX
- * revenue, so adding list prices on top of the total would double-count it.
+ * Two jobs that used to be one. The attach check is unchanged in spirit — the
+ * framework's "Other" line already carries expected VAS and FX revenue, so adding
+ * product prices to the total take rate would double-count it, and this stays
+ * advisory. What is new is that the product prices are now real: banded on monthly
+ * volume, tiered on Standard vs Other MCCs, and carrying the floor and ceiling that
+ * decide whether someone has to sign for them.
  */
 function buildVasCheck(
   intake: Intake,
   book: PricingBook,
   frameworkOtherBps: number,
   billableMonthlyTpv: number,
+  findings: Finding[],
 ): VasCheck {
+  const { tier, reason: tierReason } = mccTierFor(intake);
+  // Bands are read in the deal currency: every deck prints one figure under
+  // "Monthly Processing Volume ($/£/€)" rather than a dollar figure to convert to.
+  const band = vasBandFor(book.vas_bands, billableMonthlyTpv / 1_000_000);
+
   const lines: VasLine[] = [];
   let sum = 0;
   let anyUnverified = false;
   let anyMissing = false;
 
-  for (const entry of book.vas_catalogue) {
-    const sel = intake.vas[entry.key];
-    if (!sel?.enabled) continue;
+  const selected = book.vas_catalogue.filter((fw) => intake.vas[fw.key]?.enabled);
 
-    const attachRate = sel.attachRate ?? entry.default_attach_rate;
-    const bps =
-      entry.amount == null
-        ? null
-        : toBps({
-            unit: entry.unit,
-            amount: entry.amount,
-            currency: entry.currency,
-            atv: intake.atv,
-            attachRate,
-            billableMonthlyTpv,
-            dealCurrency: intake.currency,
-            book,
-          });
+  for (const fw of selected) {
+    const fwLines = vasLinesFor(fw, { intake, book, billableMonthlyTpv, band, tier });
+    for (const line of fwLines) {
+      // A fee we deliberately do not model is not a missing rate — it has a rate,
+      // it just has no driver in this intake. Only an absent rate breaks the total.
+      if (line.bps == null && line.notModelledReason == null) anyMissing = true;
+      else if (line.bps != null) sum += line.bps;
+      lines.push(line);
+    }
+    if (fw.needs_extraction || fw.confidence === 'unverified') anyUnverified = true;
 
-    if (bps == null) anyMissing = true;
-    else sum += bps;
-    if (entry.needs_extraction || entry.confidence === 'unverified') anyUnverified = true;
+    if (!fw.free_trials_allowed && (intake.vasFreeTrialMonths ?? 0) > 0) {
+      findings.push({
+        level: 'warning',
+        code: 'VAS_FREE_TRIAL_NOT_ALLOWED',
+        message: `${fw.label} does not permit free trials.`,
+        detail: `The ${fw.label} framework states that free trials are not allowed, but this deal carries ${intake.vasFreeTrialMonths} month(s) of VAS free trial. The Acquirer Guidance free-trial bands do not override a product framework — check with Strategic Pricing.`,
+      });
+    }
 
-    lines.push({
-      key: entry.key,
-      label: entry.label,
-      unit: entry.unit,
-      amount: entry.amount,
-      currency: entry.currency,
-      attachRate,
-      bps: bps == null ? null : roundBps(bps),
-      needsExtraction: entry.needs_extraction,
-      confidence: entry.confidence,
-      sourceId: entry.source_id,
-      notes: entry.notes,
+    if (fw.scope && !fw.scope.split('/').some((r) => r.trim().toUpperCase() === intake.region.toUpperCase())) {
+      findings.push({
+        level: 'warning',
+        code: 'VAS_OUT_OF_SCOPE_REGION',
+        message: `The ${fw.label} framework covers ${fw.scope} — this deal is ${intake.region}.`,
+        detail: 'There is no published framework price for this region. Route the product pricing to Strategic Pricing.',
+      });
+    }
+  }
+
+  for (const line of lines) {
+    if (line.verdict === 'below_floor') {
+      findings.push({
+        level: 'warning',
+        code: 'VAS_BELOW_FLOOR',
+        message: `${line.frameworkLabel} — ${line.label} at ${line.currency} ${line.amount} is below the framework floor of ${line.currency} ${line.floor}.`,
+        detail: line.approvers.length
+          ? `Needs ${line.approvers.join(' then ')}. ${line.sourceLocator}.`
+          : `${line.sourceLocator}. The framework states no approver for pricing below the floor — confirm with Strategic Pricing.`,
+      });
+    }
+    if (line.verdict === 'above_ceiling') {
+      findings.push({
+        level: 'warning',
+        code: 'VAS_ABOVE_CEILING',
+        message: `${line.frameworkLabel} — ${line.label} at ${line.currency} ${line.amount} is above the framework ceiling of ${line.currency} ${line.ceiling}.`,
+        detail: line.approvers.length
+          ? `Needs ${line.approvers.join(' then ')}. ${line.sourceLocator}.`
+          : `${line.sourceLocator}.`,
+      });
+    }
+  }
+
+  // Defensive rather than reachable today: the product frameworks floor at 500k in
+  // the deal currency and acquiring guidance floors at $1m, which is at least 787k
+  // in any currency the book carries — so anything that gets this far has already
+  // cleared 500k. Kept because the two floors are set in different documents by
+  // different teams, and the day they cross this is the difference between a gap
+  // and a silently wrong price.
+  if (selected.length > 0 && band == null) {
+    findings.push({
+      level: 'warning',
+      code: 'VAS_BELOW_FRAMEWORK_BAND',
+      message: `Product pricing frameworks start at ${intake.currency} 500k monthly volume. This deal is ${intake.currency} ${Math.round(billableMonthlyTpv).toLocaleString('en-US')}.`,
+      detail: 'No banded product price applies. Strategic Pricing sets the VAS fees below the framework floor.',
+    });
+  }
+
+  // "Pricing for X is mandatory" appears in five of the six decks. A deal quoted
+  // without them is not cheaper, it is incomplete.
+  const mandatoryMissing = book.vas_catalogue
+    .filter((fw) => fw.mandatory && !intake.vas[fw.key]?.enabled)
+    .map((fw) => ({ key: fw.key, label: fw.label }));
+
+  if (mandatoryMissing.length > 0) {
+    findings.push({
+      level: 'warning',
+      code: 'VAS_MANDATORY_MISSING',
+      message: `${mandatoryMissing.length} product${mandatoryMissing.length > 1 ? 's whose frameworks say pricing is mandatory are' : ' whose framework says pricing is mandatory is'} not on this deal: ${mandatoryMissing.map((m) => m.label).join(', ')}.`,
+      detail:
+        'Each of these frameworks states that its pricing is mandatory and that free trials are not allowed. Where the merchant takes the product it has to be priced — leaving it off is not a discount, it is a gap in the quote.',
     });
   }
 
@@ -456,8 +543,70 @@ function buildVasCheck(
     selectedListPriceBps,
     deltaBps: selectedListPriceBps == null ? null : roundBps(selectedListPriceBps - frameworkOtherBps),
     anyUnverified,
+    band,
+    tier,
+    tierReason,
     lines,
+    mandatoryMissing,
   };
+}
+
+/**
+ * The MAC gate. Runs whether or not the framework covers the merchant, because a
+ * merchant the rate card cannot price still has to clear the same risk criteria.
+ */
+function buildMacCheck(
+  intake: Intake,
+  book: PricingBook,
+  billableMonthlyTpvUsd: number | null,
+  rateBps: number | null,
+  findings: Finding[],
+): MacCheck | null {
+  if (!book.mac || book.mac.sectors.length === 0) return null;
+
+  const monthlyNetRevenueUsd =
+    billableMonthlyTpvUsd != null && rateBps != null ? billableMonthlyTpvUsd * (rateBps / 10_000) : null;
+
+  const check = checkMac({ mac: book.mac, intake, monthlyNetRevenueUsd });
+  if (check.sectors.length === 0) return check;
+
+  const titles = check.sectors.map((s) => s.title).join(', ');
+  findings.push({
+    level: 'info',
+    code: 'MAC_SECTOR',
+    message: `Minimum Acceptance Criteria apply: ${titles}.`,
+    detail: `${check.sectors.reduce((n, s) => n + s.criteria.length, 0)} criteria across ${check.sectors.length} sector(s). ${book.mac.source_locator}.`,
+  });
+
+  if (check.clearsNetRevenue === false) {
+    findings.push({
+      level: 'warning',
+      code: 'MAC_BELOW_NET_REVENUE',
+      message: `This deal produces about $${Math.round(check.monthlyNetRevenueUsd!).toLocaleString('en-US')} monthly net revenue, below the $${check.requiredMonthlyNetRevenueUsd!.toLocaleString('en-US')} the MAC expects for ${check.requiredBy}.`,
+      detail:
+        'The MAC requires a Minimum Billing where the merchant cannot demonstrate processing volume matching the expected net revenue. Set an MMB, or expect the MAF to be declined regardless of the rate.',
+    });
+  }
+
+  if (check.clearsChargebacks === false) {
+    findings.push({
+      level: 'blocking',
+      code: 'MAC_CHARGEBACKS',
+      message: `Chargebacks at ${check.chargebackRatioPct}% are above the MAC's ${check.chargebackCeilingPct}% pre-submission ceiling.`,
+      detail: `"${book.mac.chargeback_verbatim}" — the MAC says Commercial should not submit a MAF until this is answered yes. This also puts every product on its Other MCCs pricing table.`,
+    });
+  }
+
+  if (check.requiredMonthlyNetRevenueUsd == null && check.sectors.length > 0) {
+    findings.push({
+      level: 'info',
+      code: 'MAC_NO_NET_REVENUE_FLOOR',
+      message: `The MAC states a tier rather than a dollar figure for ${titles}.`,
+      detail: 'No net revenue floor is asserted here. Confirm the tier threshold with Risk before submitting.',
+    });
+  }
+
+  return check;
 }
 
 function unmappedFinding(

@@ -56,6 +56,23 @@ export function dateLabel(iso: string | null | undefined): string {
   return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
+/**
+ * A product framework price, the way its deck prints it: $0.12, 0.20%, 5 bps.
+ *
+ * No unit suffix — these appear in floor / recommended / ceiling / quoted columns
+ * where the header already carries the unit, and repeating "/ txn" four times
+ * across a row costs the column width that makes the numbers comparable.
+ *
+ * Three decimals below a cent because the frameworks genuinely go to $0.005, and
+ * rounding that to $0.01 would double it.
+ */
+export function feeAmount(amount: number | null | undefined, currency: string, unit: string): string {
+  if (amount == null || !Number.isFinite(amount)) return '—';
+  if (unit === 'pct_of_value') return `${amount}%`;
+  if (unit === 'bps') return `${amount} bps`;
+  return `${sym(currency)}${amount.toFixed(amount < 0.01 ? 3 : 2)}`;
+}
+
 /** "$0.01 / txn", "5 bps", "$250 / month" — how the source document says it. */
 export function unitLabel(unit: string, amount: number | null, currency: string): string {
   if (amount == null) return 'not extracted';

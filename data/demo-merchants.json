@@ -5,7 +5,7 @@
       "id": "uk-apparel",
       "label": "Northgate Apparel",
       "expect": "38.4 bps",
-      "note": "UK Retail, £3m/month, Cat 2. The vanilla case — guidance matches, no approval needed at target.",
+      "note": "UK Retail at £3m/month, priced at guidance. Standard MCCs on every product framework — the clean case to read the floor and ceiling columns against.",
       "intake": {
         "merchantName": "Northgate Apparel",
         "merchantUrl": "northgate-apparel.co.uk",
@@ -33,17 +33,25 @@
         "vasFreeTrialMonths": null,
         "spException": "none",
         "vas": {
-          "network_tokens": { "enabled": true, "attachRate": 1 },
-          "authentication": { "enabled": true, "attachRate": 0.35 }
+          "network_tokens": {
+            "enabled": true,
+            "attachRate": 1
+          },
+          "authentication": {
+            "enabled": true,
+            "attachRate": 0.35
+          }
         },
-        "repName": "A. Manager"
+        "repName": "A. Manager",
+        "chargebackRatioPct": 0.35,
+        "activeSellers": null
       }
     },
     {
       "id": "noram-digital-partial",
       "label": "Vantage Digital",
       "expect": "50% scope",
-      "note": "NORAM Digital, $20m/month but only half the volume. Bands on the scoped $10m, and RTAU shows attach-rate maths.",
+      "note": "NORAM Digital, $20m/month but only half the volume. Bands on the scoped $10m, RTAU shows the attach-rate maths, and the RTAU fee is quoted under its floor — watch who that pulls in.",
       "intake": {
         "merchantName": "Vantage Digital Inc",
         "merchantUrl": "vantagedigital.com",
@@ -71,18 +79,34 @@
         "vasFreeTrialMonths": null,
         "spException": "none",
         "vas": {
-          "network_tokens": { "enabled": true, "attachRate": 1 },
-          "rtau": { "enabled": true, "attachRate": 0.05 },
-          "fraud_detection": { "enabled": true, "attachRate": 1 }
+          "network_tokens": {
+            "enabled": true,
+            "attachRate": 1
+          },
+          "rtau": {
+            "enabled": true,
+            "attachRate": 0.05,
+            "quotedAmount": 0.09
+          },
+          "fraud_detection": {
+            "enabled": true,
+            "attachRate": 1
+          },
+          "authentication": {
+            "enabled": true,
+            "attachRate": 0.4
+          }
         },
-        "repName": "A. Manager"
+        "repName": "A. Manager",
+        "chargebackRatioPct": 0.5,
+        "activeSellers": null
       }
     },
     {
       "id": "gold-gambling",
       "label": "Meridian Gaming (Gold)",
       "expect": "Gold ladder",
-      "note": "EEA Gambling, Gold, €60m/month with cash incentives. Already high-risk priced, and the QTC written-approval gate applies.",
+      "note": "EEA Gambling, Gold, €60m/month with cash incentives. Chargebacks at 1.4% put every product on its Other MCCs table and breach the MAC's 0.9% submission ceiling. QTC written-approval gate applies.",
       "intake": {
         "merchantName": "Meridian Gaming Group",
         "merchantUrl": "meridiangaming.eu",
@@ -110,19 +134,83 @@
         "vasFreeTrialMonths": null,
         "spException": "none",
         "vas": {
-          "network_tokens": { "enabled": true, "attachRate": 1 },
-          "authentication": { "enabled": true, "attachRate": 0.6 },
-          "fraud_detection": { "enabled": true, "attachRate": 1 },
-          "apms": { "enabled": true, "attachRate": 0.3 }
+          "network_tokens": {
+            "enabled": true,
+            "attachRate": 1
+          },
+          "authentication": {
+            "enabled": true,
+            "attachRate": 0.6
+          },
+          "fraud_detection": {
+            "enabled": true,
+            "attachRate": 1
+          },
+          "apms": {
+            "enabled": true,
+            "attachRate": 0.1
+          }
         },
-        "repName": "A. Manager"
+        "repName": "A. Manager",
+        "chargebackRatioPct": 1.4,
+        "activeSellers": null
+      }
+    },
+    {
+      "id": "uk-platform",
+      "label": "Loomstead Platform",
+      "expect": "Platform fees",
+      "note": "UK marketplace at £8m/month with 2,500 sellers. Integrated Platforms carries four separate fees — two this tool can price, two it deliberately will not, because payout count does not follow from volume.",
+      "intake": {
+        "merchantName": "Loomstead Platform",
+        "merchantUrl": "",
+        "mcc": "5999",
+        "vertical": "Retail",
+        "verticalOverridden": false,
+        "region": "UK",
+        "countryScope": null,
+        "riskLevel": "STD",
+        "currentAcceptanceRate": 86.4,
+        "platform": "In-house marketplace",
+        "currentProviders": "Adyen",
+        "currency": "GBP",
+        "atv": 48,
+        "monthlyTpv": 8000000,
+        "threeMonthTpv": null,
+        "annualTpv": null,
+        "scopePct": 100,
+        "scopeNote": "",
+        "contractTerm": "2 years",
+        "mmb": null,
+        "isGold": false,
+        "cashIncentivesUsd": null,
+        "freeProcessingMonths": null,
+        "vasFreeTrialMonths": null,
+        "spException": "none",
+        "vas": {
+          "integrated_platforms": {
+            "enabled": true,
+            "attachRate": 1
+          },
+          "network_tokens": {
+            "enabled": true,
+            "attachRate": 1
+          },
+          "fraud_detection": {
+            "enabled": true,
+            "attachRate": 1
+          }
+        },
+        "repName": "A. Manager",
+        "chargebackRatioPct": 0.4,
+        "activeSellers": 2500
       }
     },
     {
       "id": "latam-unmapped",
       "label": "Andes Marketplace",
       "expect": "UNMAPPED",
-      "note": "LATAM is not in the Acquirer Guidance. The tool must refuse to invent a rate and route to Strategic Pricing.",
+      "note": "LATAM is not in the framework, so there is no rate. The MAC still applies and still shows — a merchant we cannot price is not a merchant without criteria.",
       "intake": {
         "merchantName": "Andes Marketplace SA",
         "merchantUrl": "andesmarket.com",
@@ -150,7 +238,9 @@
         "vasFreeTrialMonths": null,
         "spException": "none",
         "vas": {},
-        "repName": "A. Manager"
+        "repName": "A. Manager",
+        "chargebackRatioPct": null,
+        "activeSellers": null
       }
     },
     {
@@ -185,7 +275,9 @@
         "vasFreeTrialMonths": null,
         "spException": "none",
         "vas": {},
-        "repName": "A. Manager"
+        "repName": "A. Manager",
+        "chargebackRatioPct": null,
+        "activeSellers": null
       }
     }
   ]
