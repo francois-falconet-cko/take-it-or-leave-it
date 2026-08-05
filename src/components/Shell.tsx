@@ -7,6 +7,7 @@ import { useStore, type Step } from '@/lib/store';
 import { DEMO_MODE, book, bookProblems, oldestSourceDate, staleness } from '@/lib/book';
 import { dateLabel } from '@/lib/format';
 import { Chip } from './ui/primitives';
+import { Wordmark } from './ui/Wordmark';
 
 const STEPS: { key: Step; label: string }[] = [
   { key: 'intake', label: 'Merchant' },
@@ -29,11 +30,15 @@ export function Shell({ children }: { children: ReactNode }) {
     <div className="min-h-screen bg-surface">
       <header className="no-print sticky top-0 z-20 border-b border-line bg-surface/95 backdrop-blur">
         <div className="mx-auto flex max-w-[1400px] items-center gap-6 px-6 py-3">
-          <div className="flex items-baseline gap-2.5">
-            <span className="headline text-[1.0625rem] text-ink">Take it or leave it</span>
-            <span className="hidden text-[0.75rem] text-faint lg:inline">
-              Front-book pricing on Acquirer Guidance
-            </span>
+          <div className="flex shrink-0 items-center gap-3">
+            <Wordmark className="text-[0.9375rem] text-ink" />
+            <span className="h-4 w-px shrink-0 bg-line-strong" aria-hidden="true" />
+            <div className="flex items-baseline gap-2.5">
+              <span className="headline text-[1.0625rem] text-ink">Take it or leave it</span>
+              <span className="hidden text-[0.75rem] text-faint xl:inline">
+                Front-book pricing on Acquirer Guidance
+              </span>
+            </div>
           </div>
 
           <nav className="ml-2 flex items-center gap-1">
@@ -70,7 +75,13 @@ export function Shell({ children }: { children: ReactNode }) {
             <Link
               href="/book"
               className="btn btn-ghost !min-h-8 !px-2.5 !text-[0.75rem]"
-              title={`Pricing book ${book.version} · sources last dated ${dateLabel(oldest)}`}
+              title={[
+                `Pricing book ${book.version}`,
+                `sources last dated ${dateLabel(oldest)}`,
+                bookStale === 'stale' ? 'over 90 days old — refresh before quoting' : null,
+              ]
+                .filter(Boolean)
+                .join(' · ')}
             >
               <BookOpen size={13} />
               <span className="hidden sm:inline">Book</span>
@@ -95,11 +106,14 @@ export function Shell({ children }: { children: ReactNode }) {
             once the numbers have been checked.
           </Banner>
         )}
-        {bookStale === 'stale' && (
-          <Banner tone="warn">
-            Pricing sources are more than 90 days old (oldest: {dateLabel(oldest)}). Run a refresh before quoting.
-          </Banner>
-        )}
+        {/*
+          The staleness banner is deliberately not rendered. Source age is still
+          surfaced where it belongs — the dot beside every rate (StalenessDot) and
+          the per-source ages on /book — but the demo book's sources are dated
+          2023, so a persistent header warning fired on every screen and buried
+          the two banners that genuinely block a quote (failed validation,
+          unapproved book). `bookStale` is kept for the Book link's tooltip.
+        */}
       </header>
 
       <main className="mx-auto max-w-[1400px] px-6 py-6">{children}</main>

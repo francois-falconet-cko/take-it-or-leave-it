@@ -7,6 +7,7 @@ import { DEMO_MODE, book, oldestSourceDate } from '@/lib/book';
 import { bps, bpsAsPct, dateLabel, feeAmount, int, money, moneyCompact, pct } from '@/lib/format';
 import { buildEmail } from '@/lib/email';
 import { Card, Chip, FindingList, SourceLink, Tile } from './ui/primitives';
+import { BrandLockup } from './ui/Wordmark';
 
 export function DealOnAPage() {
   const { intake, setStep, reasonCategory, justification, today } = useStore();
@@ -64,8 +65,8 @@ export function DealOnAPage() {
         <Card>
           <div className="flex flex-wrap items-start justify-between gap-4 p-5">
             <div>
-              <div className="chip-mono print-muted text-faint">Deal on a page</div>
-              <h1 className="headline print-ink mt-1 text-3xl text-ink">{intake.merchantName || 'New merchant'}</h1>
+              <BrandLockup subject="Deal on a page" print />
+              <h1 className="headline print-ink mt-2 text-3xl text-ink">{intake.merchantName || 'New merchant'}</h1>
               <p className="print-muted mt-2 text-[0.8125rem] leading-relaxed text-muted">
                 {intake.merchantUrl && <>{intake.merchantUrl} · </>}
                 MCC {intake.mcc || '—'} · {quote.match!.vertical} ·{' '}

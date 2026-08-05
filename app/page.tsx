@@ -7,6 +7,7 @@ import { RecommendationScreen } from '@/components/RecommendationScreen';
 import { ChallengeScreen } from '@/components/ChallengeScreen';
 import { DealOnAPage } from '@/components/DealOnAPage';
 import { useStore } from '@/lib/store';
+import { BRAND_PLATFORM } from '@/lib/brand';
 
 export default function Page() {
   const step = useStore((s) => s.step);
@@ -19,7 +20,10 @@ export default function Page() {
   return (
     <Shell>
       {!ready ? (
-        <div className="py-24 text-center text-[0.8125rem] text-faint">Loading pricing book…</div>
+        <div className="py-24 text-center">
+          <p className="headline text-2xl text-ink">{BRAND_PLATFORM}</p>
+          <p className="mt-3 text-[0.8125rem] text-faint">Loading pricing book…</p>
+        </div>
       ) : step === 'intake' ? (
         <IntakeScreen />
       ) : step === 'recommendation' ? (

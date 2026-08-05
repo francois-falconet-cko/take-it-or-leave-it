@@ -249,7 +249,9 @@ export function Tile({
 
 const STALE_TONE: Record<Staleness, { color: string; label: string }> = {
   fresh: { color: 'var(--color-lime)', label: 'Up to date' },
-  ageing: { color: '#e8c33a', label: '31–90 days old' },
+  // Mixed from the two brand colours it sits between rather than reaching for a
+  // generic yellow, so the fresh → ageing → stale ramp stays on-palette.
+  ageing: { color: 'color-mix(in srgb, var(--color-lime) 45%, var(--color-orange))', label: '31–90 days old' },
   stale: { color: 'var(--color-orange)', label: 'Over 90 days old — refresh before quoting' },
   unknown: { color: 'var(--color-faint)', label: 'Document date unknown' },
 };
@@ -346,8 +348,15 @@ export function FindingRow({ finding }: { finding: Finding }) {
   );
 }
 
-/** Already shown as a persistent banner in the header — don't say it twice. */
-const SUPPRESSED = new Set(['BOOK_UNAPPROVED']);
+/**
+ * Findings the header already covers, or that carry their own quieter signal.
+ *
+ * BOOK_UNAPPROVED is a persistent header banner — don't say it twice.
+ * SOURCE_STALE is the row-level twin of the staleness banner that Shell no
+ * longer renders; the dot beside each rate and /book already carry source age,
+ * so repeating it as a warning row would put the nag straight back on screen.
+ */
+const SUPPRESSED = new Set(['BOOK_UNAPPROVED', 'SOURCE_STALE']);
 
 export function FindingList({ findings, levels }: { findings: Finding[]; levels?: Finding['level'][] }) {
   const shown = findings

@@ -5,6 +5,7 @@ import { ArrowLeft, CheckCircle2, RefreshCw, XCircle } from 'lucide-react';
 import { DEMO_MODE, book, bookProblems, daysSince, oldestSourceDate, staleness } from '@/lib/book';
 import { dateLabel, int } from '@/lib/format';
 import { Card, Chip, ConfidenceChip, StalenessDot, Tile } from '@/components/ui/primitives';
+import { BrandLockup } from '@/components/ui/Wordmark';
 
 /**
  * The pricing book, as a screen.
@@ -30,7 +31,8 @@ export default function BookPage() {
             <ArrowLeft size={13} />
             Back to pricing
           </Link>
-          <h1 className="headline mt-3 text-3xl text-ink">Pricing book</h1>
+          <BrandLockup subject="Pricing book" className="mt-3" />
+          <h1 className="headline mt-2 text-3xl text-ink">Pricing book</h1>
           <p className="mt-2 max-w-2xl text-[0.875rem] leading-relaxed text-muted">
             One versioned, human-approved file compiled from every pricing source. The app reads only this — it never
             queries a document at quote time, which is what makes the same merchant produce the same number twice.

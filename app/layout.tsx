@@ -12,7 +12,7 @@ const grotesk = Space_Grotesk({ subsets: ['latin'], variable: '--font-grotesk', 
 const mono = JetBrains_Mono({ subsets: ['latin'], variable: '--font-mono-face', display: 'swap' });
 
 export const metadata: Metadata = {
-  title: 'Take It or Leave It — Front-book pricing',
+  title: 'Take It or Leave It — Front-book pricing · Checkout.com',
   description: 'Acquirer Guidance take rate, approval path, and deal on a page.',
   robots: { index: false, follow: false },
 };
